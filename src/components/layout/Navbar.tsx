@@ -4,7 +4,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -12,18 +12,74 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "../ui/command";
+import { orders, tradePairs } from "../../data/mockData";
+import { Badge } from "../ui/badge";
+import { useToast } from "../../hooks/use-toast";
 
 export function Navbar() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
 
-  // Command dialog handler
+  // Command dialog handlers
   const handleCommandSelect = (value: string) => {
     setOpen(false);
     navigate(value);
   };
+  
+  // Search functionality
+  useEffect(() => {
+    if (!searchTerm) {
+      setSearchResults([]);
+      return;
+    }
+    
+    // Search orders
+    const searchTermLower = searchTerm.toLowerCase();
+    const matchingOrders = orders
+      .filter(order => {
+        const pair = tradePairs.find(p => p.id === order.tradePairId);
+        const pairName = pair?.displayName || "";
+        
+        return (
+          pairName.toLowerCase().includes(searchTermLower) ||
+          order.purpose?.toLowerCase().includes(searchTermLower) ||
+          order.notes?.toLowerCase().includes(searchTermLower) ||
+          order.rate.toLowerCase().includes(searchTermLower) ||
+          order.amount.toString().includes(searchTermLower)
+        );
+      })
+      .slice(0, 5);
+    
+    setSearchResults(matchingOrders);
+  }, [searchTerm]);
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out",
+    });
+    navigate('/login');
+  };
+
+  // Add keyboard shortcut for search
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+    
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   return (
     <header className="bg-otc-card border-b border-otc-active p-4">
@@ -43,22 +99,76 @@ export function Navbar() {
             onClick={() => setOpen(true)}
           >
             <SearchIcon className="mr-2 h-4 w-4" />
-            Search orders...
+            Search orders, pairs, or commands...
             <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">⌘</span>K
             </kbd>
           </Button>
           <CommandDialog open={open} onOpenChange={setOpen}>
-            <CommandInput placeholder="Type a command or search..." />
+            <CommandInput 
+              placeholder="Type to search..." 
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+            />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup heading="Orders">
-                <CommandItem value="/orders">All Orders</CommandItem>
-                <CommandItem value="/create-order">Create New Order</CommandItem>
+              
+              {searchResults.length > 0 && (
+                <CommandGroup heading="Orders">
+                  {searchResults.map((order) => {
+                    const pair = tradePairs.find(p => p.id === order.tradePairId);
+                    return (
+                      <CommandItem 
+                        key={order.id} 
+                        value={`/orders/${order.id}`}
+                        onSelect={handleCommandSelect}
+                        className="flex justify-between"
+                      >
+                        <div className="flex items-center">
+                          <span className={`mr-2 h-2 w-2 rounded-full ${order.type === "BUY" ? "bg-green-500" : "bg-red-500"}`}></span>
+                          <span>{pair?.displayName || "Unknown"} - ${order.amount.toLocaleString()}</span>
+                        </div>
+                        <Badge variant="outline" className="ml-2">
+                          {order.type}
+                        </Badge>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              )}
+              
+              <CommandSeparator />
+              
+              <CommandGroup heading="Quick Navigation">
+                <CommandItem value="/" onSelect={handleCommandSelect}>
+                  Dashboard
+                </CommandItem>
+                <CommandItem value="/orders" onSelect={handleCommandSelect}>
+                  All Orders
+                </CommandItem>
+                <CommandItem value="/create-order" onSelect={handleCommandSelect}>
+                  Create New Order
+                </CommandItem>
+                <CommandItem value="/deals" onSelect={handleCommandSelect}>
+                  Deals & Messages
+                </CommandItem>
+                <CommandItem value="/telegram" onSelect={handleCommandSelect}>
+                  Connect Telegram
+                </CommandItem>
               </CommandGroup>
+              
+              <CommandSeparator />
+              
               <CommandGroup heading="Trading Pairs">
-                <CommandItem value="/orders?pair=RUB_NR_USD">RUB (NR) - USD</CommandItem>
-                <CommandItem value="/orders?pair=RUB_NR_USDT">RUB (NR) - USDT</CommandItem>
+                <CommandItem value="/orders?pair=RUB_NR_USD" onSelect={handleCommandSelect}>
+                  RUB (NR) - USD
+                </CommandItem>
+                <CommandItem value="/orders?pair=RUB_NR_USDT" onSelect={handleCommandSelect}>
+                  RUB (NR) - USDT
+                </CommandItem>
+                <CommandItem value="/orders?pair=RUB_CASH_USDT" onSelect={handleCommandSelect}>
+                  RUB Cash - USDT
+                </CommandItem>
               </CommandGroup>
             </CommandList>
           </CommandDialog>
@@ -69,13 +179,21 @@ export function Navbar() {
           {currentUser ? (
             <>
               {/* Notification */}
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white relative">
                 <BellIcon className="w-5 h-5" />
+                <span className="absolute top-0 right-0 w-2 h-2 bg-otc-primary rounded-full"></span>
               </Button>
 
               {/* Messages */}
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white">
-                <MessageCircleIcon className="w-5 h-5" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-white"
+                asChild
+              >
+                <Link to="/deals">
+                  <MessageCircleIcon className="w-5 h-5" />
+                </Link>
               </Button>
 
               {/* User menu */}
@@ -98,8 +216,11 @@ export function Navbar() {
                     <Link to="/settings" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
                       Settings
                     </Link>
+                    <Link to="/telegram" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
+                      Connect Telegram
+                    </Link>
                     <button 
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm rounded-md hover:bg-otc-active text-red-400"
                     >
                       Logout
@@ -113,7 +234,7 @@ export function Navbar() {
               <Button variant="ghost" asChild>
                 <Link to="/login">Login</Link>
               </Button>
-              <Button asChild>
+              <Button className="bg-otc-primary text-black" asChild>
                 <Link to="/register">Register</Link>
               </Button>
             </div>

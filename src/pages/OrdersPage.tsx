@@ -13,6 +13,7 @@ import { Order, OrderType, TradePair, TradePairGroup } from "../types";
 import { formatDistanceToNow } from "date-fns";
 import { Separator } from "../components/ui/separator";
 import { Badge } from "../components/ui/badge";
+import { Link } from "react-router-dom";
 
 export default function OrdersPage() {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
@@ -73,10 +74,10 @@ export default function OrdersPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">Market Orders</h1>
           <Button className="bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
-            <a href="/create-order">
+            <Link to="/create-order">
               <Plus className="mr-2 h-4 w-4" />
               New Order
-            </a>
+            </Link>
           </Button>
         </div>
         
@@ -178,8 +179,10 @@ export default function OrdersPage() {
                         {user?.company || "Unknown"}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-right text-sm">
-                        <Button variant="ghost" size="sm" className="hover:bg-otc-active hover:text-white">
-                          Details <ArrowRight className="ml-1 h-4 w-4" />
+                        <Button variant="ghost" size="sm" className="hover:bg-otc-active hover:text-white" asChild>
+                          <Link to={`/orders/${order.id}`}>
+                            Details <ArrowRight className="ml-1 h-4 w-4" />
+                          </Link>
                         </Button>
                       </td>
                     </tr>

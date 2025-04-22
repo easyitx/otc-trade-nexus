@@ -60,8 +60,11 @@ const OrderCard = ({ order }: { order: Order }) => {
           <Button 
             variant="outline" 
             className="w-full border-otc-active hover:bg-otc-active hover:text-white"
+            asChild
           >
-            View Details <ArrowRight className="ml-2 h-4 w-4" />
+            <Link to={`/orders/${order.id}`}>
+              View Details <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </CardContent>
@@ -136,8 +139,8 @@ export default function DashboardPage() {
                 Trade larger volumes with minimal slippage through our OTC desk.
               </p>
             </div>
-            <Button className="mt-4 md:mt-0 bg-otc-primary text-black hover:bg-otc-primary/90">
-              Create New Order
+            <Button className="mt-4 md:mt-0 bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
+              <Link to="/create-order">Create New Order</Link>
             </Button>
           </div>
         </div>
@@ -200,8 +203,8 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-10 bg-otc-card rounded-lg border border-otc-active">
                   <p className="text-muted-foreground">No active orders found for this category.</p>
-                  <Button className="mt-4 bg-otc-primary text-black hover:bg-otc-primary/90">
-                    Create Order
+                  <Button className="mt-4 bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
+                    <Link to="/create-order">Create Order</Link>
                   </Button>
                 </div>
               )}
