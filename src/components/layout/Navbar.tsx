@@ -1,11 +1,29 @@
 
-import { BellIcon, MessageCircleIcon, UserIcon } from "lucide-react";
+import { BellIcon, MessageCircleIcon, UserIcon, SearchIcon } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { useState } from "react";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
 
 export function Navbar() {
   const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  // Command dialog handler
+  const handleCommandSelect = (value: string) => {
+    setOpen(false);
+    navigate(value);
+  };
 
   return (
     <header className="bg-otc-card border-b border-otc-active p-4">
@@ -17,15 +35,33 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Center - Search */}
+        {/* Search Command Menu */}
         <div className="flex-grow mx-4 max-w-2xl">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search orders..."
-              className="w-full bg-otc-active rounded-lg py-2 px-4 text-sm text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-otc-primary"
-            />
-          </div>
+          <Button
+            variant="outline"
+            className="w-full justify-start text-sm text-muted-foreground bg-otc-active border-otc-active"
+            onClick={() => setOpen(true)}
+          >
+            <SearchIcon className="mr-2 h-4 w-4" />
+            Search orders...
+            <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+          <CommandDialog open={open} onOpenChange={setOpen}>
+            <CommandInput placeholder="Type a command or search..." />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup heading="Orders">
+                <CommandItem value="/orders">All Orders</CommandItem>
+                <CommandItem value="/create-order">Create New Order</CommandItem>
+              </CommandGroup>
+              <CommandGroup heading="Trading Pairs">
+                <CommandItem value="/orders?pair=RUB_NR_USD">RUB (NR) - USD</CommandItem>
+                <CommandItem value="/orders?pair=RUB_NR_USDT">RUB (NR) - USDT</CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </CommandDialog>
         </div>
 
         {/* Right section - User actions */}
