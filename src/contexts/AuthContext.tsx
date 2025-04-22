@@ -1,114 +1,117 @@
 
-import { createContext, useContext, useState, ReactNode } from "react";
-import { User } from "../types";
-import { users } from "../data/mockData";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "../hooks/use-toast";
 
 interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: Partial<User>) => Promise<boolean>;
-  logout: () => void;
-  connectTelegram: (telegramId: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ error: string | null }>;
+  register: (email: string, password: string, userData: { full_name: string; company: string }) => Promise<{ error: string | null }>;
+  logout: () => Promise<void>;
+  connectTelegram: (telegramId: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { toast } = useToast();
 
-  // Mock login function
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    try {
-      // In a real app, this would be an API call
-      // For now, we'll just simulate with a timeout and check mock data
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const user = users.find(u => u.email === email);
-      
-      if (user) {
-        setCurrentUser(user);
-        localStorage.setItem('otcDeskUser', JSON.stringify(user));
-        setIsLoading(false);
-        return true;
-      } else {
-        setIsLoading(false);
-        return false;
-      }
-    } catch (error) {
-      console.error("Login error:", error);
+  useEffect(() => {
+    // Check active sessions
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUser(session?.user ?? null);
       setIsLoading(false);
-      return false;
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
     }
   };
 
-  // Mock register function
-  const register = async (userData: Partial<User>): Promise<boolean> => {
-    setIsLoading(true);
-    
+  const register = async (email: string, password: string, userData: { full_name: string; company: string }) => {
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData
+        }
+      });
       
-      // Create a new user object
-      const newUser: User = {
-        id: `user${users.length + 1}`,
-        fullName: userData.fullName || "Unknown User",
-        company: userData.company || "Unknown Company",
-        email: userData.email || `user${users.length + 1}@example.com`,
-        registrationDate: new Date(),
-        lastUpdated: new Date(),
-        isVerified: false,
-        ...userData
-      };
+      if (error) throw error;
       
-      // In a real app, we would save this to a database
-      users.push(newUser);
+      toast({
+        title: "Registration successful",
+        description: "Please check your email to verify your account",
+      });
       
-      // Log the user in
-      setCurrentUser(newUser);
-      localStorage.setItem('otcDeskUser', JSON.stringify(newUser));
-      
-      setIsLoading(false);
-      return true;
-    } catch (error) {
-      console.error("Registration error:", error);
-      setIsLoading(false);
-      return false;
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
     }
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('otcDeskUser');
+  const logout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out"
+    });
   };
 
-  const connectTelegram = async (telegramId: string): Promise<boolean> => {
-    if (!currentUser) return false;
+  const connectTelegram = async (telegramId: string) => {
+    if (!currentUser) return { error: "Not authenticated" };
 
-    setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const updatedUser = {
-        ...currentUser,
-        telegramId,
-        lastUpdated: new Date()
-      };
-      
-      setCurrentUser(updatedUser);
-      localStorage.setItem('otcDeskUser', JSON.stringify(updatedUser));
-      
-      setIsLoading(false);
-      return true;
-    } catch (error) {
-      console.error("Telegram connection error:", error);
-      setIsLoading(false);
-      return false;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ telegram_id: telegramId })
+        .eq('id', currentUser.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Telegram connected",
+        description: "Your Telegram account has been successfully linked"
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Failed to connect Telegram",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
     }
   };
 
