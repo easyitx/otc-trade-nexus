@@ -52,6 +52,16 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+                // OTC Desk custom colors
+                otc: {
+                    background: '#0D0D0D',
+                    card: '#1A1A1A',
+                    active: '#2A2B2C',
+                    'icon-bg': '#1E312F',
+                    icon: '#33B3A4',
+                    text: '#A6A8AE',
+                    primary: '#F8B822',
+                },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
