@@ -1,15 +1,17 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { User } from "@supabase/supabase-js";
+import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "../hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 
 interface AuthContextType {
   currentUser: User | null;
+  profile: any; // Will contain additional user data from profiles table
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ error: string | null }>;
-  register: (email: string, password: string, userData: { full_name: string; company: string }) => Promise<{ error: string | null }>;
+  register: (data: { email: string; password: string; fullName: string; company: string; referralCode?: string }) => Promise<boolean>;
   logout: () => Promise<void>;
   connectTelegram: (telegramId: string) => Promise<{ error: string | null }>;
 }
@@ -18,24 +20,52 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profile, setProfile] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     // Check active sessions
     supabase.auth.getSession().then(({ data: { session } }) => {
       setCurrentUser(session?.user ?? null);
+      setSession(session);
       setIsLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setCurrentUser(session?.user ?? null);
+      setSession(session);
       setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch profile when user changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!currentUser) {
+        setProfile(null);
+        return;
+      }
+
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        
+        setProfile(data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, [currentUser]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -52,13 +82,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, userData: { full_name: string; company: string }) => {
+  const register = async (data: { email: string; password: string; fullName: string; company: string; referralCode?: string }) => {
     try {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
         options: {
-          data: userData
+          data: {
+            full_name: data.fullName,
+            company: data.company
+          }
         }
       });
       
@@ -69,14 +102,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "Please check your email to verify your account",
       });
       
-      return { error: null };
+      return true;
     } catch (error: any) {
       toast({
         title: "Registration failed",
         description: error.message,
         variant: "destructive"
       });
-      return { error: error.message };
+      return false;
     }
   };
 
@@ -119,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         currentUser,
+        profile,
         isAuthenticated: !!currentUser,
         isLoading,
         login,

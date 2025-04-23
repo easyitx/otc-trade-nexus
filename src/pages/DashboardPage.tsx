@@ -105,7 +105,7 @@ const StatsCard = ({ title, value, description, icon, trend }: StatsCardProps) =
 );
 
 export default function DashboardPage() {
-  const { currentUser } = useAuth();
+  const { currentUser, profile } = useAuth();
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState("all");
   
@@ -133,7 +133,7 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
               <h1 className="text-2xl font-bold text-white">
-                Welcome, {currentUser?.fullName.split(' ')[0]}
+                Welcome, {profile?.full_name ? profile.full_name.split(' ')[0] : 'User'}
               </h1>
               <p className="text-muted-foreground mt-1">
                 Trade larger volumes with minimal slippage through our OTC desk.

@@ -51,9 +51,10 @@ export default function RegisterPage() {
 
     try {
       const success = await register({
+        email: formData.email,
+        password: formData.password,
         fullName: formData.fullName,
         company: formData.company,
-        email: formData.email,
         referralCode: formData.referralCode || undefined
       });
 

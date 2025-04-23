@@ -3,17 +3,31 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/lib/supabase-types';
 import { useToast } from './use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useOrders() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
   const createOrder = async (orderData: Omit<Order, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to create orders",
+        variant: "destructive"
+      });
+      return { data: null, error: "Authentication required" };
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('orders')
-        .insert(orderData)
+        .insert({
+          ...orderData,
+          user_id: currentUser.id
+        })
         .select()
         .single();
 

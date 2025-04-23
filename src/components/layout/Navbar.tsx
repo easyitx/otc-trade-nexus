@@ -3,7 +3,6 @@ import { BellIcon, MessageCircleIcon, UserIcon, SearchIcon } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { useState, useEffect } from "react";
 import {
   CommandDialog,
@@ -19,7 +18,7 @@ import { Badge } from "../ui/badge";
 import { useToast } from "../../hooks/use-toast";
 
 export function Navbar() {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, profile, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -203,7 +202,7 @@ export function Navbar() {
                     <UserIcon className="w-5 h-5 text-otc-icon" />
                   </div>
                   <span className="text-sm font-medium hidden sm:inline-block">
-                    {currentUser.fullName.split(' ')[0]}
+                    {profile?.full_name ? profile.full_name.split(' ')[0] : 'User'}
                   </span>
                 </Button>
 

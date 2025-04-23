@@ -5,9 +5,10 @@ import { Button } from "../components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
 import { Label } from "../components/ui/label";
 import { formatDistanceToNow } from "date-fns";
+import { Link } from "react-router-dom";
 
 export default function ProfilePage() {
-  const { currentUser } = useAuth();
+  const { currentUser, profile } = useAuth();
 
   if (!currentUser) return null;
 
@@ -23,12 +24,12 @@ export default function ProfilePage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label className="text-muted-foreground">Full Name</Label>
-              <p className="text-white">{currentUser.fullName}</p>
+              <p className="text-white">{profile?.full_name || 'Not set'}</p>
             </div>
             
             <div className="space-y-2">
               <Label className="text-muted-foreground">Company</Label>
-              <p className="text-white">{currentUser.company}</p>
+              <p className="text-white">{profile?.company || 'Not set'}</p>
             </div>
             
             <div className="space-y-2">
@@ -39,16 +40,19 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label className="text-muted-foreground">Member Since</Label>
               <p className="text-white">
-                {formatDistanceToNow(new Date(currentUser.registrationDate), { addSuffix: true })}
+                {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'Not available'}
               </p>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Verification Status</Label>
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${currentUser.isVerified ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                <span className="text-white">{currentUser.isVerified ? 'Verified' : 'Pending Verification'}</span>
-              </div>
+              <Label className="text-muted-foreground">Telegram ID</Label>
+              <p className="text-white">{profile?.telegram_id || 'Not connected'}</p>
+            </div>
+
+            <div className="pt-4">
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/settings">Edit Profile</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
