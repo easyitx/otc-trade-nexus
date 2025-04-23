@@ -1,10 +1,43 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Order } from '@/lib/supabase-types';
+import type { Order as SupabaseOrder } from '@/lib/supabase-types';
+import type { Order as FrontendOrder } from '@/types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+// Adapter function to convert from Supabase format to frontend format
+const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
+  return {
+    id: order.id,
+    type: order.type as "BUY" | "SELL",
+    amount: Number(order.amount),
+    rate: order.rate,
+    createdAt: new Date(order.created_at),
+    updatedAt: new Date(order.updated_at),
+    expiresAt: new Date(order.expires_at),
+    purpose: order.purpose || undefined,
+    notes: order.notes || undefined,
+    userId: order.user_id,
+    status: order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED",
+    // Use a default tradePairId until we implement proper pair selection
+    tradePairId: "USD_USDT_PAIR" 
+  };
+};
+
+// Adapter function to convert from frontend format to Supabase format
+const adaptOrderToSupabase = (order: Omit<FrontendOrder, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'tradePairId'>) => {
+  return {
+    type: order.type,
+    amount: order.amount,
+    rate: order.rate,
+    expires_at: order.expiresAt.toISOString(),
+    purpose: order.purpose || null,
+    notes: order.notes || null,
+    status: order.status
+  };
+};
 
 export function useOrders() {
   const [loading, setLoading] = useState(false);
@@ -12,7 +45,7 @@ export function useOrders() {
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
 
-  const createOrder = async (orderData: Omit<Order, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  const createOrder = async (orderData: Omit<FrontendOrder, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'tradePairId'>) => {
     if (!currentUser) {
       toast({
         title: "Authentication required",
@@ -24,10 +57,11 @@ export function useOrders() {
 
     setLoading(true);
     try {
+      const supabaseOrderData = adaptOrderToSupabase(orderData);
       const { data, error } = await supabase
         .from('orders')
         .insert({
-          ...orderData,
+          ...supabaseOrderData,
           user_id: currentUser.id
         })
         .select()
@@ -40,7 +74,9 @@ export function useOrders() {
         description: "Your order has been successfully created"
       });
 
-      return { data, error: null };
+      // Convert the returned data to our frontend format
+      const adaptedData = data ? adaptOrderFromSupabase(data) : null;
+      return { data: adaptedData, error: null };
     } catch (error: any) {
       toast({
         title: "Failed to create order",
@@ -62,11 +98,13 @@ export function useOrders() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Convert all orders to our frontend format
+      return data.map(adaptOrderFromSupabase);
     }
   });
 
-  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
+  const updateOrderStatus = async (orderId: string, status: FrontendOrder['status']) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -83,7 +121,9 @@ export function useOrders() {
         description: `Order status has been updated to ${status}`
       });
 
-      return { data, error: null };
+      // Convert the returned data to our frontend format
+      const adaptedData = data ? adaptOrderFromSupabase(data) : null;
+      return { data: adaptedData, error: null };
     } catch (error: any) {
       toast({
         title: "Failed to update order",

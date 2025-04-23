@@ -10,10 +10,11 @@ import { tradePairs } from "../data/mockData";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
 import { useOrders } from "@/hooks/useOrders";
+import { Order } from "@/types";
 
 export default function OrdersPage() {
   const { orders, isLoadingOrders } = useOrders();
-  const [filteredOrders, setFilteredOrders] = useState(orders || []);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedPairGroup, setSelectedPairGroup] = useState<string>("all");

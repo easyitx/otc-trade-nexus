@@ -80,4 +80,4 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => {
       </table>
     </div>
   );
-};
+}
