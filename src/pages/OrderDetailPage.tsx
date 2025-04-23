@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
@@ -9,38 +8,49 @@ import { Separator } from "../components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "../components/ui/sheet";
 import { Textarea } from "../components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
-import { orders, tradePairs, users } from "../data/mockData";
-import { ArrowLeft, MessageSquare, Share, AlertTriangle, Clock, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, MessageSquare, Share, AlertTriangle, Clock } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
-import { Order, TradePair } from "../types";
+import { useOrders } from "../hooks/useOrders";
+import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useDeals } from "@/hooks/useDeals";
+import { useMessages } from "@/hooks/useMessages";
+import { useQuery } from "@tanstack/react-query";
+import { DealChat } from "@/components/chat/DealChat";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [pair, setPair] = useState<TradePair | null>(null);
-  const [user, setUser] = useState<any | null>(null);
   const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
   const [message, setMessage] = useState("");
   const { toast } = useToast();
+  const { currentUser } = useAuth();
+  const { createDeal, getDealByOrderId } = useDeals();
   
-  useEffect(() => {
-    if (id) {
-      // In a real app, this would be an API call
-      const foundOrder = orders.find(o => o.id === id);
-      if (foundOrder) {
-        setOrder(foundOrder);
+  const { data: order, isLoading: isLoadingOrder } = useQuery({
+    queryKey: ['order', id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*, profiles(*)')
+        .eq('id', id)
+        .single();
         
-        // Find related data
-        const relatedPair = tradePairs.find(p => p.id === foundOrder.tradePairId);
-        const relatedUser = users.find(u => u.id === foundOrder.userId);
-        
-        setPair(relatedPair || null);
-        setUser(relatedUser || null);
-      }
-    }
-  }, [id]);
-  
-  const handleContactSubmit = () => {
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id
+  });
+
+  const { data: deal } = useQuery({
+    queryKey: ['deal', id],
+    queryFn: () => getDealByOrderId(id!),
+    enabled: !!id
+  });
+
+  const { messages, sendMessage } = useMessages(deal?.id);
+
+  const handleContactSubmit = async () => {
     if (!message.trim()) {
       toast({
         title: "Error",
@@ -49,15 +59,62 @@ export default function OrderDetailPage() {
       });
       return;
     }
-    
-    // In a real app, this would send the message
-    toast({
-      title: "Message sent",
-      description: "Your message has been sent to the counterparty",
-    });
-    
-    setMessage("");
-    setIsContactSheetOpen(false);
+
+    if (!order) return;
+
+    try {
+      if (!deal) {
+        const { error } = await createDeal(order.id, order.user_id);
+        if (error) throw new Error(error);
+      }
+
+      await sendMessage(message);
+      setMessage("");
+      setIsContactSheetOpen(false);
+
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent to the counterparty",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (isLoadingOrder) {
+    return (
+      <MainLayout>
+        <div>Loading order details...</div>
+      </MainLayout>
+    );
+  }
+
+  if (!order) {
+    return (
+      <MainLayout>
+        <div className="flex flex-col items-center justify-center h-[60vh]">
+          <h2 className="text-xl font-semibold text-white mb-2">Order not found</h2>
+          <p className="text-muted-foreground mb-4">The order you're looking for doesn't exist or has been removed.</p>
+          <Button asChild>
+            <Link to="/orders">Back to Orders</Link>
+          </Button>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  const pair = {
+    displayName: "Mock Pair",
+  };
+
+  const user = {
+    company: "Mock Company",
+    registrationDate: new Date(),
+    isVerified: true,
   };
   
   const handleShare = () => {
@@ -82,20 +139,6 @@ export default function OrderDetailPage() {
     }
   };
   
-  if (!order || !pair) {
-    return (
-      <MainLayout>
-        <div className="flex flex-col items-center justify-center h-[60vh]">
-          <h2 className="text-xl font-semibold text-white mb-2">Order not found</h2>
-          <p className="text-muted-foreground mb-4">The order you're looking for doesn't exist or has been removed.</p>
-          <Button asChild>
-            <Link to="/orders">Back to Orders</Link>
-          </Button>
-        </div>
-      </MainLayout>
-    );
-  }
-  
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -119,7 +162,7 @@ export default function OrderDetailPage() {
               </Badge>
             </h1>
             <p className="text-muted-foreground">
-              Created {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })} by {user?.company || "Unknown"}
+              Created {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })} by {user?.company || "Unknown"}
             </p>
           </div>
           
@@ -164,14 +207,14 @@ export default function OrderDetailPage() {
                 
                 <div>
                   <p className="text-sm text-muted-foreground">Created Date</p>
-                  <p className="text-white">{new Date(order.createdAt).toLocaleDateString()}</p>
+                  <p className="text-white">{new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
                 
                 <div>
                   <p className="text-sm text-muted-foreground">Expires</p>
                   <div className="flex items-center">
-                    <p className="text-white">{new Date(order.expiresAt).toLocaleDateString()}</p>
-                    {new Date(order.expiresAt) < new Date(Date.now() + 24 * 60 * 60 * 1000) && (
+                    <p className="text-white">{new Date(order.expires_at).toLocaleDateString()}</p>
+                    {new Date(order.expires_at) < new Date(Date.now() + 24 * 60 * 60 * 1000) && (
                       <Badge className="ml-2 bg-yellow-900/70 text-yellow-400">
                         <Clock className="mr-1 h-3 w-3" />
                         Expiring soon
@@ -253,67 +296,8 @@ export default function OrderDetailPage() {
           </Card>
         </div>
         
-        {/* Similar Orders */}
         <Card className="bg-otc-card border-otc-active">
-          <CardHeader>
-            <CardTitle>Similar Orders</CardTitle>
-            <CardDescription>Other orders with the same trading pair</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-otc-active/50">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Amount</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Rate</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Expires</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-otc-active">
-                  {orders
-                    .filter(o => o.id !== order.id && o.tradePairId === order.tradePairId)
-                    .slice(0, 3)
-                    .map(similarOrder => (
-                      <tr key={similarOrder.id} className="hover:bg-otc-active/50 transition-colors">
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={`text-sm font-semibold rounded-full px-2 py-0.5 ${
-                            similarOrder.type === "BUY" ? "bg-green-900/30 text-green-500" : "bg-red-900/30 text-red-500"
-                          }`}>
-                            {similarOrder.type}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-white">
-                          ${similarOrder.amount.toLocaleString()}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-white">
-                          {similarOrder.rate}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(similarOrder.expiresAt), { addSuffix: true })}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right text-sm">
-                          <Button variant="ghost" size="sm" className="hover:bg-otc-active hover:text-white" asChild>
-                            <Link to={`/orders/${similarOrder.id}`}>
-                              View <ArrowUpRight className="ml-1 h-3 w-3" />
-                            </Link>
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  
-                  {orders.filter(o => o.id !== order.id && o.tradePairId === order.tradePairId).length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
-                        No similar orders found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
+          <DealChat dealId={deal?.id!} />
         </Card>
       </div>
       
