@@ -67,7 +67,16 @@ export function useOrders() {
 
     setLoading(true);
     try {
-      const supabaseOrderData = adaptOrderToSupabase(orderData);
+      const supabaseOrderData = {
+        type: orderData.type,
+        amount: orderData.amount,
+        rate: orderData.rate,
+        expires_at: orderData.expiresAt.toISOString(),
+        purpose: orderData.purpose || null,
+        notes: orderData.notes || null,
+        status: orderData.status
+      };
+
       const { data, error } = await supabase
         .from('orders')
         .insert({
