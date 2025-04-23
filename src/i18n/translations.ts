@@ -59,6 +59,22 @@ export const translations = {
     dashboard: "Dashboard",
     deals: "Deals & Messages",
     orders: "All Orders",
+    
+    // Error Pages
+    error404: "Error 404",
+    oopsNotFound: "Oops! Page not found",
+    returnHome: "Return Home",
+    
+    // Profile Page
+    personalInfo: "Personal Information",
+    fullName: "Full Name",
+    company: "Company",
+    email: "Email",
+    memberSince: "Member Since",
+    notSet: "Not Set",
+    notAvailable: "Not Available",
+    notConnected: "Not Connected",
+    editProfile: "Edit Profile"
   },
   ru: {
     // Auth
@@ -110,7 +126,6 @@ export const translations = {
     // Orders Page
     marketOrders: "Рыночные ордера",
     searchOrders: "Поиск ордеров...",
-    orderType: "Тип ордера",
     allTypes: "Все типы",
     buyOrders: "Ордера на покупку",
     sellOrders: "Ордера на продажу",
@@ -148,10 +163,9 @@ export const translations = {
     notConnected: "Не подключен",
     
     // Error Pages
-    pageNotFound: "Страница не найдена",
-    returnHome: "Вернуться на главную",
     error404: "Ошибка 404",
     oopsNotFound: "Упс! Страница не найдена",
+    returnHome: "Вернуться на главную",
     
     // Success messages
     orderCreated: "Ордер успешно создан",
