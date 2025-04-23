@@ -6,18 +6,21 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Filter, Plus, Search } from "lucide-react";
-import { orders, tradePairs } from "../data/mockData";
-import { Order } from "../types";
+import { tradePairs } from "../data/mockData";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
+import { useOrders } from "@/hooks/useOrders";
 
 export default function OrdersPage() {
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
+  const { orders, isLoadingOrders } = useOrders();
+  const [filteredOrders, setFilteredOrders] = useState(orders || []);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedPairGroup, setSelectedPairGroup] = useState<string>("all");
 
   useEffect(() => {
+    if (!orders) return;
+    
     let result = [...orders];
     
     // Filter by search term
@@ -50,7 +53,15 @@ export default function OrdersPage() {
     }
     
     setFilteredOrders(result);
-  }, [searchTerm, selectedType, selectedPairGroup]);
+  }, [searchTerm, selectedType, selectedPairGroup, orders]);
+
+  if (isLoadingOrders) {
+    return (
+      <MainLayout>
+        <div>Loading orders...</div>
+      </MainLayout>
+    );
+  }
   
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

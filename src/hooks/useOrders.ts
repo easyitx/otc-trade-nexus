@@ -4,11 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/lib/supabase-types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export function useOrders() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { currentUser } = useAuth();
+  const queryClient = useQueryClient();
 
   const createOrder = async (orderData: Omit<Order, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!currentUser) {
@@ -51,22 +53,18 @@ export function useOrders() {
     }
   };
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
+  const { data: orders, isLoading: isLoadingOrders } = useQuery({
+    queryKey: ['orders'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return { data, error: null };
-    } catch (error: any) {
-      return { data: null, error: error.message };
-    } finally {
-      setLoading(false);
+      return data;
     }
-  };
+  });
 
   const updateOrderStatus = async (orderId: string, status: Order['status']) => {
     setLoading(true);
@@ -100,8 +98,9 @@ export function useOrders() {
 
   return {
     loading,
+    orders,
+    isLoadingOrders,
     createOrder,
-    fetchOrders,
     updateOrderStatus
   };
 }

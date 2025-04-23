@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
@@ -12,14 +11,20 @@ import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { tradePairs } from "../data/mockData";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { CheckCircle, Info } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useOrders } from "@/hooks/useOrders";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function CreateOrderPage() {
+  const navigate = useNavigate();
+  const { createOrder } = useOrders();
+  const { currentUser } = useAuth();
   const [orderType, setOrderType] = useState<string>("BUY");
   const [selectedPair, setSelectedPair] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [rate, setRate] = useState<string>("");
   const [expiryDate, setExpiryDate] = useState<Date | undefined>(
-    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   );
   const [purpose, setPurpose] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
@@ -40,6 +45,11 @@ export default function CreateOrderPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+    
     // Validate minimum amount (500,000 USD)
     const parsedAmount = parseFloat(amount.replace(/,/g, ''));
     if (isNaN(parsedAmount) || parsedAmount < 500000) {
@@ -47,29 +57,22 @@ export default function CreateOrderPage() {
       setIsSubmitting(false);
       return;
     }
-    
-    try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setIsSuccess(true);
-      
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setIsSuccess(false);
-        setOrderType("BUY");
-        setSelectedPair("");
-        setAmount("");
-        setRate("");
-        setExpiryDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
-        setPurpose("");
-        setNotes("");
-      }, 3000);
-    } catch (error) {
-      console.error("Error creating order:", error);
-      alert("Failed to create order. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+
+    const { error } = await createOrder({
+      type: orderType as "BUY" | "SELL",
+      amount: parsedAmount,
+      rate,
+      expires_at: expiryDate?.toISOString() || new Date().toISOString(),
+      purpose: purpose || null,
+      notes: notes || null,
+      status: "ACTIVE"
+    });
+
+    if (!error) {
+      navigate('/orders');
     }
+    
+    setIsSubmitting(false);
   };
   
   if (isSuccess) {
