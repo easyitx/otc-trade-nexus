@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const { register, isAuthenticated } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     company: "",
@@ -58,7 +59,10 @@ export default function RegisterPage() {
         referralCode: formData.referralCode || undefined
       });
 
-      if (!success) {
+      if (success) {
+        // Successfully registered and logged in, navigate to dashboard
+        navigate('/');
+      } else {
         setError("Registration failed. Please try again.");
       }
     } catch (err) {

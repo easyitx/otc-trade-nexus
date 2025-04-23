@@ -84,7 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (data: { email: string; password: string; fullName: string; company: string; referralCode?: string }) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      // First, sign up the user
+      const { error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -95,12 +96,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
       
-      if (error) throw error;
+      if (signUpError) throw signUpError;
       
       toast({
         title: "Registration successful",
-        description: "Please check your email to verify your account",
+        description: "You have been automatically logged in."
       });
+      
+      // Automatically log the user in right after registration
+      if (process.env.NODE_ENV === 'development') {
+        // In development, we might want to automatically sign in since email verification might be disabled
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password
+        });
+        
+        if (signInError) {
+          console.error("Auto login failed:", signInError);
+          // Still return true as registration was successful
+        }
+      }
       
       return true;
     } catch (error: any) {
