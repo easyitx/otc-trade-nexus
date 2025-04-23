@@ -107,12 +107,62 @@ export const translations = {
     minOrderSize: "Минимальный размер ордера",
     minOrderDesc: "OTC Desk требует минимальный размер ордера эквивалентный $500,000 USD.",
     
+    // Orders Page
+    marketOrders: "Рыночные ордера",
+    searchOrders: "Поиск ордеров...",
+    orderType: "Тип ордера",
+    allTypes: "Все типы",
+    buyOrders: "Ордера на покупку",
+    sellOrders: "Ордера на продажу",
+    pairGroup: "Группа пар",
+    allGroups: "Все группы",
+    moreFilters: "Дополнительные фильтры",
+    
+    // Order Detail Page
+    backToOrders: "Назад к ордерам",
+    share: "Поделиться",
+    contactCounterparty: "Связаться с контрагентом",
+    createdDate: "Дата создания",
+    expires: "Истекает",
+    expiringSoon: "Скоро истекает",
+    importantNotice: "Важное уведомление",
+    complianceNotice: "Все транзакции проходят проверку на соответствие. Убедитесь в точности всех деталей перед совершением транзакции.",
+    counterparty: "Контрагент",
+    memberSince: "Участник с",
+    verification: "Верификация",
+    verified: "Верифицирован",
+    pendingVerification: "Ожидает верификации",
+    similarOrders: "Похожие ордера",
+    otherOrders: "Другие ордера с той же торговой парой",
+    noSimilarOrders: "Похожих ордеров не найдено.",
+    view: "Просмотр",
+    
+    // Profile Page
+    personalInfo: "Личная информация",
+    fullName: "Полное имя",
+    company: "Компания",
+    email: "Email",
+    notSet: "Не указано",
+    editProfile: "Редактировать профиль",
+    notAvailable: "Недоступно",
+    notConnected: "Не подключен",
+    
+    // Error Pages
+    pageNotFound: "Страница не найдена",
+    returnHome: "Вернуться на главную",
+    error404: "Ошибка 404",
+    oopsNotFound: "Упс! Страница не найдена",
+    
     // Success messages
     orderCreated: "Ордер успешно создан",
     orderCreatedDesc: "Ваш ордер отправлен на OTC Desk и теперь виден потенциальным контрагентам.",
     createAnother: "Создать другой ордер",
+    messageSent: "Сообщение отправлено",
+    messageSentDesc: "Ваше сообщение отправлено контрагенту",
+    copiedToClipboard: "Скопировано в буфер обмена",
+    linkCopied: "Ссылка на ордер скопирована в буфер обмена",
     
-    // Search
+    // Search and Navigation
     search: "Поиск ордеров, пар или команд...",
     noResults: "Результаты не найдены.",
     quickNav: "Быстрая навигация",
