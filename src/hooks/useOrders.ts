@@ -67,15 +67,7 @@ export function useOrders() {
 
     setLoading(true);
     try {
-      const supabaseOrderData = {
-        type: orderData.type,
-        amount: orderData.amount,
-        rate: orderData.rate,
-        expires_at: orderData.expiresAt.toISOString(),
-        purpose: orderData.purpose || null,
-        notes: orderData.notes || null,
-        status: orderData.status
-      };
+      const supabaseOrderData = adaptOrderToSupabase(orderData);
 
       const { data, error } = await supabase
         .from('orders')
@@ -94,7 +86,7 @@ export function useOrders() {
       });
 
       // Convert the returned data to our frontend format
-      const adaptedData = data ? adaptOrderFromSupabase(data) : null;
+      const adaptedData = data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
       return { data: adaptedData, error: null };
     } catch (error: any) {
       toast({
@@ -119,7 +111,7 @@ export function useOrders() {
       if (error) throw error;
       
       // Convert all orders to our frontend format
-      return data.map(adaptOrderFromSupabase);
+      return data.map((order) => adaptOrderFromSupabase(order as SupabaseOrder));
     }
   });
 
@@ -141,7 +133,7 @@ export function useOrders() {
       });
 
       // Convert the returned data to our frontend format
-      const adaptedData = data ? adaptOrderFromSupabase(data) : null;
+      const adaptedData = data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
       return { data: adaptedData, error: null };
     } catch (error: any) {
       toast({
