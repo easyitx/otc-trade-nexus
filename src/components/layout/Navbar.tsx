@@ -1,4 +1,3 @@
-
 import { BellIcon, MessageCircleIcon, UserIcon, SearchIcon } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,6 +15,14 @@ import {
 import { orders, tradePairs } from "../../data/mockData";
 import { Badge } from "../ui/badge";
 import { useToast } from "../../hooks/use-toast";
+import { Globe } from "lucide-react";
+import { useLanguage } from "../../contexts/LanguageContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 export function Navbar() {
   const { currentUser, profile, logout } = useAuth();
@@ -24,6 +31,7 @@ export function Navbar() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { language, setLanguage, t } = useLanguage();
 
   // Command dialog handlers
   const handleCommandSelect = (value: string) => {
@@ -98,19 +106,19 @@ export function Navbar() {
             onClick={() => setOpen(true)}
           >
             <SearchIcon className="mr-2 h-4 w-4" />
-            Search orders, pairs, or commands...
+            {t('search')}
             <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">⌘</span>K
             </kbd>
           </Button>
           <CommandDialog open={open} onOpenChange={setOpen}>
             <CommandInput 
-              placeholder="Type to search..." 
+              placeholder={t('search')} 
               value={searchTerm}
               onValueChange={setSearchTerm}
             />
             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>{t('noResults')}</CommandEmpty>
               
               {searchResults.length > 0 && (
                 <CommandGroup heading="Orders">
@@ -138,21 +146,18 @@ export function Navbar() {
               
               <CommandSeparator />
               
-              <CommandGroup heading="Quick Navigation">
+              <CommandGroup heading={t('quickNav')}>
                 <CommandItem value="/" onSelect={handleCommandSelect}>
-                  Dashboard
+                  {t('dashboard')}
                 </CommandItem>
                 <CommandItem value="/orders" onSelect={handleCommandSelect}>
-                  All Orders
+                  {t('orders')}
                 </CommandItem>
                 <CommandItem value="/create-order" onSelect={handleCommandSelect}>
-                  Create New Order
+                  {t('createNewOrder')}
                 </CommandItem>
                 <CommandItem value="/deals" onSelect={handleCommandSelect}>
-                  Deals & Messages
-                </CommandItem>
-                <CommandItem value="/telegram" onSelect={handleCommandSelect}>
-                  Connect Telegram
+                  {t('deals')}
                 </CommandItem>
               </CommandGroup>
               
@@ -175,6 +180,27 @@ export function Navbar() {
 
         {/* Right section - User actions */}
         <div className="flex items-center space-x-4">
+          {/* Language Selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-white"
+              >
+                <Globe className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setLanguage('en')}>
+                <span className={language === 'en' ? 'font-bold' : ''}>English</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('ru')}>
+                <span className={language === 'ru' ? 'font-bold' : ''}>Русский</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {currentUser ? (
             <>
               {/* Notification */}
@@ -210,19 +236,19 @@ export function Navbar() {
                 <div className="absolute right-0 mt-2 w-48 bg-otc-card border border-otc-active rounded-md shadow-lg z-50 hidden group-hover:block">
                   <div className="p-2">
                     <Link to="/profile" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
-                      Profile
+                      {t('profile')}
                     </Link>
                     <Link to="/settings" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
-                      Settings
+                      {t('settings')}
                     </Link>
                     <Link to="/telegram" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
-                      Connect Telegram
+                      {t('connectTelegram')}
                     </Link>
                     <button 
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm rounded-md hover:bg-otc-active text-red-400"
                     >
-                      Logout
+                      {t('logout')}
                     </button>
                   </div>
                 </div>
@@ -231,10 +257,10 @@ export function Navbar() {
           ) : (
             <div className="flex space-x-2">
               <Button variant="ghost" asChild>
-                <Link to="/login">Login</Link>
+                <Link to="/login">{t('login')}</Link>
               </Button>
               <Button className="bg-otc-primary text-black" asChild>
-                <Link to="/register">Register</Link>
+                <Link to="/register">{t('register')}</Link>
               </Button>
             </div>
           )}
