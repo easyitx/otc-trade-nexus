@@ -9,9 +9,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Adapter function to convert from Supabase format to frontend format
 const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
+  // Ensure type is explicitly cast as "BUY" or "SELL"
+  const orderType = order.type === "BUY" || order.type === "SELL" 
+    ? order.type 
+    : "BUY"; // Default to BUY if not matching
+
+  // Ensure status is properly cast to expected union type
+  const orderStatus = ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED"].includes(order.status || "")
+    ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED"
+    : "ACTIVE"; // Default to ACTIVE if not matching
+
   return {
     id: order.id,
-    type: order.type as "BUY" | "SELL",
+    type: orderType,
     amount: Number(order.amount),
     rate: order.rate,
     createdAt: new Date(order.created_at),
@@ -20,7 +30,7 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     purpose: order.purpose || undefined,
     notes: order.notes || undefined,
     userId: order.user_id,
-    status: order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED",
+    status: orderStatus,
     // Use a default tradePairId until we implement proper pair selection
     tradePairId: "USD_USDT_PAIR" 
   };

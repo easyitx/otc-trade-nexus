@@ -62,14 +62,14 @@ export default function CreateOrderPage() {
       type: orderType as "BUY" | "SELL",
       amount: parsedAmount,
       rate,
-      expires_at: expiryDate?.toISOString() || new Date().toISOString(),
-      purpose: purpose || null,
-      notes: notes || null,
+      expiresAt: expiryDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      purpose: purpose || undefined,
+      notes: notes || undefined,
       status: "ACTIVE"
     });
 
     if (!error) {
-      navigate('/orders');
+      setIsSuccess(true);
     }
     
     setIsSubmitting(false);
