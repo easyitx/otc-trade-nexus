@@ -136,58 +136,57 @@ export default function DashboardPage() {
         // Explicitly cast the type to OrderType
         type: order.type === "BUY" || order.type === "SELL" 
           ? order.type as OrderType 
-          : "BUY" // Default to BUY if not matching
+          : "BUY", // Default to BUY if not matching
+        // Ensure status is cast to the proper union type
+        status: ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED"].includes(order.status || "")
+          ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED"
+          : "ACTIVE" // Default to ACTIVE if not matching
       }));
     }
   });
 
   // Fetch platform statistics
-  const { data: stats } = useQuery({
-    queryKey: ['platform-stats'],
-    queryFn: async () => {
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('orders')
-        .select('amount, created_at, status');
+  const { data: ordersData, error: ordersError } = await supabase
+    .from('orders')
+    .select('amount, created_at, status');
 
-      if (ordersError) {
-        console.error("Error fetching orders for stats:", ordersError);
-        return {
-          totalVolume: 0,
-          activeOrders: 0,
-          avgSettlement: "N/A",
-          activeTraders: 0
-        };
-      }
+  if (ordersError) {
+    console.error("Error fetching orders for stats:", ordersError);
+    return {
+      totalVolume: 0,
+      activeOrders: 0,
+      avgSettlement: "N/A",
+      activeTraders: 0
+    };
+  }
 
-      const now = new Date();
-      const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
 
-      // Calculate total volume from last 30 days
-      const totalVolume = ordersData
-        .filter(order => new Date(order.created_at) >= thirtyDaysAgo)
-        .reduce((sum, order) => sum + Number(order.amount), 0);
+  // Calculate total volume from last 30 days
+  const totalVolume = ordersData
+    .filter(order => new Date(order.created_at) >= thirtyDaysAgo)
+    .reduce((sum, order) => sum + Number(order.amount), 0);
 
-      // Count active orders
-      const activeOrders = ordersData.filter(order => order.status === 'ACTIVE').length;
+  // Count active orders
+  const activeOrders = ordersData.filter(order => order.status === 'ACTIVE').length;
 
-      // Get unique traders count for this week
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, created_at');
+  // Get unique traders count for this week
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, created_at');
 
-      const weekAgo = new Date(now.setDate(now.getDate() - 7));
-      const activeTraders = profiles?.filter(profile => 
-        new Date(profile.created_at) >= weekAgo
-      ).length || 0;
+  const weekAgo = new Date(now.setDate(now.getDate() - 7));
+  const activeTraders = profiles?.filter(profile => 
+    new Date(profile.created_at) >= weekAgo
+  ).length || 0;
 
-      return {
-        totalVolume,
-        activeOrders,
-        avgSettlement: "4.2 hrs", // This would need real data calculation
-        activeTraders
-      };
-    }
-  });
+  return {
+    totalVolume,
+    activeOrders,
+    avgSettlement: "4.2 hrs", // This would need real data calculation
+    activeTraders
+  };
   
   const filterOrdersByGroup = (orders: Order[], group: string): Order[] => {
     if (group === "all") return orders;
