@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDeals } from "@/hooks/useDeals";
 import { DealChat } from "@/components/chat/DealChat";
 import { tradePairs } from "@/data/mockData";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +34,7 @@ export default function OrderDetailPage() {
       if (!id) return null;
       const { data, error } = await supabase
         .from('orders')
-        .select('*, user_id:profiles!orders_user_id_fkey(*)')
+        .select('*')
         .eq('id', id)
         .single();
         
@@ -44,6 +45,26 @@ export default function OrderDetailPage() {
       return data;
     },
     enabled: !!id
+  });
+
+  // Fetch user profile separately if order exists
+  const { data: userProfile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ['profile', order?.user_id],
+    queryFn: async () => {
+      if (!order?.user_id) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', order.user_id)
+        .single();
+        
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      return data;
+    },
+    enabled: !!order?.user_id
   });
 
   // Fetch deal if exists
@@ -96,7 +117,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  if (isLoadingOrder) {
+  if (isLoadingOrder || isLoadingProfile) {
     return (
       <MainLayout>
         <div>Loading order details...</div>
@@ -119,12 +140,8 @@ export default function OrderDetailPage() {
   }
 
   // Find the trade pair for this order (falling back to a generic one if not found)
-  const pair = tradePairs.find(p => p.id === order.tradePairId) || {
-    displayName: "Crypto Pair",
-  };
-
-  // User/company information
-  const userProfile = order.user_id;
+  // Since tradePairId doesn't exist in the DB, we'll use a default pair
+  const pair = tradePairs[0] || { displayName: "Crypto Pair" };
   
   const handleShare = () => {
     if (navigator.share) {

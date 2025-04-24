@@ -28,7 +28,8 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => {
         </thead>
         <tbody className="divide-y divide-otc-active">
           {orders.map((order) => {
-            const pair = tradePairs.find(p => p.id === order.tradePairId);
+            // For now, we're using a default pair since tradePairId is not in the database schema
+            const pair = tradePairs[0];
             
             return (
               <tr key={order.id} className="hover:bg-otc-active/50 transition-colors">
