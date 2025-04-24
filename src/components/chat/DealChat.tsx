@@ -1,10 +1,10 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { ChatMessages } from "./ChatMessages";
 import { useMessages } from "@/hooks/useMessages";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Loader2 } from "lucide-react";
 
 interface DealChatProps {
   dealId: string;
@@ -13,12 +13,24 @@ interface DealChatProps {
 export function DealChat({ dealId }: DealChatProps) {
   const [message, setMessage] = useState("");
   const { messages, sendMessage, isLoadingMessages } = useMessages(dealId);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isSending, setIsSending] = useState(false);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = async () => {
     if (!message.trim()) return;
     
+    setIsSending(true);
     await sendMessage(message);
     setMessage("");
+    setIsSending(false);
   };
 
   return (
@@ -28,8 +40,17 @@ export function DealChat({ dealId }: DealChatProps) {
         <h3 className="text-lg font-semibold text-white">Chat</h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto mb-4">
-        <ChatMessages messages={messages || []} />
+      <div className="flex-1 overflow-y-auto mb-4 pr-2">
+        {isLoadingMessages ? (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="h-8 w-8 text-otc-primary animate-spin" />
+          </div>
+        ) : (
+          <>
+            <ChatMessages messages={messages || []} />
+            <div ref={messagesEndRef} />
+          </>
+        )}
       </div>
 
       <div className="flex space-x-2">
@@ -48,9 +69,13 @@ export function DealChat({ dealId }: DealChatProps) {
         <Button
           onClick={handleSend}
           className="bg-otc-primary text-black hover:bg-otc-primary/90"
-          disabled={!message.trim()}
+          disabled={!message.trim() || isSending}
         >
-          Send
+          {isSending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Send"
+          )}
         </Button>
       </div>
     </div>

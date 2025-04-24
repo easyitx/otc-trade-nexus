@@ -1,13 +1,16 @@
-import { useSearchParams } from "react-router-dom";
+
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { DealChat } from "@/components/chat/DealChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatDistanceToNow } from 'date-fns'; // Add this import
+import { formatDistanceToNow } from 'date-fns'; 
+import { Loader2 } from "lucide-react";
 
 export default function ChatPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const activeDealId = searchParams.get("deal");
   const { currentUser } = useAuth();
 
@@ -28,10 +31,38 @@ export default function ChatPage() {
     enabled: !!currentUser?.id,
   });
 
+  // Get latest messages for each deal to show in sidebar
+  const { data: latestMessages, isLoading: isLoadingMessages } = useQuery({
+    queryKey: ["latestMessages"],
+    queryFn: async () => {
+      if (!deals?.length) return {};
+      
+      const messages: Record<string, any> = {};
+      
+      for (const deal of deals) {
+        const { data, error } = await supabase
+          .from("messages")
+          .select("*")
+          .eq("deal_id", deal.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+          
+        if (!error && data.length > 0) {
+          messages[deal.id] = data[0];
+        }
+      }
+      
+      return messages;
+    },
+    enabled: !!deals?.length,
+  });
+
   if (isLoading) {
     return (
       <MainLayout>
-        <div>Loading your chats...</div>
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="h-10 w-10 text-otc-primary animate-spin" />
+        </div>
       </MainLayout>
     );
   }
@@ -52,6 +83,11 @@ export default function ChatPage() {
   const activeDeal = activeDealId 
     ? deals.find(deal => deal.id === activeDealId) 
     : deals[0];
+    
+  // If deal ID in URL doesn't exist, redirect to first deal
+  if (activeDealId && !activeDeal) {
+    navigate(`/deals?deal=${deals[0].id}`);
+  }
 
   return (
     <MainLayout>
@@ -60,22 +96,37 @@ export default function ChatPage() {
         <div className="md:col-span-1 bg-otc-card border border-otc-active rounded-lg p-4 overflow-y-auto">
           <h2 className="text-lg font-semibold text-white mb-4">Active Deals</h2>
           <div className="space-y-2">
-            {deals.map((deal) => (
-              <a
-                key={deal.id}
-                href={`/deals?deal=${deal.id}`}
-                className={`block p-3 rounded-lg transition-colors ${
-                  deal.id === activeDeal?.id
-                    ? "bg-otc-active text-white"
-                    : "hover:bg-otc-active/50 text-muted-foreground"
-                }`}
-              >
-                <div className="font-medium">Order #{deal.orders?.id.slice(-6)}</div>
-                <div className="text-sm opacity-70">
-                  {formatDistanceToNow(new Date(deal.created_at), { addSuffix: true })}
-                </div>
-              </a>
-            ))}
+            {deals.map((deal) => {
+              const hasUnreadMessages = false; // This would need backend support to track unread counts
+              const latestMessage = latestMessages?.[deal.id];
+              
+              return (
+                <a
+                  key={deal.id}
+                  href={`/deals?deal=${deal.id}`}
+                  className={`block p-3 rounded-lg transition-colors ${
+                    deal.id === activeDeal?.id
+                      ? "bg-otc-active text-white"
+                      : "hover:bg-otc-active/50 text-muted-foreground"
+                  }`}
+                >
+                  <div className="font-medium flex justify-between items-center">
+                    <span>Order #{deal.orders?.id.slice(-6)}</span>
+                    {hasUnreadMessages && (
+                      <span className="bg-otc-primary rounded-full w-2 h-2"></span>
+                    )}
+                  </div>
+                  {latestMessage && (
+                    <div className="text-sm truncate opacity-70 mt-1">
+                      {latestMessage.content}
+                    </div>
+                  )}
+                  <div className="text-sm opacity-70 mt-1">
+                    {formatDistanceToNow(new Date(deal.created_at), { addSuffix: true })}
+                  </div>
+                </a>
+              )
+            })}
           </div>
         </div>
 
