@@ -1,10 +1,10 @@
-
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { DealChat } from "@/components/chat/DealChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatDistanceToNow } from 'date-fns'; // Add this import
 
 export default function ChatPage() {
   const [searchParams] = useSearchParams();
