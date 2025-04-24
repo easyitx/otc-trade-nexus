@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -7,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useAuth } from "../contexts/AuthContext";
 import { ArrowRight, CircleDollarSign, TrendingUp, Clock, Users, ArrowUpRight } from "lucide-react";
 import { tradePairs } from "../data/mockData";
-import { Order } from "../types";
+import { Order, OrderType } from "../types";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -133,7 +132,11 @@ export default function DashboardPage() {
         updatedAt: new Date(order.updated_at),
         expiresAt: new Date(order.expires_at),
         userId: order.user_id,
-        tradePairId: "USD_USDT_PAIR" // Add default tradePairId
+        tradePairId: "USD_USDT_PAIR", // Add default tradePairId
+        // Explicitly cast the type to OrderType
+        type: order.type === "BUY" || order.type === "SELL" 
+          ? order.type as OrderType 
+          : "BUY" // Default to BUY if not matching
       }));
     }
   });
@@ -294,4 +297,3 @@ export default function DashboardPage() {
     </MainLayout>
   );
 }
-
