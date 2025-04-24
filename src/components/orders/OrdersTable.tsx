@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
-import { Order, TradePair } from "../../types";
+import { Order } from "../../types";
 import { tradePairs, users } from "../../data/mockData";
 
 interface OrdersTableProps {
@@ -29,7 +29,6 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => {
         <tbody className="divide-y divide-otc-active">
           {orders.map((order) => {
             const pair = tradePairs.find(p => p.id === order.tradePairId);
-            const user = users.find(u => u.id === order.userId);
             
             return (
               <tr key={order.id} className="hover:bg-otc-active/50 transition-colors">
@@ -44,7 +43,7 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => {
                   {pair?.displayName || "Unknown Pair"}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-white">
-                  ${order.amount.toLocaleString()}
+                  ${Number(order.amount).toLocaleString()}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-white">
                   {order.rate}
@@ -56,7 +55,7 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => {
                   {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                  {user?.company || "Unknown"}
+                  {order.userId}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-right text-sm">
                   <Button variant="ghost" size="sm" className="hover:bg-otc-active hover:text-white" asChild>

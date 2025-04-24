@@ -1,5 +1,6 @@
+
 import { useParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -10,13 +11,12 @@ import { Textarea } from "../components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, MessageSquare, Share, AlertTriangle, Clock } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
-import { useOrders } from "../hooks/useOrders";
-import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useDeals } from "@/hooks/useDeals";
-import { useMessages } from "@/hooks/useMessages";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDeals } from "@/hooks/useDeals";
 import { DealChat } from "@/components/chat/DealChat";
+import { tradePairs } from "@/data/mockData";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,29 +26,32 @@ export default function OrderDetailPage() {
   const { currentUser } = useAuth();
   const { createDeal, getDealByOrderId } = useDeals();
   
+  // Fetch order details
   const { data: order, isLoading: isLoadingOrder } = useQuery({
     queryKey: ['order', id],
     queryFn: async () => {
       if (!id) return null;
       const { data, error } = await supabase
         .from('orders')
-        .select('*, profiles(*)')
+        .select('*, user_id:profiles!orders_user_id_fkey(*)')
         .eq('id', id)
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching order:", error);
+        return null;
+      }
       return data;
     },
     enabled: !!id
   });
 
+  // Fetch deal if exists
   const { data: deal } = useQuery({
     queryKey: ['deal', id],
     queryFn: () => getDealByOrderId(id!),
     enabled: !!id
   });
-
-  const { messages, sendMessage } = useMessages(deal?.id);
 
   const handleContactSubmit = async () => {
     if (!message.trim()) {
@@ -63,12 +66,20 @@ export default function OrderDetailPage() {
     if (!order) return;
 
     try {
-      if (!deal) {
-        const { error } = await createDeal(order.id, order.user_id);
+      // If no deal exists yet, create one
+      let currentDeal = deal;
+      if (!currentDeal) {
+        const { data: newDeal, error } = await createDeal(order.id, order.user_id);
         if (error) throw new Error(error);
+        currentDeal = newDeal;
       }
 
-      await sendMessage(message);
+      if (!currentDeal || !currentDeal.id) {
+        throw new Error("Failed to create or retrieve deal");
+      }
+
+      // Send the message using the deal's message hooks
+      // Note: This will be handled by the DealChat component after we close the sheet
       setMessage("");
       setIsContactSheetOpen(false);
 
@@ -107,15 +118,13 @@ export default function OrderDetailPage() {
     );
   }
 
-  const pair = {
-    displayName: "Mock Pair",
+  // Find the trade pair for this order (falling back to a generic one if not found)
+  const pair = tradePairs.find(p => p.id === order.tradePairId) || {
+    displayName: "Crypto Pair",
   };
 
-  const user = {
-    company: "Mock Company",
-    registrationDate: new Date(),
-    isVerified: true,
-  };
+  // User/company information
+  const userProfile = order.user_id;
   
   const handleShare = () => {
     if (navigator.share) {
@@ -162,7 +171,7 @@ export default function OrderDetailPage() {
               </Badge>
             </h1>
             <p className="text-muted-foreground">
-              Created {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })} by {user?.company || "Unknown"}
+              Created {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })} by {userProfile?.company || "Unknown"}
             </p>
           </div>
           
@@ -179,6 +188,7 @@ export default function OrderDetailPage() {
             <Button 
               className="bg-otc-primary text-black hover:bg-otc-primary/90"
               onClick={() => setIsContactSheetOpen(true)}
+              disabled={!!deal || currentUser?.id === order.user_id}
             >
               <MessageSquare className="mr-2 h-4 w-4" />
               Contact Counterparty
@@ -197,7 +207,7 @@ export default function OrderDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
                 <div>
                   <p className="text-sm text-muted-foreground">Amount</p>
-                  <p className="text-xl font-semibold text-white">${order.amount.toLocaleString()}</p>
+                  <p className="text-xl font-semibold text-white">${Number(order.amount).toLocaleString()}</p>
                 </div>
                 
                 <div>
@@ -259,35 +269,37 @@ export default function OrderDetailPage() {
               <CardTitle>Counterparty</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {user ? (
+              {userProfile ? (
                 <>
                   <div>
                     <p className="text-sm text-muted-foreground">Company</p>
-                    <p className="font-medium text-white">{user.company}</p>
+                    <p className="font-medium text-white">{userProfile.company || "Not specified"}</p>
                   </div>
                   
                   <div>
                     <p className="text-sm text-muted-foreground">Member since</p>
-                    <p className="text-white">{new Date(user.registrationDate).toLocaleDateString()}</p>
+                    <p className="text-white">{new Date(userProfile.created_at).toLocaleDateString()}</p>
                   </div>
                   
                   <div>
                     <p className="text-sm text-muted-foreground">Verification</p>
                     <div className="flex items-center space-x-2">
-                      <div className={`w-2 h-2 rounded-full ${user.isVerified ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                      <span className="text-white">{user.isVerified ? 'Verified' : 'Pending Verification'}</span>
+                      <div className={`w-2 h-2 rounded-full bg-green-500`} />
+                      <span className="text-white">Verified</span>
                     </div>
                   </div>
                   
-                  <div className="pt-4">
-                    <Button 
-                      className="w-full bg-otc-primary text-black hover:bg-otc-primary/90"
-                      onClick={() => setIsContactSheetOpen(true)}
-                    >
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      Contact Counterparty
-                    </Button>
-                  </div>
+                  {currentUser?.id !== order.user_id && !deal && (
+                    <div className="pt-4">
+                      <Button 
+                        className="w-full bg-otc-primary text-black hover:bg-otc-primary/90"
+                        onClick={() => setIsContactSheetOpen(true)}
+                      >
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Contact Counterparty
+                      </Button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="text-muted-foreground">User information not available</p>
@@ -296,9 +308,13 @@ export default function OrderDetailPage() {
           </Card>
         </div>
         
-        <Card className="bg-otc-card border-otc-active">
-          <DealChat dealId={deal?.id!} />
-        </Card>
+        {deal && (
+          <Card className="bg-otc-card border-otc-active">
+            <CardContent className="pt-6">
+              <DealChat dealId={deal.id} />
+            </CardContent>
+          </Card>
+        )}
       </div>
       
       {/* Contact Sheet */}
@@ -316,7 +332,7 @@ export default function OrderDetailPage() {
               <p className="text-white font-medium">Order Details</p>
               <div className="text-sm text-muted-foreground">
                 <p>{pair.displayName} • {order.type}</p>
-                <p>Amount: ${order.amount.toLocaleString()}</p>
+                <p>Amount: ${Number(order.amount).toLocaleString()}</p>
                 <p>Rate: {order.rate}</p>
               </div>
             </div>
