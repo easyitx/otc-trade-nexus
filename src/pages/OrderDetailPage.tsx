@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
@@ -14,7 +14,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeals } from "@/hooks/useDeals";
-import { DealChat } from "@/components/chat/DealChat";
 import { tradePairs } from "@/data/mockData";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -25,6 +24,7 @@ export default function OrderDetailPage() {
   const { toast } = useToast();
   const { currentUser } = useAuth();
   const { createDeal, getDealByOrderId } = useDeals();
+  const navigate = useNavigate();
   
   // Fetch order details
   const { data: order, isLoading: isLoadingOrder } = useQuery({
@@ -86,27 +86,24 @@ export default function OrderDetailPage() {
     if (!order) return;
 
     try {
-      // If no deal exists yet, create one
-      let currentDeal = deal;
-      if (!currentDeal) {
-        const { data: newDeal, error } = await createDeal(order.id, order.user_id);
-        if (error) throw new Error(error);
-        currentDeal = newDeal;
+      // Create a new deal
+      const { data: newDeal, error } = await createDeal(order.id, order.user_id);
+      if (error) throw new Error(error);
+      
+      if (!newDeal || !newDeal.id) {
+        throw new Error("Failed to create deal");
       }
 
-      if (!currentDeal || !currentDeal.id) {
-        throw new Error("Failed to create or retrieve deal");
-      }
-
-      // Send the message using the deal's message hooks
-      // Note: This will be handled by the DealChat component after we close the sheet
       setMessage("");
       setIsContactSheetOpen(false);
 
       toast({
-        title: "Message sent",
-        description: "Your message has been sent to the counterparty",
+        title: "Deal created",
+        description: "You've been redirected to the chat",
       });
+
+      // Redirect to the chat page
+      navigate(`/deals?deal=${newDeal.id}`);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -323,14 +320,6 @@ export default function OrderDetailPage() {
             </CardContent>
           </Card>
         </div>
-        
-        {deal && (
-          <Card className="bg-otc-card border-otc-active">
-            <CardContent className="pt-6">
-              <DealChat dealId={deal.id} />
-            </CardContent>
-          </Card>
-        )}
       </div>
       
       {/* Contact Sheet */}
