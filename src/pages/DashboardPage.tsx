@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useAuth } from "../contexts/AuthContext";
-import { ArrowRight, CircleDollarSign, TrendingUp, Clock, Users } from "lucide-react";
+import { ArrowRight, CircleDollarSign, TrendingUp, Clock, Users, ArrowUpRight } from "lucide-react";
 import { tradePairs } from "../data/mockData";
 import { Order } from "../types";
 import { Link } from "react-router-dom";
@@ -132,7 +132,8 @@ export default function DashboardPage() {
         createdAt: new Date(order.created_at),
         updatedAt: new Date(order.updated_at),
         expiresAt: new Date(order.expires_at),
-        userId: order.user_id
+        userId: order.user_id,
+        tradePairId: "USD_USDT_PAIR" // Add default tradePairId
       }));
     }
   });
