@@ -5,14 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useAuth } from "../contexts/AuthContext";
-import { ArrowRight, ArrowUpRight, CircleDollarSign, TrendingUp, Clock, Users } from "lucide-react";
-import { orders, tradePairs } from "../data/mockData";
-import { Order, TradePair, TradePairGroup } from "../types";
+import { ArrowRight, CircleDollarSign, TrendingUp, Clock, Users } from "lucide-react";
+import { tradePairs } from "../data/mockData";
+import { Order } from "../types";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
 
 // Order card component for the dashboard
 const OrderCard = ({ order }: { order: Order }) => {
-  const pair = tradePairs.find(p => p.id === order.tradePairId);
+  // Since tradePairId doesn't exist in the DB yet, we'll use a default pair
+  const pair = tradePairs[0];
   
   return (
     <Card className="bg-otc-card border-otc-active">
@@ -29,14 +33,14 @@ const OrderCard = ({ order }: { order: Order }) => {
             </span>
           </div>
           <span className="text-xs text-muted-foreground">
-            {new Date(order.createdAt).toLocaleDateString()}
+            {formatDistanceToNow(new Date(order.createdAt), { addSuffix: true })}
           </span>
         </div>
         
         <div className="mt-4 space-y-2">
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Amount:</span>
-            <span className="text-white font-medium">${order.amount.toLocaleString()}</span>
+            <span className="text-white font-medium">${Number(order.amount).toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Rate:</span>
@@ -45,7 +49,7 @@ const OrderCard = ({ order }: { order: Order }) => {
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Expires:</span>
             <span className="text-white font-medium">
-              {new Date(order.expiresAt).toLocaleDateString()}
+              {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}
             </span>
           </div>
           {order.purpose && (
@@ -106,24 +110,101 @@ const StatsCard = ({ title, value, description, icon, trend }: StatsCardProps) =
 
 export default function DashboardPage() {
   const { currentUser, profile } = useAuth();
-  const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState("all");
-  
-  useEffect(() => {
-    // In a real app, we would fetch this data from an API
-    setActiveOrders(orders.filter(order => order.status === "ACTIVE"));
-  }, []);
+
+  // Fetch active orders
+  const { data: activeOrders = [], isLoading: isLoadingOrders } = useQuery({
+    queryKey: ['active-orders'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('status', 'ACTIVE')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching active orders:", error);
+        return [];
+      }
+
+      return data.map(order => ({
+        ...order,
+        createdAt: new Date(order.created_at),
+        updatedAt: new Date(order.updated_at),
+        expiresAt: new Date(order.expires_at),
+        userId: order.user_id
+      }));
+    }
+  });
+
+  // Fetch platform statistics
+  const { data: stats } = useQuery({
+    queryKey: ['platform-stats'],
+    queryFn: async () => {
+      const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select('amount, created_at, status');
+
+      if (ordersError) {
+        console.error("Error fetching orders for stats:", ordersError);
+        return {
+          totalVolume: 0,
+          activeOrders: 0,
+          avgSettlement: "N/A",
+          activeTraders: 0
+        };
+      }
+
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+
+      // Calculate total volume from last 30 days
+      const totalVolume = ordersData
+        .filter(order => new Date(order.created_at) >= thirtyDaysAgo)
+        .reduce((sum, order) => sum + Number(order.amount), 0);
+
+      // Count active orders
+      const activeOrders = ordersData.filter(order => order.status === 'ACTIVE').length;
+
+      // Get unique traders count for this week
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, created_at');
+
+      const weekAgo = new Date(now.setDate(now.getDate() - 7));
+      const activeTraders = profiles?.filter(profile => 
+        new Date(profile.created_at) >= weekAgo
+      ).length || 0;
+
+      return {
+        totalVolume,
+        activeOrders,
+        avgSettlement: "4.2 hrs", // This would need real data calculation
+        activeTraders
+      };
+    }
+  });
   
   const filterOrdersByGroup = (orders: Order[], group: string): Order[] => {
     if (group === "all") return orders;
     
     return orders.filter(order => {
-      const pair = tradePairs.find(p => p.id === order.tradePairId);
+      const pair = tradePairs.find(p => p.id === "USD_USDT_PAIR"); // Using default pair for now
       return pair?.group === group;
     });
   };
 
   const filteredOrders = filterOrdersByGroup(activeOrders, activeTab);
+  
+  if (isLoadingOrders) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-otc-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
   
   return (
     <MainLayout>
@@ -149,30 +230,27 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard 
             title="Total Trading Volume"
-            value="$24.5M"
+            value={`$${(stats?.totalVolume || 0).toLocaleString()}`}
             description="Last 30 days"
             icon={<CircleDollarSign className="h-5 w-5 text-otc-icon" />}
-            trend={12}
           />
           <StatsCard 
             title="Active Orders"
-            value={activeOrders.length.toString()}
+            value={String(stats?.activeOrders || 0)}
             description="Across all markets"
             icon={<TrendingUp className="h-5 w-5 text-otc-icon" />}
           />
           <StatsCard 
             title="Average Settlement"
-            value="4.2 hrs"
+            value={stats?.avgSettlement || "N/A"}
             description="Order to completion"
             icon={<Clock className="h-5 w-5 text-otc-icon" />}
-            trend={-8}
           />
           <StatsCard 
             title="Active Traders"
-            value="142"
+            value={String(stats?.activeTraders || 0)}
             description="This week"
             icon={<Users className="h-5 w-5 text-otc-icon" />}
-            trend={5}
           />
         </div>
         
@@ -215,3 +293,4 @@ export default function DashboardPage() {
     </MainLayout>
   );
 }
+
