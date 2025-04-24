@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -107,6 +108,14 @@ const StatsCard = ({ title, value, description, icon, trend }: StatsCardProps) =
   </Card>
 );
 
+// Define a type for our platform statistics
+interface PlatformStats {
+  totalVolume: number;
+  activeOrders: number;
+  avgSettlement: string;
+  activeTraders: number;
+}
+
 export default function DashboardPage() {
   const { currentUser, profile } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
@@ -146,47 +155,57 @@ export default function DashboardPage() {
   });
 
   // Fetch platform statistics
-  const { data: ordersData, error: ordersError } = await supabase
-    .from('orders')
-    .select('amount, created_at, status');
+  const { data: stats = { 
+    totalVolume: 0,
+    activeOrders: 0,
+    avgSettlement: "N/A",
+    activeTraders: 0
+  } } = useQuery<PlatformStats>({
+    queryKey: ['platform-stats'],
+    queryFn: async () => {
+      const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select('amount, created_at, status');
 
-  if (ordersError) {
-    console.error("Error fetching orders for stats:", ordersError);
-    return {
-      totalVolume: 0,
-      activeOrders: 0,
-      avgSettlement: "N/A",
-      activeTraders: 0
-    };
-  }
+      if (ordersError) {
+        console.error("Error fetching orders for stats:", ordersError);
+        return {
+          totalVolume: 0,
+          activeOrders: 0,
+          avgSettlement: "N/A",
+          activeTraders: 0
+        };
+      }
 
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+      const now = new Date();
+      const thirtyDaysAgo = new Date(new Date().setDate(now.getDate() - 30));
 
-  // Calculate total volume from last 30 days
-  const totalVolume = ordersData
-    .filter(order => new Date(order.created_at) >= thirtyDaysAgo)
-    .reduce((sum, order) => sum + Number(order.amount), 0);
+      // Calculate total volume from last 30 days
+      const totalVolume = ordersData
+        .filter(order => new Date(order.created_at) >= thirtyDaysAgo)
+        .reduce((sum, order) => sum + Number(order.amount), 0);
 
-  // Count active orders
-  const activeOrders = ordersData.filter(order => order.status === 'ACTIVE').length;
+      // Count active orders count
+      const activeOrdersCount = ordersData.filter(order => order.status === 'ACTIVE').length;
 
-  // Get unique traders count for this week
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('id, created_at');
+      // Get unique traders count for this week
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, created_at');
 
-  const weekAgo = new Date(now.setDate(now.getDate() - 7));
-  const activeTraders = profiles?.filter(profile => 
-    new Date(profile.created_at) >= weekAgo
-  ).length || 0;
+      const weekAgo = new Date(new Date().setDate(now.getDate() - 7));
+      const activeTraders = profiles?.filter(profile => 
+        new Date(profile.created_at) >= weekAgo
+      ).length || 0;
 
-  return {
-    totalVolume,
-    activeOrders,
-    avgSettlement: "4.2 hrs", // This would need real data calculation
-    activeTraders
-  };
+      return {
+        totalVolume,
+        activeOrders: activeOrdersCount,
+        avgSettlement: "4.2 hrs", // This would need real data calculation
+        activeTraders
+      };
+    }
+  });
   
   const filterOrdersByGroup = (orders: Order[], group: string): Order[] => {
     if (group === "all") return orders;
