@@ -12,7 +12,7 @@ interface DealChatProps {
 
 export function DealChat({ dealId }: DealChatProps) {
   const [message, setMessage] = useState("");
-  const { messages, sendMessage } = useMessages(dealId);
+  const { messages, sendMessage, isLoadingMessages } = useMessages(dealId);
 
   const handleSend = async () => {
     if (!message.trim()) return;
