@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.3";
-import { TOTP } from "https://deno.land/x/totp@1.0.0/mod.ts";
+import { TOTP } from "https://esm.sh/totp-generator@0.0.14";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,8 +48,8 @@ serve(async (req) => {
     }
     
     // Verify the token using the TOTP library
-    const totp = new TOTP(profile.two_factor_secret);
-    const verified = totp.verify(token);
+    const currentToken = TOTP(profile.two_factor_secret);
+    const verified = currentToken === token;
     
     return new Response(
       JSON.stringify({ verified }),
