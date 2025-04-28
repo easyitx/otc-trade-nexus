@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +13,11 @@ interface AuthContextType {
   register: (data: { email: string; password: string; fullName: string; company: string; referralCode?: string }) => Promise<boolean>;
   logout: () => Promise<void>;
   connectTelegram: (telegramId: string) => Promise<{ error: string | null }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: string | null }>;
+  enableTwoFactor: () => Promise<{ qrCode: string; secret: string; error: string | null }>;
+  verifyTwoFactor: (token: string) => Promise<{ error: string | null }>;
+  disableTwoFactor: (token: string) => Promise<{ error: string | null }>;
+  isTwoFactorEnabled: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [profile, setProfile] = useState<any>(null);
+  const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -48,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchProfile = async () => {
       if (!currentUser) {
         setProfile(null);
+        setIsTwoFactorEnabled(false);
         return;
       }
 
@@ -59,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
         
         setProfile(data);
+        setIsTwoFactorEnabled(!!data?.two_factor_enabled);
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -163,6 +170,170 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      if (!currentUser) {
+        return { error: "You must be logged in to change your password" };
+      }
+
+      // First verify current password by attempting to sign in
+      const { error: verificationError } = await supabase.auth.signInWithPassword({
+        email: currentUser.email as string,
+        password: currentPassword
+      });
+
+      if (verificationError) {
+        return { error: "Current password is incorrect" };
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Password updated",
+        description: "Your password has been changed successfully",
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Password change failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
+    }
+  };
+
+  const enableTwoFactor = async () => {
+    try {
+      if (!currentUser) {
+        return { qrCode: "", secret: "", error: "You must be logged in to enable 2FA" };
+      }
+
+      // Call Supabase Edge Function to generate TOTP secret and QR code
+      const { data, error } = await supabase.functions.invoke("generate-totp", {
+        body: { userId: currentUser.id }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        qrCode: data.qrCode,
+        secret: data.secret,
+        error: null
+      };
+    } catch (error: any) {
+      toast({
+        title: "Failed to enable 2FA",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { qrCode: "", secret: "", error: error.message };
+    }
+  };
+
+  const verifyTwoFactor = async (token: string) => {
+    try {
+      if (!currentUser) {
+        return { error: "You must be logged in to verify 2FA" };
+      }
+
+      // Call Supabase Edge Function to verify TOTP token and enable 2FA
+      const { data, error } = await supabase.functions.invoke("verify-totp", {
+        body: { userId: currentUser.id, token }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.verified) {
+        return { error: "Invalid verification code" };
+      }
+
+      // Update profile to mark 2FA as enabled
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ two_factor_enabled: true })
+        .eq('id', currentUser.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setIsTwoFactorEnabled(true);
+
+      toast({
+        title: "Two-factor authentication enabled",
+        description: "Your account is now more secure"
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Failed to verify 2FA",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
+    }
+  };
+
+  const disableTwoFactor = async (token: string) => {
+    try {
+      if (!currentUser) {
+        return { error: "You must be logged in to disable 2FA" };
+      }
+
+      // Call Supabase Edge Function to verify TOTP token before disabling 2FA
+      const { data, error } = await supabase.functions.invoke("verify-totp", {
+        body: { userId: currentUser.id, token }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.verified) {
+        return { error: "Invalid verification code" };
+      }
+
+      // Update profile to mark 2FA as disabled
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ two_factor_enabled: false, two_factor_secret: null })
+        .eq('id', currentUser.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setIsTwoFactorEnabled(false);
+
+      toast({
+        title: "Two-factor authentication disabled",
+        description: "Your account is now less secure"
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Failed to disable 2FA",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -173,7 +344,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
-        connectTelegram
+        connectTelegram,
+        changePassword,
+        enableTwoFactor,
+        verifyTwoFactor,
+        disableTwoFactor,
+        isTwoFactorEnabled
       }}
     >
       {children}

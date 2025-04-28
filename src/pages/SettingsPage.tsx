@@ -10,16 +10,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Separator } from "../components/ui/separator";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
-import { Save, Bell, Lock, Globe, User, Webhook } from "lucide-react";
+import { Bell, Lock, Globe, User, Webhook, Save } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { TwoFactorSetup } from "../components/auth/TwoFactorSetup";
+import { DisableTwoFactor } from "../components/auth/DisableTwoFactor";
+import { PasswordChange } from "../components/auth/PasswordChange";
 
 export default function SettingsPage() {
+  const { isAuthenticated, profile } = useAuth();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [telegramNotifications, setTelegramNotifications] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(true);
   const [newDeals, setNewDeals] = useState(true);
   const [marketAlerts, setMarketAlerts] = useState(false);
   const [language, setLanguage] = useState("en");
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const { toast } = useToast();
 
   const handleSaveNotifications = () => {
@@ -29,19 +33,32 @@ export default function SettingsPage() {
     });
   };
 
-  const handleSaveSecurity = () => {
-    toast({
-      title: "Security settings saved",
-      description: "Your security settings have been updated.",
-    });
-  };
+  if (!isAuthenticated) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-full">
+          <Card className="bg-otc-card border-otc-active">
+            <CardHeader>
+              <CardTitle>Authentication Required</CardTitle>
+              <CardDescription>Please log in to access settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="bg-otc-primary text-black hover:bg-otc-primary/90">
+                <a href="/login">Log In</a>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-white">Settings</h1>
 
-        <Tabs defaultValue="notifications" className="space-y-4">
+        <Tabs defaultValue="security" className="space-y-4">
           <TabsList className="bg-otc-active">
             <TabsTrigger value="notifications" className="data-[state=active]:bg-otc-primary data-[state=active]:text-black">
               <Bell className="h-4 w-4 mr-2" />
@@ -158,7 +175,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <p className="font-medium text-white">Telegram Account Connected</p>
-                    <p className="text-muted-foreground text-sm">@username</p>
+                    <p className="text-muted-foreground text-sm">{profile?.telegram_id ? `@${profile.telegram_id}` : "Not connected"}</p>
                     <div className="mt-2">
                       <Button 
                         variant="outline" 
@@ -177,80 +194,11 @@ export default function SettingsPage() {
 
           {/* Security Tab */}
           <TabsContent value="security" className="space-y-4">
-            <Card className="bg-otc-card border-otc-active">
-              <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>Change your account password</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="current-password">Current Password</Label>
-                  <Input 
-                    id="current-password" 
-                    type="password"
-                    className="bg-otc-active border-otc-active text-white"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
-                  <Input 
-                    id="new-password" 
-                    type="password"
-                    className="bg-otc-active border-otc-active text-white"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
-                  <Input 
-                    id="confirm-password" 
-                    type="password"
-                    className="bg-otc-active border-otc-active text-white"
-                  />
-                </div>
-              </CardContent>
-              <div className="flex justify-end px-6 pb-6">
-                <Button className="bg-otc-primary text-black hover:bg-otc-primary/90">
-                  <Save className="mr-2 h-4 w-4" />
-                  Change Password
-                </Button>
-              </div>
-            </Card>
+            <PasswordChange />
 
-            <Card className="bg-otc-card border-otc-active">
-              <CardHeader>
-                <CardTitle>Two-Factor Authentication</CardTitle>
-                <CardDescription>Add an extra layer of security to your account</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="two-factor" className="flex flex-col space-y-1">
-                    <span>Enable Two-Factor Authentication</span>
-                    <span className="text-sm text-muted-foreground">Require a verification code when logging in</span>
-                  </Label>
-                  <Switch
-                    id="two-factor"
-                    checked={twoFactorEnabled}
-                    onCheckedChange={setTwoFactorEnabled}
-                  />
-                </div>
-                
-                {twoFactorEnabled && (
-                  <div className="pt-4">
-                    <Button variant="outline" className="border-otc-active hover:bg-otc-active text-white">
-                      Set Up Two-Factor Authentication
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-              <div className="flex justify-end px-6 pb-6">
-                <Button onClick={handleSaveSecurity} className="bg-otc-primary text-black hover:bg-otc-primary/90">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Security Settings
-                </Button>
-              </div>
-            </Card>
+            <TwoFactorSetup />
+
+            <DisableTwoFactor />
           </TabsContent>
 
           {/* Preferences Tab */}
