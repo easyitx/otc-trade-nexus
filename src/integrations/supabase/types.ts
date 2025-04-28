@@ -134,6 +134,8 @@ export type Database = {
           full_name: string | null
           id: string
           telegram_id: string | null
+          two_factor_enabled: boolean | null
+          two_factor_secret: string | null
           updated_at: string
         }
         Insert: {
@@ -142,6 +144,8 @@ export type Database = {
           full_name?: string | null
           id: string
           telegram_id?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           updated_at?: string
         }
         Update: {
@@ -150,6 +154,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           telegram_id?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           updated_at?: string
         }
         Relationships: []
