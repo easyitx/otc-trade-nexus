@@ -7,6 +7,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { AlertCircleIcon } from "lucide-react";
+import { TwoFactorVerification } from "../../components/auth/TwoFactorVerification";
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -14,6 +15,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -33,9 +36,14 @@ export default function LoginPage() {
     }
 
     try {
-      const success = await login(email, password);
-      if (!success) {
-        setError("Invalid credentials. Please try again.");
+      const result = await login(email, password);
+      
+      if (result.error) {
+        setError(result.error);
+      } else if (result.needsTwoFactor && result.userId) {
+        // Show 2FA verification
+        setUserId(result.userId);
+        setShowTwoFactor(true);
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -44,6 +52,29 @@ export default function LoginPage() {
       setIsSubmitting(false);
     }
   };
+
+  const handleTwoFactorSuccess = () => {
+    // After successful 2FA verification, the user will be automatically logged in
+    // and the isAuthenticated state will change, triggering the redirect
+  };
+
+  const handleTwoFactorCancel = () => {
+    setShowTwoFactor(false);
+    setUserId(null);
+  };
+
+  if (showTwoFactor && userId) {
+    return (
+      <div className="min-h-screen bg-otc-background flex items-center justify-center px-4 py-12">
+        <TwoFactorVerification 
+          userId={userId} 
+          email={email}
+          onSuccess={handleTwoFactorSuccess}
+          onCancel={handleTwoFactorCancel}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-otc-background flex items-center justify-center px-4 py-12">

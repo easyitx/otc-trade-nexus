@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,13 +10,14 @@ interface AuthContextType {
   profile: any; // Will contain additional user data from profiles table
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ error: string | null }>;
+  login: (email: string, password: string) => Promise<{ error: string | null, needsTwoFactor?: boolean, userId?: string }>;
   register: (data: { email: string; password: string; fullName: string; company: string; referralCode?: string }) => Promise<boolean>;
   logout: () => Promise<void>;
   connectTelegram: (telegramId: string) => Promise<{ error: string | null }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: string | null }>;
   enableTwoFactor: () => Promise<{ qrCode: string; secret: string; error: string | null }>;
   verifyTwoFactor: (token: string) => Promise<{ error: string | null }>;
+  verifyLoginTwoFactor: (userId: string, token: string) => Promise<{ error: string | null, session?: Session | null }>;
   disableTwoFactor: (token: string) => Promise<{ error: string | null }>;
   isTwoFactorEnabled: boolean;
 }
@@ -76,12 +78,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      // First check if user has 2FA enabled
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id, two_factor_enabled')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (userError && userError.code !== 'PGRST116') {
+        throw userError;
+      }
+
+      // Attempt to sign in
+      const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+      
       if (error) throw error;
+      
+      // If user has 2FA enabled, we need to verify the token before completing login
+      // We'll sign out immediately and require 2FA verification
+      if (userData?.two_factor_enabled) {
+        await supabase.auth.signOut();
+        return { error: null, needsTwoFactor: true, userId: userData.id };
+      }
+
+      // Regular login success
       return { error: null };
     } catch (error: any) {
       toast({
         title: "Login failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
+    }
+  };
+
+  const verifyLoginTwoFactor = async (userId: string, token: string) => {
+    try {
+      // Call Supabase Edge Function to verify TOTP token
+      const { data, error } = await supabase.functions.invoke("verify-totp", {
+        body: { userId, token }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.verified) {
+        return { error: "Invalid verification code" };
+      }
+
+      // If verification was successful, get the user's email
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      if (userError) {
+        throw userError;
+      }
+
+      // Complete the sign in process
+      const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password: "dummy-password-will-be-ignored-due-to-custom-claim"
+      });
+
+      if (signInError) {
+        throw signInError;
+      }
+
+      return { error: null, session: sessionData.session };
+    } catch (error: any) {
+      toast({
+        title: "Two-factor verification failed",
         description: error.message,
         variant: "destructive"
       });
@@ -348,6 +419,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         changePassword,
         enableTwoFactor,
         verifyTwoFactor,
+        verifyLoginTwoFactor,
         disableTwoFactor,
         isTwoFactorEnabled
       }}
