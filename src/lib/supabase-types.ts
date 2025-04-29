@@ -8,7 +8,6 @@ export type Profile = {
   updated_at: string;
   two_factor_secret?: string | null;
   two_factor_enabled?: boolean;
-  email?: string | null;
 };
 
 export type Order = {

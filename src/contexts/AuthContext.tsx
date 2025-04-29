@@ -79,14 +79,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       // First check if user has 2FA enabled
-      const { data: userData, error: userError } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id, two_factor_enabled')
-        .eq('email', email)
+        .eq('id', await getUserIdByEmail(email))
         .maybeSingle();
       
-      if (userError && userError.code !== 'PGRST116') {
-        throw userError;
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
       }
 
       // Attempt to sign in
@@ -96,9 +96,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // If user has 2FA enabled, we need to verify the token before completing login
       // We'll sign out immediately and require 2FA verification
-      if (userData?.two_factor_enabled) {
+      if (profileData?.two_factor_enabled) {
         await supabase.auth.signOut();
-        return { error: null, needsTwoFactor: true, userId: userData.id };
+        return { error: null, needsTwoFactor: true, userId: profileData.id };
       }
 
       // Regular login success
@@ -110,6 +110,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive"
       });
       return { error: error.message };
+    }
+  };
+
+  // Helper function to get user ID from email
+  const getUserIdByEmail = async (email: string): Promise<string> => {
+    try {
+      const { data, error } = await supabase.auth.admin.getUserByEmail(email);
+      if (error) throw error;
+      return data?.user?.id || '';
+    } catch (error) {
+      console.error("Error fetching user by email:", error);
+      return '';
     }
   };
 
@@ -128,12 +140,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: "Invalid verification code" };
       }
 
-      // If verification was successful, get the user's email
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', userId)
-        .single();
+      // If verification was successful, get the user's email from auth
+      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
 
       if (userError) {
         throw userError;
@@ -141,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Complete the sign in process
       const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: userData.email,
+        email: userData?.user?.email || '',
         password: "dummy-password-will-be-ignored-due-to-custom-claim"
       });
 
