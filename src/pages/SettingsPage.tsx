@@ -10,10 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Separator } from "../components/ui/separator";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
-import { Bell, Lock, Globe, User, Webhook, Save } from "lucide-react";
+import { Bell, Lock, Globe, User, Save } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { TwoFactorSetup } from "../components/auth/TwoFactorSetup";
-import { DisableTwoFactor } from "../components/auth/DisableTwoFactor";
 import { PasswordChange } from "../components/auth/PasswordChange";
 
 export default function SettingsPage() {
@@ -71,10 +69,6 @@ export default function SettingsPage() {
             <TabsTrigger value="preferences" className="data-[state=active]:bg-otc-primary data-[state=active]:text-black">
               <User className="h-4 w-4 mr-2" />
               Preferences
-            </TabsTrigger>
-            <TabsTrigger value="api" className="data-[state=active]:bg-otc-primary data-[state=active]:text-black">
-              <Webhook className="h-4 w-4 mr-2" />
-              API
             </TabsTrigger>
           </TabsList>
 
@@ -195,10 +189,6 @@ export default function SettingsPage() {
           {/* Security Tab */}
           <TabsContent value="security" className="space-y-4">
             <PasswordChange />
-
-            <TwoFactorSetup />
-
-            <DisableTwoFactor />
           </TabsContent>
 
           {/* Preferences Tab */}
@@ -248,37 +238,6 @@ export default function SettingsPage() {
                   Save Preferences
                 </Button>
               </div>
-            </Card>
-          </TabsContent>
-
-          {/* API Tab */}
-          <TabsContent value="api" className="space-y-4">
-            <Card className="bg-otc-card border-otc-active">
-              <CardHeader>
-                <CardTitle>API Access</CardTitle>
-                <CardDescription>Manage your API keys for automated trading</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 bg-otc-active/50 rounded-lg">
-                  <p className="text-white font-medium mb-2">Your API Keys</p>
-                  <p className="text-muted-foreground text-sm mb-2">
-                    API access allows you to create automated trading systems and connect external platforms to your OTC Desk account.
-                  </p>
-                  <Button className="bg-otc-primary text-black hover:bg-otc-primary/90">
-                    Generate New API Key
-                  </Button>
-                </div>
-
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <p>All API requests must be authenticated and encrypted.</p>
-                  <p>For security purposes, API keys have limited permissions by default.</p>
-                  <p>
-                    <a href="#" className="text-otc-primary hover:underline">
-                      View API Documentation
-                    </a>
-                  </p>
-                </div>
-              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

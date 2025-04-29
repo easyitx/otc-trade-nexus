@@ -6,8 +6,6 @@ export type Profile = {
   telegram_id: string | null;
   created_at: string;
   updated_at: string;
-  two_factor_secret?: string | null;
-  two_factor_enabled?: boolean;
 };
 
 export type Order = {
