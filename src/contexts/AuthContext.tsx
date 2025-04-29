@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,27 +77,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      // First check if user has 2FA enabled
+      // First attempt to sign in to get the user ID
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) throw error;
+      
+      const userId = data.user?.id;
+      
+      if (!userId) {
+        throw new Error("Failed to get user ID");
+      }
+      
+      // Now check if user has 2FA enabled
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id, two_factor_enabled')
-        .eq('id', await getUserIdByEmail(email))
+        .eq('id', userId)
         .maybeSingle();
       
       if (profileError && profileError.code !== 'PGRST116') {
         throw profileError;
       }
-
-      // Attempt to sign in
-      const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) throw error;
       
       // If user has 2FA enabled, we need to verify the token before completing login
       // We'll sign out immediately and require 2FA verification
       if (profileData?.two_factor_enabled) {
         await supabase.auth.signOut();
-        return { error: null, needsTwoFactor: true, userId: profileData.id };
+        return { error: null, needsTwoFactor: true, userId };
       }
 
       // Regular login success
@@ -110,18 +115,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive"
       });
       return { error: error.message };
-    }
-  };
-
-  // Helper function to get user ID from email
-  const getUserIdByEmail = async (email: string): Promise<string> => {
-    try {
-      const { data, error } = await supabase.auth.admin.getUserByEmail(email);
-      if (error) throw error;
-      return data?.user?.id || '';
-    } catch (error) {
-      console.error("Error fetching user by email:", error);
-      return '';
     }
   };
 
