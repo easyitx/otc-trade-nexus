@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
@@ -14,6 +15,7 @@ import { CheckCircle, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
+import { ExchangeRates } from "@/components/ExchangeRates";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
@@ -22,7 +24,8 @@ export default function CreateOrderPage() {
   const [orderType, setOrderType] = useState<string>("BUY");
   const [selectedPair, setSelectedPair] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
-  const [rate, setRate] = useState<string>("");
+  const [rateSource, setRateSource] = useState<string>("cbr");
+  const [rateAdjustment, setRateAdjustment] = useState<string>("0");
   const [expiryDate, setExpiryDate] = useState<Date | undefined>(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   );
@@ -40,6 +43,24 @@ export default function CreateOrderPage() {
     groups[group].push(pair);
     return groups;
   }, {} as Record<string, typeof tradePairs>);
+
+  // Format rate string based on selected source and adjustment
+  const formatRate = () => {
+    const sourceMap = {
+      "cbr": "ЦБ",
+      "profinance": "PF",
+      "investing": "IV",
+      "xe": "XE"
+    };
+    
+    const sourceName = sourceMap[rateSource as keyof typeof sourceMap] || rateSource;
+    const adjustment = parseFloat(rateAdjustment);
+    
+    if (adjustment === 0) return sourceName;
+    
+    const sign = adjustment > 0 ? "+" : "";
+    return `${sourceName}${sign}${adjustment}%`;
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +82,7 @@ export default function CreateOrderPage() {
     const { error } = await createOrder({
       type: orderType as "BUY" | "SELL",
       amount: parsedAmount,
-      rate,
+      rate: formatRate(),
       expiresAt: expiryDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       purpose: purpose || undefined,
       notes: notes || undefined,
@@ -113,6 +134,10 @@ export default function CreateOrderPage() {
   return (
     <MainLayout>
       <div className="space-y-6">
+        <div>
+          <ExchangeRates className="max-w-7xl mx-auto mb-6" />
+        </div>
+      
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">Create New Order</h1>
         </div>
@@ -196,14 +221,41 @@ export default function CreateOrderPage() {
               
               {/* Rate */}
               <div className="space-y-2">
-                <Label htmlFor="rate">Rate</Label>
-                <Input
-                  id="rate"
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
-                  placeholder="e.g., CB+1.5%, Market Price, etc."
-                  className="bg-otc-active border-otc-active text-white"
-                />
+                <Label>Rate</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="rateSource" className="text-sm text-muted-foreground mb-1 block">Rate Source</Label>
+                    <Select value={rateSource} onValueChange={setRateSource}>
+                      <SelectTrigger id="rateSource" className="bg-otc-active border-otc-active text-white">
+                        <SelectValue placeholder="Select Source" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-otc-card border-otc-active">
+                        <SelectItem value="cbr">ЦБ (CBR)</SelectItem>
+                        <SelectItem value="profinance">Profinance (PF)</SelectItem>
+                        <SelectItem value="investing">Investing (IV)</SelectItem>
+                        <SelectItem value="xe">XE</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="rateAdjustment" className="text-sm text-muted-foreground mb-1 block">Adjustment (%)</Label>
+                    <div className="relative">
+                      <Input
+                        id="rateAdjustment"
+                        type="number"
+                        step="0.1"
+                        value={rateAdjustment}
+                        onChange={(e) => setRateAdjustment(e.target.value)}
+                        className="bg-otc-active border-otc-active text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-otc-active/50 rounded-md p-3 mt-2">
+                  <Label className="text-white">Final Rate: {formatRate()}</Label>
+                </div>
               </div>
               
               {/* Expiry Date */}
@@ -254,7 +306,7 @@ export default function CreateOrderPage() {
               <Button 
                 type="submit"
                 className="bg-otc-primary text-black hover:bg-otc-primary/90"
-                disabled={isSubmitting || !selectedPair || !amount || !rate}
+                disabled={isSubmitting || !selectedPair || !amount || !rateSource}
               >
                 {isSubmitting ? "Creating..." : "Create Order"}
               </Button>

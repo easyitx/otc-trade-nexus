@@ -1,3 +1,4 @@
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
@@ -16,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDeals } from "@/hooks/useDeals";
 import { tradePairs } from "@/data/mockData";
 import { useProfile } from "@/hooks/useProfile";
+import { ExchangeRates } from "@/components/ExchangeRates";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -164,6 +166,10 @@ export default function OrderDetailPage() {
   return (
     <MainLayout>
       <div className="space-y-6">
+        <div>
+          <ExchangeRates className="max-w-7xl mx-auto mb-6" />
+        </div>
+        
         {/* Navigation */}
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
@@ -231,6 +237,11 @@ export default function OrderDetailPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Created Date</p>
                   <p className="text-white">{new Date(order.created_at).toLocaleDateString()}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm text-muted-foreground">Last Updated</p>
+                  <p className="text-white">{new Date(order.updated_at).toLocaleDateString()}</p>
                 </div>
                 
                 <div>
