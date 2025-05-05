@@ -17,12 +17,15 @@ import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExchangeRates } from "@/components/ExchangeRates";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
   const { createOrder } = useOrders();
   const { currentUser } = useAuth();
   const { rateAdjustments, isLoading: isLoadingSettings } = usePlatformSettings();
+  const { t } = useLanguage();
+  
   const [orderType, setOrderType] = useState<string>("BUY");
   const [selectedPair, setSelectedPair] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
@@ -81,7 +84,7 @@ export default function CreateOrderPage() {
     // Validate minimum amount (500,000 USD)
     const parsedAmount = parseFloat(amount.replace(/,/g, ''));
     if (isNaN(parsedAmount) || parsedAmount < 500000) {
-      alert("Minimum order amount is 500,000 USD");
+      alert(t("otcMinimumReq"));
       setIsSubmitting(false);
       return;
     }
@@ -112,9 +115,9 @@ export default function CreateOrderPage() {
               <div className="w-16 h-16 bg-green-900/20 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Order Created Successfully</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">{t("orderCreatedSuccess")}</h2>
               <p className="text-muted-foreground mb-6">
-                Your order has been submitted to the OTC Desk and is now visible to potential counterparties.
+                {t("orderSubmitted")}
               </p>
               <div className="flex space-x-4">
                 <Button 
@@ -122,13 +125,13 @@ export default function CreateOrderPage() {
                   className="border-otc-active hover:bg-otc-active text-white"
                   onClick={() => setIsSuccess(false)}
                 >
-                  Create Another Order
+                  {t("createAnotherOrder")}
                 </Button>
                 <Button 
                   className="bg-otc-primary text-black hover:bg-otc-primary/90"
                   asChild
                 >
-                  <a href="/orders">View All Orders</a>
+                  <a href="/orders">{t("viewAllOrders")}</a>
                 </Button>
               </div>
             </CardContent>
@@ -146,29 +149,29 @@ export default function CreateOrderPage() {
         </div>
       
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Create New Order</h1>
+          <h1 className="text-2xl font-bold text-white">{t("createNewOrder")}</h1>
         </div>
         
         <Alert className="bg-otc-secondary/20 border-otc-icon text-white">
           <Info className="h-4 w-4 text-otc-icon" />
-          <AlertTitle>Minimum order size</AlertTitle>
+          <AlertTitle>{t("minOrderSize")}</AlertTitle>
           <AlertDescription>
-            OTC Desk requires a minimum order size of $500,000 USD equivalent.
+            {t("otcMinimumReq")}
           </AlertDescription>
         </Alert>
         
         <form onSubmit={handleSubmit}>
           <Card className="bg-otc-card border-otc-active">
             <CardHeader>
-              <CardTitle className="text-white">Order Details</CardTitle>
+              <CardTitle className="text-white">{t("orderDetails")}</CardTitle>
               <CardDescription>
-                Enter the details of your OTC order.
+                {t("enterOrderDetails")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Order Type */}
               <div className="space-y-2">
-                <Label>Order Type</Label>
+                <Label>{t("orderType")}</Label>
                 <RadioGroup 
                   defaultValue="BUY" 
                   value={orderType}
@@ -177,28 +180,27 @@ export default function CreateOrderPage() {
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="BUY" id="buy" className="border-otc-active text-otc-primary" />
-                    <Label htmlFor="buy" className="cursor-pointer">Buy</Label>
+                    <Label htmlFor="buy" className="cursor-pointer">{t("buy")}</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="SELL" id="sell" className="border-otc-active text-otc-primary" />
-                    <Label htmlFor="sell" className="cursor-pointer">Sell</Label>
+                    <Label htmlFor="sell" className="cursor-pointer">{t("sell")}</Label>
                   </div>
                 </RadioGroup>
               </div>
               
               {/* Trading Pair */}
               <div className="space-y-2">
-                <Label htmlFor="tradingPair">Trading Pair</Label>
+                <Label htmlFor="tradingPair">{t("tradingPair")}</Label>
                 <Select value={selectedPair} onValueChange={setSelectedPair}>
                   <SelectTrigger id="tradingPair" className="bg-otc-active border-otc-active text-white">
-                    <SelectValue placeholder="Select Trading Pair" />
+                    <SelectValue placeholder={t("selectTradingPair")} />
                   </SelectTrigger>
                   <SelectContent className="bg-otc-card border-otc-active max-h-[300px]">
                     {Object.entries(groupedPairs).map(([group, pairs]) => (
                       <div key={group}>
                         <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase">
-                          {group === "RUB_NR" ? "RUB (Non-Resident)" : 
-                           group === "RUB_CASH" ? "Cash" : "Tokenized"}
+                          {t(group as "RUB_NR" | "RUB_CASH" | "TOKENIZED")}
                         </div>
                         {pairs.map((pair) => (
                           <SelectItem key={pair.id} value={pair.id}>
@@ -213,14 +215,14 @@ export default function CreateOrderPage() {
               
               {/* Amount */}
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount (USD equivalent)</Label>
+                <Label htmlFor="amount">{t("amount")}</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
                   <Input
                     id="amount"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder="500,000 minimum"
+                    placeholder={t("minimumOrder")}
                     className="pl-8 bg-otc-active border-otc-active text-white"
                   />
                 </div>
@@ -228,12 +230,12 @@ export default function CreateOrderPage() {
               
               {/* Rate */}
               <div className="space-y-2">
-                <Label>Rate</Label>
+                <Label>{t("rate")}</Label>
                 <div>
-                  <Label htmlFor="rateSource" className="text-sm text-muted-foreground mb-1 block">Rate Source</Label>
+                  <Label htmlFor="rateSource" className="text-sm text-muted-foreground mb-1 block">{t("rateSource")}</Label>
                   <Select value={rateSource} onValueChange={setRateSource}>
                     <SelectTrigger id="rateSource" className="bg-otc-active border-otc-active text-white">
-                      <SelectValue placeholder="Select Source" />
+                      <SelectValue placeholder={t("selectSource")} />
                     </SelectTrigger>
                     <SelectContent className="bg-otc-card border-otc-active">
                       <SelectItem value="cbr">ЦБ (CBR)</SelectItem>
@@ -246,48 +248,48 @@ export default function CreateOrderPage() {
                 
                 <div className="bg-otc-active/50 rounded-md p-3 mt-2">
                   <div className="flex justify-between items-center">
-                    <Label className="text-white">Platform Adjustment: </Label>
+                    <Label className="text-white">{t("platformAdjustment")}: </Label>
                     <span className="text-otc-primary font-semibold">
                       {getAdjustmentPercent()}%
                     </span>
                   </div>
                   <div className="mt-2 pt-2 border-t border-otc-active">
-                    <Label className="text-white">Final Rate: {formatRate()}</Label>
+                    <Label className="text-white">{t("finalRate")}: {formatRate()}</Label>
                   </div>
                 </div>
               </div>
               
               {/* Expiry Date */}
               <div className="space-y-2">
-                <Label>Expiry Date</Label>
+                <Label>{t("expiryDate")}</Label>
                 <EnhancedDatePicker 
                   date={expiryDate} 
                   setDate={setExpiryDate} 
                   className="bg-otc-active border-otc-active text-white" 
-                  placeholder="Select when this order expires"
+                  placeholder={t("selectWhenExpires")}
                 />
               </div>
               
               {/* Purpose */}
               <div className="space-y-2">
-                <Label htmlFor="purpose">Payment Purpose</Label>
+                <Label htmlFor="purpose">{t("paymentPurpose")}</Label>
                 <Input
                   id="purpose"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
-                  placeholder="e.g., Import payment, Export revenue, etc."
+                  placeholder={t("purposeExample")}
                   className="bg-otc-active border-otc-active text-white"
                 />
               </div>
               
               {/* Additional Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Additional Notes</Label>
+                <Label htmlFor="notes">{t("additionalNotes")}</Label>
                 <Textarea
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Any additional details or requirements for this order"
+                  placeholder={t("notesPlaceholder")}
                   className="bg-otc-active border-otc-active text-white min-h-[100px]"
                 />
               </div>
@@ -299,14 +301,14 @@ export default function CreateOrderPage() {
                 className="border-otc-active hover:bg-otc-active text-white"
                 onClick={() => window.history.back()}
               >
-                Cancel
+                {t("cancel")}
               </Button>
               <Button 
                 type="submit"
                 className="bg-otc-primary text-black hover:bg-otc-primary/90"
                 disabled={isSubmitting || !selectedPair || !amount || !rateSource}
               >
-                {isSubmitting ? "Creating..." : "Create Order"}
+                {isSubmitting ? t("creatingOrder") : t("createOrder")}
               </Button>
             </CardFooter>
           </Card>
