@@ -6,6 +6,7 @@ export type Profile = {
   telegram_id: string | null;
   created_at: string;
   updated_at: string;
+  avatar_url?: string | null; // Added avatar_url property
 };
 
 export type Order = {

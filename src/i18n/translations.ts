@@ -1,4 +1,7 @@
 
+export type Language = 'en' | 'ru';
+export type TranslationKey = keyof typeof translations['en'];
+
 export const translations = {
   en: {
     welcome: "Welcome",
