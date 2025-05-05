@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -12,6 +11,8 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { OrderStatistics } from "@/components/dashboard/OrderStatistics";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Order card component for the dashboard
 const OrderCard = ({ order }: { order: Order }) => {
@@ -118,6 +119,7 @@ interface PlatformStats {
 
 export default function DashboardPage() {
   const { currentUser, profile } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
 
   // Fetch active orders
@@ -236,42 +238,45 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
               <h1 className="text-2xl font-bold text-white">
-                Welcome, {profile?.full_name ? profile.full_name.split(' ')[0] : 'User'}
+                {t('welcome')}, {profile?.full_name ? profile.full_name.split(' ')[0] : 'User'}
               </h1>
               <p className="text-muted-foreground mt-1">
-                Trade larger volumes with minimal slippage through our OTC desk.
+                Торгуйте большими объемами с минимальным проскальзыванием через наш OTC деск.
               </p>
             </div>
             <Button className="mt-4 md:mt-0 bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
-              <Link to="/create-order">Create New Order</Link>
+              <Link to="/create-order">{t('createNewOrder')}</Link>
             </Button>
           </div>
         </div>
         
-        {/* Stats Grid */}
+        {/* Order Statistics Component */}
+        <OrderStatistics />
+        
+        {/* Stats Grid - Keep for historical/comparison purposes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard 
-            title="Total Trading Volume"
+            title={t('tradeVolume')}
             value={`$${(stats?.totalVolume || 0).toLocaleString()}`}
-            description="Last 30 days"
+            description={t('last30Days')}
             icon={<CircleDollarSign className="h-5 w-5 text-otc-icon" />}
           />
           <StatsCard 
-            title="Active Orders"
+            title={t('activeOrders')}
             value={String(stats?.activeOrders || 0)}
-            description="Across all markets"
+            description={t('acrossMarkets')}
             icon={<TrendingUp className="h-5 w-5 text-otc-icon" />}
           />
           <StatsCard 
-            title="Average Settlement"
+            title={t('avgSettlement')}
             value={stats?.avgSettlement || "N/A"}
-            description="Order to completion"
+            description={t('orderToCompletion')}
             icon={<Clock className="h-5 w-5 text-otc-icon" />}
           />
           <StatsCard 
-            title="Active Traders"
+            title={t('activeTraders')}
             value={String(stats?.activeTraders || 0)}
-            description="This week"
+            description={t('thisWeek')}
             icon={<Users className="h-5 w-5 text-otc-icon" />}
           />
         </div>
@@ -279,18 +284,18 @@ export default function DashboardPage() {
         {/* Market Orders */}
         <div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-            <h2 className="text-xl font-semibold text-white">Active Market Orders</h2>
+            <h2 className="text-xl font-semibold text-white">{t('activeMarketOrders')}</h2>
             <Link to="/orders" className="text-otc-primary hover:underline text-sm flex items-center">
-              View all orders <ArrowRight className="ml-1 h-4 w-4" />
+              {t('viewAllOrders')} <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
           
           <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
             <TabsList className="bg-otc-active mb-6">
-              <TabsTrigger value="all">All Pairs</TabsTrigger>
+              <TabsTrigger value="all">{t('allPairs')}</TabsTrigger>
               <TabsTrigger value="RUB_NR">RUB (NR)</TabsTrigger>
               <TabsTrigger value="RUB_CASH">RUB (Cash)</TabsTrigger>
-              <TabsTrigger value="TOKENIZED">Tokenized</TabsTrigger>
+              <TabsTrigger value="TOKENIZED">Токенизированные</TabsTrigger>
             </TabsList>
             
             <TabsContent value={activeTab}>
@@ -302,9 +307,9 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="text-center py-10 bg-otc-card rounded-lg border border-otc-active">
-                  <p className="text-muted-foreground">No active orders found for this category.</p>
+                  <p className="text-muted-foreground">{t('noActiveOrders')}</p>
                   <Button className="mt-4 bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
-                    <Link to="/create-order">Create Order</Link>
+                    <Link to="/create-order">{t('create')}</Link>
                   </Button>
                 </div>
               )}
