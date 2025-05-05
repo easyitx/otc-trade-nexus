@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { 
@@ -11,7 +10,7 @@ import {
   SendIcon, 
   ChevronLeftIcon,
   ChevronRightIcon,
-  SliderIcon
+  SlidersIcon
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
@@ -97,7 +96,7 @@ export function Sidebar() {
                 {!isCollapsed && <p className="text-xs text-muted-foreground uppercase font-semibold">Admin</p>}
               </div>
               <NavItem 
-                icon={SliderIcon} 
+                icon={SlidersIcon} 
                 label="Rate Management" 
                 href="/admin/rate-management" 
                 isCollapsed={isCollapsed} 

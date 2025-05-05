@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +14,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   connectTelegram: (telegramId: string) => Promise<{ error: string | null }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: string | null }>;
-  assignRole: (userId: string, role: string) => Promise<{ error: string | null }>;
+  assignRole: (userId: string, role: "user" | "manager" | "admin") => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -209,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Function to assign a role to a user
-  const assignRole = async (userId: string, role: string) => {
+  const assignRole = async (userId: string, role: "user" | "manager" | "admin") => {
     if (!currentUser) {
       return { error: "Not authenticated" };
     }
