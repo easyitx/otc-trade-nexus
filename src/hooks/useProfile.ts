@@ -26,6 +26,7 @@ export function useProfile() {
       if (error) throw error;
       
       // Ensure all required fields from Profile type are present
+      // The avatar_url field might not exist in the database yet
       const profileData: Profile = {
         id: data.id,
         full_name: data.full_name,
@@ -33,7 +34,7 @@ export function useProfile() {
         telegram_id: data.telegram_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
-        avatar_url: data.avatar_url || null,
+        avatar_url: null, // Set a default value since it doesn't exist in the DB yet
         two_factor_enabled: data.two_factor_enabled,
         two_factor_secret: data.two_factor_secret
       };
@@ -65,7 +66,7 @@ export function useProfile() {
         telegram_id: data.telegram_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
-        avatar_url: data.avatar_url || null,
+        avatar_url: null, // Set a default value since it doesn't exist in the DB yet
         two_factor_enabled: data.two_factor_enabled,
         two_factor_secret: data.two_factor_secret
       };

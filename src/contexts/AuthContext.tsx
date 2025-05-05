@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             telegram_id: data.telegram_id,
             created_at: data.created_at,
             updated_at: data.updated_at,
-            avatar_url: data.avatar_url || null, // Ensure avatar_url is present
+            avatar_url: null, // Set a default since it doesn't exist in the DB yet
             two_factor_enabled: data.two_factor_enabled,
             two_factor_secret: data.two_factor_secret
           };
