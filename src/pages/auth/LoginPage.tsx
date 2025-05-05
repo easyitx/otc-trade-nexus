@@ -7,6 +7,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { AlertCircleIcon } from "lucide-react";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { t } = useLanguage();
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -27,7 +29,7 @@ export default function LoginPage() {
 
     // Validate form
     if (!email || !password) {
-      setError("Email and password are required");
+      setError("Email и пароль обязательны");
       setIsSubmitting(false);
       return;
     }
@@ -39,7 +41,7 @@ export default function LoginPage() {
         setError(result.error);
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      setError("Произошла непредвиденная ошибка. Пожалуйста, попробуйте еще раз.");
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -50,9 +52,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-otc-background flex items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md bg-otc-card border-otc-active">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-white">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center text-white">{t('login')}</CardTitle>
           <CardDescription className="text-center text-muted-foreground">
-            Enter your credentials to access your OTC Desk account
+            Введите свои данные для доступа к аккаунту OTC Desk
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,7 +71,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Введите ваш email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-otc-active border-otc-active text-white"
@@ -78,15 +80,15 @@ export default function LoginPage() {
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Пароль</Label>
                 <Link to="/forgot-password" className="text-xs text-otc-primary hover:underline">
-                  Forgot password?
+                  Забыли пароль?
                 </Link>
               </div>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Введите ваш пароль"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-otc-active border-otc-active text-white"
@@ -98,22 +100,22 @@ export default function LoginPage() {
               className="w-full bg-otc-primary text-black hover:bg-otc-primary/90" 
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Logging in..." : "Login"}
+              {isSubmitting ? "Вход..." : t('login')}
             </Button>
 
             {/* Demo account for testing */}
             <div className="text-center">
               <p className="text-xs text-muted-foreground">
-                Demo credentials: a.ivanov@example.com / any password
+                Тестовые данные: a.ivanov@example.com / любой пароль
               </p>
             </div>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-muted-foreground text-sm">
-            Don't have an account?{" "}
+            Нет аккаунта?{" "}
             <Link to="/register" className="text-otc-primary hover:underline">
-              Register
+              {t('register')}
             </Link>
           </p>
         </CardFooter>

@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { Label } from "../components/ui/label";
 import { formatDistanceToNow } from "date-fns";
+import { ru } from "date-fns/locale";
 import { Link } from "react-router-dom";
 
 export default function ProfilePage() {
@@ -42,7 +43,7 @@ export default function ProfilePage() {
             <div className="space-y-2">
               <Label className="text-muted-foreground">{t('memberSince')}</Label>
               <p className="text-white">
-                {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : t('notAvailable')}
+                {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true, locale: ru }) : t('notAvailable')}
               </p>
             </div>
             

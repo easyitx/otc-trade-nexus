@@ -10,11 +10,13 @@ import { Edit2, Save, AlertTriangle } from "lucide-react";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function RateManagementPage() {
   const { settings, updateSetting, userRoles, isLoadingRoles, isLoading } = usePlatformSettings();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   
   const [rateAdjustments, setRateAdjustments] = useState({
     cbr: 0,
@@ -39,6 +41,11 @@ export default function RateManagementPage() {
     });
     
     setIsEditing(false);
+    
+    toast({
+      title: "Настройки сохранены",
+      description: "Настройки корректировок курсов были успешно обновлены"
+    });
   };
   
   // Check if user has permissions
@@ -48,17 +55,17 @@ export default function RateManagementPage() {
         <div className="flex items-center justify-center h-full">
           <Card className="w-full max-w-md bg-otc-card border-otc-active">
             <CardHeader>
-              <CardTitle className="text-white">Access Denied</CardTitle>
+              <CardTitle className="text-white">Доступ запрещен</CardTitle>
               <CardDescription>
-                You do not have permission to view this page.
+                У вас нет разрешения на просмотр этой страницы.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Alert className="bg-red-900/20 border-red-500 text-white">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
-                <AlertTitle>Restricted Area</AlertTitle>
+                <AlertTitle>Ограниченная зона</AlertTitle>
                 <AlertDescription>
-                  Only managers and administrators can access rate management.
+                  Только менеджеры и администраторы могут управлять курсами.
                 </AlertDescription>
               </Alert>
             </CardContent>
@@ -67,7 +74,7 @@ export default function RateManagementPage() {
                 className="bg-otc-primary text-black hover:bg-otc-primary/90"
                 onClick={() => navigate('/')}
               >
-                Return to Dashboard
+                Вернуться на главную
               </Button>
             </CardFooter>
           </Card>
@@ -80,7 +87,7 @@ export default function RateManagementPage() {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-full">
-          <p className="text-white">Loading...</p>
+          <p className="text-white">Загрузка...</p>
         </div>
       </MainLayout>
     );
@@ -90,7 +97,7 @@ export default function RateManagementPage() {
     <MainLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Rate Management</h1>
+          <h1 className="text-2xl font-bold text-white">Управление курсами</h1>
           
           {!isEditing ? (
             <Button 
@@ -98,7 +105,7 @@ export default function RateManagementPage() {
               className="bg-otc-primary text-black hover:bg-otc-primary/90 flex items-center"
             >
               <Edit2 className="mr-2 h-4 w-4" />
-              Edit Adjustments
+              Редактировать
             </Button>
           ) : (
             <Button 
@@ -107,30 +114,30 @@ export default function RateManagementPage() {
               disabled={updateSetting.isPending}
             >
               <Save className="mr-2 h-4 w-4" />
-              {updateSetting.isPending ? "Saving..." : "Save Changes"}
+              {updateSetting.isPending ? "Сохранение..." : "Сохранить изменения"}
             </Button>
           )}
         </div>
         
         <Card className="bg-otc-card border-otc-active">
           <CardHeader>
-            <CardTitle className="text-white">Rate Adjustment Settings</CardTitle>
+            <CardTitle className="text-white">Настройки корректировок курсов</CardTitle>
             <CardDescription>
-              Configure the percentage adjustments applied to each rate source
+              Настройте процентные корректировки, применяемые к каждому источнику курсов
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <Alert className="bg-otc-secondary/20 border-otc-icon text-white">
               <AlertTriangle className="h-4 w-4 text-otc-icon" />
-              <AlertTitle>Important</AlertTitle>
+              <AlertTitle>Важно</AlertTitle>
               <AlertDescription>
-                These adjustments affect all orders created using the corresponding rate source. Changes will apply to new orders only.
+                Эти корректировки влияют на все ордера, созданные с использованием соответствующего источника курсов. Изменения будут применяться только к новым ордерам.
               </AlertDescription>
             </Alert>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label htmlFor="cbr">ЦБ (CBR) Adjustment (%)</Label>
+                <Label htmlFor="cbr">Корректировка ЦБ (CBR) (%)</Label>
                 <div className="relative">
                   <Input
                     id="cbr"
@@ -149,7 +156,7 @@ export default function RateManagementPage() {
               </div>
               
               <div className="space-y-3">
-                <Label htmlFor="profinance">Profinance (PF) Adjustment (%)</Label>
+                <Label htmlFor="profinance">Корректировка Profinance (PF) (%)</Label>
                 <div className="relative">
                   <Input
                     id="profinance"
@@ -168,7 +175,7 @@ export default function RateManagementPage() {
               </div>
               
               <div className="space-y-3">
-                <Label htmlFor="investing">Investing.com (IV) Adjustment (%)</Label>
+                <Label htmlFor="investing">Корректировка Investing.com (IV) (%)</Label>
                 <div className="relative">
                   <Input
                     id="investing"
@@ -187,7 +194,7 @@ export default function RateManagementPage() {
               </div>
               
               <div className="space-y-3">
-                <Label htmlFor="xe">XE.com Adjustment (%)</Label>
+                <Label htmlFor="xe">Корректировка XE.com (%)</Label>
                 <div className="relative">
                   <Input
                     id="xe"

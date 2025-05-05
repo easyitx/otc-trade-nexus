@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { 
@@ -16,6 +17,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -48,6 +50,7 @@ export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { userRoles, isLoadingRoles } = usePlatformSettings();
   const isManager = userRoles?.isManager || userRoles?.isAdmin;
+  const { t } = useLanguage();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -82,22 +85,22 @@ export function Sidebar() {
       {/* Navigation */}
       <div className="flex-1 py-4 px-3 overflow-y-auto">
         <div className="space-y-1">
-          <NavItem icon={HomeIcon} label="Dashboard" href="/" isCollapsed={isCollapsed} />
-          <NavItem icon={ListIcon} label="Orders" href="/orders" isCollapsed={isCollapsed} />
-          <NavItem icon={MessageCircleIcon} label="Deals" href="/deals" isCollapsed={isCollapsed} />
-          <NavItem icon={PlusCircleIcon} label="Create Order" href="/create-order" isCollapsed={isCollapsed} />
-          <NavItem icon={UserIcon} label="Profile" href="/profile" isCollapsed={isCollapsed} />
-          <NavItem icon={Settings2Icon} label="Settings" href="/settings" isCollapsed={isCollapsed} />
-          <NavItem icon={SendIcon} label="Connect Telegram" href="/telegram" isCollapsed={isCollapsed} />
+          <NavItem icon={HomeIcon} label={t('dashboard')} href="/" isCollapsed={isCollapsed} />
+          <NavItem icon={ListIcon} label={t('orders')} href="/orders" isCollapsed={isCollapsed} />
+          <NavItem icon={MessageCircleIcon} label={t('deals')} href="/deals" isCollapsed={isCollapsed} />
+          <NavItem icon={PlusCircleIcon} label={t('createNewOrder')} href="/create-order" isCollapsed={isCollapsed} />
+          <NavItem icon={UserIcon} label={t('profile')} href="/profile" isCollapsed={isCollapsed} />
+          <NavItem icon={Settings2Icon} label={t('settings')} href="/settings" isCollapsed={isCollapsed} />
+          <NavItem icon={SendIcon} label={t('connectTelegram')} href="/telegram" isCollapsed={isCollapsed} />
           
           {isManager && !isLoadingRoles && (
             <div className="mt-4 pt-4 border-t border-otc-active/50">
               <div className="px-3 py-2">
-                {!isCollapsed && <p className="text-xs text-muted-foreground uppercase font-semibold">Admin</p>}
+                {!isCollapsed && <p className="text-xs text-muted-foreground uppercase font-semibold">Админ</p>}
               </div>
               <NavItem 
                 icon={SlidersIcon} 
-                label="Rate Management" 
+                label="Управление курсами" 
                 href="/admin/rate-management" 
                 isCollapsed={isCollapsed} 
               />
@@ -117,7 +120,7 @@ export function Sidebar() {
         >
           <Link to="/create-order">
             <PlusCircleIcon className="w-5 h-5 mr-2" />
-            {!isCollapsed && <span>New Order</span>}
+            {!isCollapsed && <span>{t('createNewOrder')}</span>}
           </Link>
         </Button>
       </div>
