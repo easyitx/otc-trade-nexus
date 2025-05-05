@@ -148,7 +148,6 @@ export const translations = {
     orderCreatedSuccess: "Order Created Successfully",
     orderSubmitted: "Your order has been submitted to the OTC Desk and is now visible to potential counterparties.",
     createAnotherOrder: "Create Another Order",
-    viewAllOrders: "View All Orders",
     
     // Deals page
     noChatsSelected: "No chat selected",
@@ -157,7 +156,6 @@ export const translations = {
     startNewConversation: "Start a new conversation by matching with an order",
     browseActiveOrders: "Browse active orders",
     typeMessage: "Type your message...",
-    sending: "Sending...",
     send: "Send",
     dealWith: "Deal with",
     startedOn: "Started on",
@@ -325,7 +323,6 @@ export const translations = {
     orderCreatedSuccess: "Ордер успешно создан",
     orderSubmitted: "Ваш ордер был отправлен в OTC Desk и теперь виден потенциальным контрагентам.",
     createAnotherOrder: "Создать еще один ордер",
-    viewAllOrders: "Просмотреть все ордера",
     
     // Deals page
     noChatsSelected: "Чат не выбран",
@@ -334,7 +331,6 @@ export const translations = {
     startNewConversation: "Начните новый разговор, сопоставив с ордером",
     browseActiveOrders: "Просмотреть активные ордера",
     typeMessage: "Введите ваше сообщение...",
-    sending: "Отправка...",
     send: "Отправить",
     dealWith: "Сделка с",
     startedOn: "Начата",
