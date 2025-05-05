@@ -8,10 +8,11 @@ import { Label } from "../components/ui/label";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Link } from "react-router-dom";
+import { Skeleton } from "../components/ui/skeleton";
 
 export default function ProfilePage() {
-  const { currentUser, profile } = useAuth();
-  const { t } = useLanguage();
+  const { currentUser, profile, isLoading } = useAuth();
+  const { t, language } = useLanguage();
 
   if (!currentUser) return null;
 
@@ -27,12 +28,20 @@ export default function ProfilePage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label className="text-muted-foreground">{t('fullName')}</Label>
-              <p className="text-white">{profile?.full_name || t('notSet')}</p>
+              {isLoading ? (
+                <Skeleton className="h-6 w-48" />
+              ) : (
+                <p className="text-white">{profile?.full_name || t('notSet')}</p>
+              )}
             </div>
             
             <div className="space-y-2">
               <Label className="text-muted-foreground">{t('company')}</Label>
-              <p className="text-white">{profile?.company || t('notSet')}</p>
+              {isLoading ? (
+                <Skeleton className="h-6 w-40" />
+              ) : (
+                <p className="text-white">{profile?.company || t('notSet')}</p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -42,14 +51,25 @@ export default function ProfilePage() {
             
             <div className="space-y-2">
               <Label className="text-muted-foreground">{t('memberSince')}</Label>
-              <p className="text-white">
-                {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true, locale: ru }) : t('notAvailable')}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-6 w-36" />
+              ) : (
+                <p className="text-white">
+                  {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { 
+                    addSuffix: true, 
+                    locale: language === 'ru' ? ru : undefined 
+                  }) : t('notAvailable')}
+                </p>
+              )}
             </div>
             
             <div className="space-y-2">
               <Label className="text-muted-foreground">Telegram ID</Label>
-              <p className="text-white">{profile?.telegram_id || t('notConnected')}</p>
+              {isLoading ? (
+                <Skeleton className="h-6 w-32" />
+              ) : (
+                <p className="text-white">{profile?.telegram_id || t('notConnected')}</p>
+              )}
             </div>
 
             <div className="pt-4">

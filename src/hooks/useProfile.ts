@@ -1,37 +1,34 @@
 
-import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { Profile } from '@/lib/supabase-types';
 
 export function useProfile() {
   const { currentUser } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    async function fetchProfile() {
-      if (!currentUser?.id) return;
+  const {
+    data: profile,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['profile', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return null;
 
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
 
-        if (error) throw error;
-        setProfile(data);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchProfile();
-  }, [currentUser?.id]);
+      if (error) throw error;
+      return data as Profile;
+    },
+    enabled: !!currentUser?.id,
+    staleTime: 1000 * 60 * 5, // Keep data fresh for 5 minutes
+  });
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!currentUser?.id) return;
@@ -45,12 +42,20 @@ export function useProfile() {
         .single();
 
       if (error) throw error;
-      setProfile(data);
+      
+      // Update the cached data
+      queryClient.setQueryData(['profile', currentUser.id], data);
+      
       return { data, error: null };
     } catch (e: any) {
       return { data: null, error: e.message };
     }
   };
 
-  return { profile, loading, error, updateProfile };
+  return { 
+    profile, 
+    loading, 
+    error: error ? (error as Error).message : null,
+    updateProfile 
+  };
 }

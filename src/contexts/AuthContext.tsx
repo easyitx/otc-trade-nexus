@@ -2,11 +2,12 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "../hooks/use-toast";
-import { useProfile } from "@/hooks/useProfile";
+import { useQueryClient } from "@tanstack/react-query";
+import type { Profile } from "@/lib/supabase-types";
 
 interface AuthContextType {
   currentUser: User | null;
-  profile: any; // Will contain additional user data from profiles table
+  profile: Profile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -23,8 +24,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Check active sessions
@@ -53,6 +55,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
+        // Check if we already have the profile data in the query cache
+        const cachedProfile = queryClient.getQueryData<Profile>(['profile', currentUser.id]);
+        
+        if (cachedProfile) {
+          setProfile(cachedProfile);
+          return;
+        }
+
+        // If not in cache, fetch it and update the cache
         const { data } = await supabase
           .from('profiles')
           .select('*')
@@ -60,13 +71,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
         
         setProfile(data);
+        
+        // Store in query cache for reuse
+        queryClient.setQueryData(['profile', currentUser.id], data);
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
     };
 
     fetchProfile();
-  }, [currentUser]);
+  }, [currentUser, queryClient]);
 
   const login = async (email: string, password: string) => {
     try {

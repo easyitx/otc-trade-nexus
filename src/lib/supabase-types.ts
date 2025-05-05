@@ -6,7 +6,9 @@ export type Profile = {
   telegram_id: string | null;
   created_at: string;
   updated_at: string;
-  avatar_url?: string | null; // Added avatar_url property
+  avatar_url: string | null;
+  two_factor_enabled?: boolean;
+  two_factor_secret?: string | null;
 };
 
 export type Order = {
