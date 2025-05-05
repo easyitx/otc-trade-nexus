@@ -156,7 +156,7 @@ export default function RegisterPage() {
               />
             </div>
             
-            <div className="space-y-2">
+{/*             <div className="space-y-2">
               <Label htmlFor="referralCode">Код приглашения (опционально)</Label>
               <Input
                 id="referralCode"
@@ -166,7 +166,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 className="bg-otc-active border-otc-active text-white"
               />
-            </div>
+            </div> */}
             
             <Button 
               type="submit" 
