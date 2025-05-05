@@ -25,7 +25,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   const buyOrders = orders.filter(order => order.type === "BUY")
     .sort((a, b) => Number(b.rate) - Number(a.rate));
   const sellOrders = orders.filter(order => order.type === "SELL")
-    .sort((a, b) => Number(a.rate) - Number(a.rate));
+    .sort((a, b) => Number(a.rate) - Number(b.rate));
 
   if (orders.length === 0) {
     return (

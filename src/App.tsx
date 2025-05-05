@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +17,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ConnectTelegramPage from "./pages/ConnectTelegramPage";
 import NotFound from "./pages/NotFound";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { ExchangeRates } from "./components/ExchangeRates";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,9 @@ const App = () => (
     <AuthProvider>
       <LanguageProvider>
         <TooltipProvider>
+          <div className="fixed top-0 left-0 right-0 z-50 bg-otc-background/80 backdrop-blur-sm p-2">
+            <ExchangeRates className="max-w-7xl mx-auto" />
+          </div>
           <Toaster />
           <Sonner />
           <BrowserRouter>
