@@ -44,6 +44,22 @@ export const translations = {
     TOKENIZED: "Tokenized",
     exchangeRates: "Exchange Rates",
     ratesUpdatedAutomatically: "Rates are updated automatically every 5 minutes",
+    
+    // Adding missing translation keys for NotFound page
+    error404: "404 - Page Not Found",
+    oopsNotFound: "Oops! The page you were looking for doesn't exist.",
+    returnHome: "Return to Homepage",
+    
+    // Adding missing translation keys for Profile page
+    personalInfo: "Personal Information",
+    fullName: "Full Name",
+    company: "Company",
+    email: "Email",
+    memberSince: "Member Since",
+    notSet: "Not Set",
+    notAvailable: "Not Available",
+    notConnected: "Not Connected",
+    editProfile: "Edit Profile"
   },
   ru: {
     welcome: "Добро пожаловать",
@@ -86,5 +102,21 @@ export const translations = {
     TOKENIZED: "Токенизированный",
     exchangeRates: "Курсы валют",
     ratesUpdatedAutomatically: "Курсы обновляются автоматически каждые 5 минут",
+    
+    // Adding missing translation keys for NotFound page
+    error404: "404 - Страница не найдена",
+    oopsNotFound: "Упс! Страница, которую вы искали, не существует.",
+    returnHome: "Вернуться на главную",
+    
+    // Adding missing translation keys for Profile page
+    personalInfo: "Личная информация",
+    fullName: "Полное имя",
+    company: "Компания",
+    email: "Электронная почта",
+    memberSince: "Участник с",
+    notSet: "Не указано",
+    notAvailable: "Недоступно",
+    notConnected: "Не подключено",
+    editProfile: "Редактировать профиль"
   },
 };
