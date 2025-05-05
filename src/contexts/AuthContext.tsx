@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,10 +71,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('id', currentUser.id)
           .single();
         
-        setProfile(data);
-        
-        // Store in query cache for reuse
-        queryClient.setQueryData(['profile', currentUser.id], data);
+        if (data) {
+          // Make sure all required fields in the Profile type are present
+          const profileData: Profile = {
+            id: data.id,
+            full_name: data.full_name,
+            company: data.company,
+            telegram_id: data.telegram_id,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
+            avatar_url: data.avatar_url || null, // Ensure avatar_url is present
+            two_factor_enabled: data.two_factor_enabled,
+            two_factor_secret: data.two_factor_secret
+          };
+          
+          setProfile(profileData);
+          
+          // Store in query cache for reuse
+          queryClient.setQueryData(['profile', currentUser.id], profileData);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
       }

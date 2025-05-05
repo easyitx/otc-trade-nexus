@@ -24,7 +24,21 @@ export function useProfile() {
         .single();
 
       if (error) throw error;
-      return data as Profile;
+      
+      // Ensure all required fields from Profile type are present
+      const profileData: Profile = {
+        id: data.id,
+        full_name: data.full_name,
+        company: data.company,
+        telegram_id: data.telegram_id,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        avatar_url: data.avatar_url || null,
+        two_factor_enabled: data.two_factor_enabled,
+        two_factor_secret: data.two_factor_secret
+      };
+      
+      return profileData;
     },
     enabled: !!currentUser?.id,
     staleTime: 1000 * 60 * 5, // Keep data fresh for 5 minutes
@@ -43,10 +57,23 @@ export function useProfile() {
 
       if (error) throw error;
       
-      // Update the cached data
-      queryClient.setQueryData(['profile', currentUser.id], data);
+      // Ensure the returned data has all fields required by Profile type
+      const profileData: Profile = {
+        id: data.id,
+        full_name: data.full_name,
+        company: data.company,
+        telegram_id: data.telegram_id,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        avatar_url: data.avatar_url || null,
+        two_factor_enabled: data.two_factor_enabled,
+        two_factor_secret: data.two_factor_secret
+      };
       
-      return { data, error: null };
+      // Update the cached data
+      queryClient.setQueryData(['profile', currentUser.id], profileData);
+      
+      return { data: profileData, error: null };
     } catch (e: any) {
       return { data: null, error: e.message };
     }
