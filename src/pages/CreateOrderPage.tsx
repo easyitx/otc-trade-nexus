@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Textarea } from "../components/ui/textarea";
-import { DatePicker } from "../components/ui/date-picker";
+import { EnhancedDatePicker } from "../components/ui/enhanced-date-picker";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { tradePairs } from "../data/mockData";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
@@ -16,16 +16,17 @@ import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
 import { ExchangeRates } from "@/components/ExchangeRates";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
   const { createOrder } = useOrders();
   const { currentUser } = useAuth();
+  const { rateAdjustments, isLoading: isLoadingSettings } = usePlatformSettings();
   const [orderType, setOrderType] = useState<string>("BUY");
   const [selectedPair, setSelectedPair] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [rateSource, setRateSource] = useState<string>("cbr");
-  const [rateAdjustment, setRateAdjustment] = useState<string>("0");
   const [expiryDate, setExpiryDate] = useState<Date | undefined>(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   );
@@ -44,7 +45,13 @@ export default function CreateOrderPage() {
     return groups;
   }, {} as Record<string, typeof tradePairs>);
 
-  // Format rate string based on selected source and adjustment
+  // Get rate adjustment based on selected source
+  const getAdjustmentPercent = () => {
+    if (isLoadingSettings) return 0;
+    return rateAdjustments[rateSource as keyof typeof rateAdjustments] || 0;
+  };
+  
+  // Format rate string based on selected source and fixed adjustment
   const formatRate = () => {
     const sourceMap = {
       "cbr": "ЦБ",
@@ -54,7 +61,7 @@ export default function CreateOrderPage() {
     };
     
     const sourceName = sourceMap[rateSource as keyof typeof sourceMap] || rateSource;
-    const adjustment = parseFloat(rateAdjustment);
+    const adjustment = getAdjustmentPercent();
     
     if (adjustment === 0) return sourceName;
     
@@ -222,52 +229,43 @@ export default function CreateOrderPage() {
               {/* Rate */}
               <div className="space-y-2">
                 <Label>Rate</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="rateSource" className="text-sm text-muted-foreground mb-1 block">Rate Source</Label>
-                    <Select value={rateSource} onValueChange={setRateSource}>
-                      <SelectTrigger id="rateSource" className="bg-otc-active border-otc-active text-white">
-                        <SelectValue placeholder="Select Source" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-otc-card border-otc-active">
-                        <SelectItem value="cbr">ЦБ (CBR)</SelectItem>
-                        <SelectItem value="profinance">Profinance (PF)</SelectItem>
-                        <SelectItem value="investing">Investing (IV)</SelectItem>
-                        <SelectItem value="xe">XE</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="rateAdjustment" className="text-sm text-muted-foreground mb-1 block">Adjustment (%)</Label>
-                    <div className="relative">
-                      <Input
-                        id="rateAdjustment"
-                        type="number"
-                        step="0.1"
-                        value={rateAdjustment}
-                        onChange={(e) => setRateAdjustment(e.target.value)}
-                        className="bg-otc-active border-otc-active text-white"
-                      />
-                    </div>
-                  </div>
+                <div>
+                  <Label htmlFor="rateSource" className="text-sm text-muted-foreground mb-1 block">Rate Source</Label>
+                  <Select value={rateSource} onValueChange={setRateSource}>
+                    <SelectTrigger id="rateSource" className="bg-otc-active border-otc-active text-white">
+                      <SelectValue placeholder="Select Source" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-otc-card border-otc-active">
+                      <SelectItem value="cbr">ЦБ (CBR)</SelectItem>
+                      <SelectItem value="profinance">Profinance (PF)</SelectItem>
+                      <SelectItem value="investing">Investing (IV)</SelectItem>
+                      <SelectItem value="xe">XE</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="bg-otc-active/50 rounded-md p-3 mt-2">
-                  <Label className="text-white">Final Rate: {formatRate()}</Label>
+                  <div className="flex justify-between items-center">
+                    <Label className="text-white">Platform Adjustment: </Label>
+                    <span className="text-otc-primary font-semibold">
+                      {getAdjustmentPercent()}%
+                    </span>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-otc-active">
+                    <Label className="text-white">Final Rate: {formatRate()}</Label>
+                  </div>
                 </div>
               </div>
               
               {/* Expiry Date */}
               <div className="space-y-2">
                 <Label>Expiry Date</Label>
-                <div className="bg-otc-active border border-otc-active rounded-md p-3">
-                  <DatePicker 
-                    date={expiryDate} 
-                    setDate={setExpiryDate} 
-                    className="text-white" 
-                  />
-                </div>
+                <EnhancedDatePicker 
+                  date={expiryDate} 
+                  setDate={setExpiryDate} 
+                  className="bg-otc-active border-otc-active text-white" 
+                  placeholder="Select when this order expires"
+                />
               </div>
               
               {/* Purpose */}

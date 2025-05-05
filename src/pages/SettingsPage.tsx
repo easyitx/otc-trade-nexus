@@ -10,12 +10,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Separator } from "../components/ui/separator";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
-import { Bell, Lock, Globe, User, Save } from "lucide-react";
+import { Bell, Lock, Globe, User, Save, Settings, ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { PasswordChange } from "../components/auth/PasswordChange";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { Link } from "react-router-dom";
 
 export default function SettingsPage() {
   const { isAuthenticated, profile } = useAuth();
+  const { userRoles, isLoadingRoles } = usePlatformSettings();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [telegramNotifications, setTelegramNotifications] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(true);
@@ -30,6 +33,8 @@ export default function SettingsPage() {
       description: "Your notification preferences have been updated.",
     });
   };
+
+  const isManager = userRoles?.isManager || userRoles?.isAdmin;
 
   if (!isAuthenticated) {
     return (
@@ -55,6 +60,39 @@ export default function SettingsPage() {
     <MainLayout>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-white">Settings</h1>
+
+        {isManager && !isLoadingRoles && (
+          <Card className="bg-otc-card border-otc-active">
+            <CardHeader>
+              <CardTitle className="text-white">Administration</CardTitle>
+              <CardDescription>
+                Manage platform settings and configurations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-otc-active/50 rounded-lg flex items-center justify-between">
+                <div className="flex items-start space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-otc-icon-bg flex items-center justify-center">
+                    <Settings className="h-5 w-5 text-otc-icon" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">Rate Management</p>
+                    <p className="text-muted-foreground text-sm">Configure platform rate adjustments</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  className="text-white hover:bg-otc-active"
+                  asChild
+                >
+                  <Link to="/admin/rate-management">
+                    <ChevronRight className="h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Tabs defaultValue="security" className="space-y-4">
           <TabsList className="bg-otc-active">

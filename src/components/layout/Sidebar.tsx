@@ -10,11 +10,13 @@ import {
   Settings2Icon, 
   SendIcon, 
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  SliderIcon
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -45,6 +47,8 @@ const NavItem = ({ icon: Icon, label, href, isCollapsed }: NavItemProps) => {
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { userRoles, isLoadingRoles } = usePlatformSettings();
+  const isManager = userRoles?.isManager || userRoles?.isAdmin;
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -86,6 +90,20 @@ export function Sidebar() {
           <NavItem icon={UserIcon} label="Profile" href="/profile" isCollapsed={isCollapsed} />
           <NavItem icon={Settings2Icon} label="Settings" href="/settings" isCollapsed={isCollapsed} />
           <NavItem icon={SendIcon} label="Connect Telegram" href="/telegram" isCollapsed={isCollapsed} />
+          
+          {isManager && !isLoadingRoles && (
+            <div className="mt-4 pt-4 border-t border-otc-active/50">
+              <div className="px-3 py-2">
+                {!isCollapsed && <p className="text-xs text-muted-foreground uppercase font-semibold">Admin</p>}
+              </div>
+              <NavItem 
+                icon={SliderIcon} 
+                label="Rate Management" 
+                href="/admin/rate-management" 
+                isCollapsed={isCollapsed} 
+              />
+            </div>
+          )}
         </div>
       </div>
       

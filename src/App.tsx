@@ -15,6 +15,7 @@ import ChatPage from "./pages/ChatPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import ConnectTelegramPage from "./pages/ConnectTelegramPage";
+import RateManagementPage from "./pages/admin/RateManagementPage";
 import NotFound from "./pages/NotFound";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ExchangeRates } from "./components/ExchangeRates";
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/telegram" element={<ConnectTelegramPage />} />
+              <Route path="/admin/rate-management" element={<RateManagementPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

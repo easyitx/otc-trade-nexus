@@ -15,6 +15,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   connectTelegram: (telegramId: string) => Promise<{ error: string | null }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: string | null }>;
+  assignRole: (userId: string, role: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -207,6 +208,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Function to assign a role to a user
+  const assignRole = async (userId: string, role: string) => {
+    if (!currentUser) {
+      return { error: "Not authenticated" };
+    }
+    
+    try {
+      // Check if user already has this role
+      const { data: existingRole, error: checkError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('role', role)
+        .maybeSingle();
+        
+      if (checkError) throw checkError;
+      
+      // If role doesn't exist yet, add it
+      if (!existingRole) {
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({ 
+            user_id: userId, 
+            role: role 
+          });
+          
+        if (error) throw error;
+      }
+      
+      toast({
+        title: "Role assigned",
+        description: `User has been assigned the ${role} role`
+      });
+      
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Failed to assign role",
+        description: error.message,
+        variant: "destructive"
+      });
+      return { error: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -218,7 +264,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         connectTelegram,
-        changePassword
+        changePassword,
+        assignRole
       }}
     >
       {children}
