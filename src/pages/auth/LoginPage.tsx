@@ -102,13 +102,6 @@ export default function LoginPage() {
             >
               {isSubmitting ? "Вход..." : t('login')}
             </Button>
-
-            {/* Demo account for testing */}
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground">
-                Тестовые данные: a.ivanov@example.com / любой пароль
-              </p>
-            </div>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
