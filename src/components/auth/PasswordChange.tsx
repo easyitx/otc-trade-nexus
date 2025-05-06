@@ -82,14 +82,14 @@ export function PasswordChange() {
               name="currentPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Current Password</FormLabel>
+                  <FormLabel className={theme === "light" ? "text-gray-700" : ""}>Current Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showCurrentPass ? "text" : "password"}
                         className={cn(
                           "pr-10",
-                          theme === "light" ? "bg-white border-gray-200" : "bg-otc-active border-otc-active"
+                          theme === "light" ? "bg-white border-gray-200 text-gray-900" : "bg-otc-active border-otc-active"
                         )}
                         placeholder="Enter your current password"
                         {...field}
@@ -113,14 +113,14 @@ export function PasswordChange() {
               name="newPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>New Password</FormLabel>
+                  <FormLabel className={theme === "light" ? "text-gray-700" : ""}>New Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showNewPass ? "text" : "password"}
                         className={cn(
                           "pr-10",
-                          theme === "light" ? "bg-white border-gray-200" : "bg-otc-active border-otc-active"
+                          theme === "light" ? "bg-white border-gray-200 text-gray-900" : "bg-otc-active border-otc-active"
                         )}
                         placeholder="Enter your new password"
                         {...field}
@@ -144,14 +144,14 @@ export function PasswordChange() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormLabel className={theme === "light" ? "text-gray-700" : ""}>Confirm New Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showConfirmPass ? "text" : "password"}
                         className={cn(
                           "pr-10",
-                          theme === "light" ? "bg-white border-gray-200" : "bg-otc-active border-otc-active"
+                          theme === "light" ? "bg-white border-gray-200 text-gray-900" : "bg-otc-active border-otc-active"
                         )}
                         placeholder="Confirm your new password"
                         {...field}

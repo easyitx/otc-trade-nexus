@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { ChartBarIcon, TrendingUpIcon, ArrowUpRightIcon } from 'lucide-react';
 import {
   BarChart,
@@ -14,6 +15,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
+import { cn } from '@/lib/utils';
 
 // Defining trading pairs and their groups
 const tradingPairs = {
@@ -50,11 +52,19 @@ interface OrderStats {
 }
 
 // Custom tooltip component for the chart
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, theme }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-otc-card p-3 border border-otc-active rounded-md shadow-md">
-        <p className="font-medium text-white">{label}</p>
+      <div className={cn(
+        "p-3 border rounded-md shadow-md",
+        theme === "light" 
+          ? "bg-white border-gray-200" 
+          : "bg-otc-card border-otc-active"
+      )}>
+        <p className={cn(
+          "font-medium", 
+          theme === "light" ? "text-gray-900" : "text-white"
+        )}>{label}</p>
         <p className="text-green-400">Покупка: {payload[0].value}</p>
         <p className="text-red-400">Продажа: {payload[1].value}</p>
       </div>
@@ -66,6 +76,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export const OrderStatistics = () => {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<'RUB_NR' | 'RUB_CASH' | 'TOKENIZED'>('RUB_NR');
 
   // Fetch order statistics from the database
@@ -144,8 +155,14 @@ export const OrderStatistics = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-40 bg-otc-card animate-pulse rounded-lg"></div>
-        <div className="h-80 bg-otc-card animate-pulse rounded-lg"></div>
+        <div className={cn(
+          "h-40 animate-pulse rounded-lg",
+          theme === "light" ? "bg-gray-100" : "bg-otc-card"
+        )}></div>
+        <div className={cn(
+          "h-80 animate-pulse rounded-lg",
+          theme === "light" ? "bg-gray-100" : "bg-otc-card"
+        )}></div>
       </div>
     );
   }
@@ -154,17 +171,28 @@ export const OrderStatistics = () => {
     <div className="space-y-6">
       {/* Summary Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-otc-card border-otc-active">
+        <Card className={cn(
+          theme === "light" ? "bg-white border-gray-200" : "bg-otc-card border-otc-active"
+        )}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Общий объем торгов
             </CardTitle>
-            <div className="h-8 w-8 rounded-full bg-otc-icon-bg flex items-center justify-center">
-              <ChartBarIcon className="h-5 w-5 text-otc-icon" />
+            <div className={cn(
+              "h-8 w-8 rounded-full flex items-center justify-center",
+              theme === "light" ? "bg-blue-50" : "bg-otc-icon-bg"
+            )}>
+              <ChartBarIcon className={cn(
+                "h-5 w-5",
+                theme === "light" ? "text-primary" : "text-otc-icon"
+              )} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className={cn(
+              "text-2xl font-bold",
+              theme === "light" ? "text-gray-900" : "text-white"
+            )}>
               ${stats?.totalVolume.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -173,17 +201,30 @@ export const OrderStatistics = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-otc-card border-otc-active">
+        <Card className={cn(
+          theme === "light" ? "bg-white border-gray-200" : "bg-otc-card border-otc-active"
+        )}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Всего ордеров
             </CardTitle>
-            <div className="h-8 w-8 rounded-full bg-otc-icon-bg flex items-center justify-center">
-              <TrendingUpIcon className="h-5 w-5 text-otc-icon" />
+            <div className={cn(
+              "h-8 w-8 rounded-full flex items-center justify-center",
+              theme === "light" ? "bg-blue-50" : "bg-otc-icon-bg"
+            )}>
+              <TrendingUpIcon className={cn(
+                "h-5 w-5",
+                theme === "light" ? "text-primary" : "text-otc-icon"
+              )} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{stats?.totalOrders}</div>
+            <div className={cn(
+              "text-2xl font-bold",
+              theme === "light" ? "text-gray-900" : "text-white"
+            )}>
+              {stats?.totalOrders}
+            </div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center">
               {stats?.activeOrders} активных ордеров
               <span className="ml-2 flex items-center text-green-500">
@@ -193,17 +234,28 @@ export const OrderStatistics = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-otc-card border-otc-active">
+        <Card className={cn(
+          theme === "light" ? "bg-white border-gray-200" : "bg-otc-card border-otc-active"
+        )}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Средний объем ордера
             </CardTitle>
-            <div className="h-8 w-8 rounded-full bg-otc-icon-bg flex items-center justify-center">
-              <ChartBarIcon className="h-5 w-5 text-otc-icon" />
+            <div className={cn(
+              "h-8 w-8 rounded-full flex items-center justify-center",
+              theme === "light" ? "bg-blue-50" : "bg-otc-icon-bg"
+            )}>
+              <ChartBarIcon className={cn(
+                "h-5 w-5",
+                theme === "light" ? "text-primary" : "text-otc-icon"
+              )} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className={cn(
+              "text-2xl font-bold",
+              theme === "light" ? "text-gray-900" : "text-white"
+            )}>
               ${stats?.totalOrders ? Math.floor(stats.totalVolume / stats.totalOrders).toLocaleString() : 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -214,37 +266,59 @@ export const OrderStatistics = () => {
       </div>
 
       {/* Trading Pairs Statistics */}
-      <Card className="bg-otc-card border-otc-active">
+      <Card className={cn(
+        theme === "light" ? "bg-white border-gray-200" : "bg-otc-card border-otc-active"
+      )}>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Статистика торговых пар</CardTitle>
+          <CardTitle className={cn(
+            "text-lg font-medium",
+            theme === "light" ? "text-gray-900" : "text-white"
+          )}>
+            Статистика торговых пар
+          </CardTitle>
           <div className="flex space-x-2 mt-2">
             <button
               onClick={() => setActiveTab('RUB_NR')}
-              className={`px-3 py-1 rounded-md text-sm ${
+              className={cn(
+                "px-3 py-1 rounded-md text-sm",
                 activeTab === 'RUB_NR' 
-                  ? 'bg-otc-primary text-black' 
-                  : 'bg-otc-active text-white hover:bg-otc-active/80'
-              }`}
+                  ? theme === "light"
+                    ? "bg-primary text-white"
+                    : "bg-otc-primary text-black"
+                  : theme === "light"
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-otc-active text-white hover:bg-otc-active/80"
+              )}
             >
               RUB (Нерезидентский)
             </button>
             <button
               onClick={() => setActiveTab('RUB_CASH')}
-              className={`px-3 py-1 rounded-md text-sm ${
+              className={cn(
+                "px-3 py-1 rounded-md text-sm",
                 activeTab === 'RUB_CASH' 
-                  ? 'bg-otc-primary text-black' 
-                  : 'bg-otc-active text-white hover:bg-otc-active/80'
-              }`}
+                  ? theme === "light"
+                    ? "bg-primary text-white"
+                    : "bg-otc-primary text-black"
+                  : theme === "light"
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-otc-active text-white hover:bg-otc-active/80"
+              )}
             >
               RUB (Наличный)
             </button>
             <button
               onClick={() => setActiveTab('TOKENIZED')}
-              className={`px-3 py-1 rounded-md text-sm ${
+              className={cn(
+                "px-3 py-1 rounded-md text-sm",
                 activeTab === 'TOKENIZED' 
-                  ? 'bg-otc-primary text-black' 
-                  : 'bg-otc-active text-white hover:bg-otc-active/80'
-              }`}
+                  ? theme === "light"
+                    ? "bg-primary text-white"
+                    : "bg-otc-primary text-black"
+                  : theme === "light"
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-otc-active text-white hover:bg-otc-active/80"
+              )}
             >
               Токенизированный
             </button>
@@ -259,17 +333,20 @@ export const OrderStatistics = () => {
                 margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                 barGap={0}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme === "light" ? "#e5e7eb" : "#444"} />
                 <XAxis 
                   dataKey="name" 
-                  stroke="#888" 
-                  tick={{ fill: '#888' }} 
+                  stroke={theme === "light" ? "#6b7280" : "#888"} 
+                  tick={{ fill: theme === "light" ? "#6b7280" : "#888" }} 
                   angle={-45}
                   textAnchor="end"
                   height={70}
                 />
-                <YAxis stroke="#888" tick={{ fill: '#888' }} />
-                <Tooltip content={<CustomTooltip />} />
+                <YAxis 
+                  stroke={theme === "light" ? "#6b7280" : "#888"} 
+                  tick={{ fill: theme === "light" ? "#6b7280" : "#888" }} 
+                />
+                <Tooltip content={<CustomTooltip theme={theme} />} />
                 <Bar dataKey="buy" fill="#4ade80" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="sell" fill="#f87171" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -280,7 +357,10 @@ export const OrderStatistics = () => {
           <div className="mt-6">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-otc-active">
+                <tr className={cn(
+                  "border-b",
+                  theme === "light" ? "border-gray-200" : "border-otc-active"
+                )}>
                   <th className="text-left py-2 px-2 text-muted-foreground">Торговая пара</th>
                   <th className="text-right py-2 px-2 text-muted-foreground">Объем</th>
                   <th className="text-right py-2 px-2 text-muted-foreground">Ордера</th>
@@ -288,13 +368,28 @@ export const OrderStatistics = () => {
               </thead>
               <tbody>
                 {tradingPairs[activeTab].map((pair) => (
-                  <tr key={pair.id} className="border-b border-otc-active/30 hover:bg-otc-active/20">
-                    <td className="py-2 px-2 text-white">{pair.displayName}</td>
-                    <td className="text-right py-2 px-2 text-white">
+                  <tr key={pair.id} className={cn(
+                    "border-b hover:bg-opacity-20",
+                    theme === "light" 
+                      ? "border-gray-100 hover:bg-gray-50" 
+                      : "border-otc-active/30 hover:bg-otc-active/20"
+                  )}>
+                    <td className={cn(
+                      "py-2 px-2",
+                      theme === "light" ? "text-gray-900" : "text-white"
+                    )}>
+                      {pair.displayName}
+                    </td>
+                    <td className={cn(
+                      "text-right py-2 px-2",
+                      theme === "light" ? "text-gray-900" : "text-white"
+                    )}>
                       ${stats?.pairStats[pair.id]?.volume.toLocaleString() || '0'}
                     </td>
                     <td className="text-right py-2 px-2">
-                      <span className="text-white">{stats?.pairStats[pair.id]?.count || 0}</span>
+                      <span className={theme === "light" ? "text-gray-900" : "text-white"}>
+                        {stats?.pairStats[pair.id]?.count || 0}
+                      </span>
                       <span className="text-xs ml-2">
                         (<span className="text-green-400">{stats?.pairStats[pair.id]?.buyCount || 0}</span>/<span className="text-red-400">{stats?.pairStats[pair.id]?.sellCount || 0}</span>)
                       </span>
