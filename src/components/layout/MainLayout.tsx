@@ -5,6 +5,7 @@ import { Sidebar } from "./Sidebar";
 import { useAuth } from "../../contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -21,7 +22,10 @@ export function MainLayout({ children, requireAuth = true }: MainLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className={cn(
+      "flex h-screen",
+      theme === "light" ? "bg-gray-50" : "bg-background"
+    )}>
       {/* Sidebar */}
       <Sidebar />
 
@@ -34,7 +38,10 @@ export function MainLayout({ children, requireAuth = true }: MainLayoutProps) {
         <main className="flex-1 overflow-auto p-6">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
-              <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 ${theme === "light" ? "border-primary" : "border-otc-primary"}`}></div>
+              <div className={cn(
+                "animate-spin rounded-full h-12 w-12 border-t-2 border-b-2",
+                theme === "light" ? "border-primary" : "border-otc-primary"
+              )}></div>
             </div>
           ) : (
             <div className="max-w-7xl mx-auto">

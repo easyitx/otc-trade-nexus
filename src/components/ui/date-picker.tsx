@@ -29,6 +29,7 @@ export function DatePicker({ date, setDate, className }: DatePickerProps) {
           className={cn(
             "w-full justify-start text-left font-normal",
             !date && "text-muted-foreground",
+            theme === "light" ? "bg-white border-gray-200" : "",
             className
           )}
         >
@@ -38,14 +39,19 @@ export function DatePicker({ date, setDate, className }: DatePickerProps) {
       </PopoverTrigger>
       <PopoverContent className={cn(
         "w-auto p-0 border", 
-        theme === "light" ? "bg-card border-border shadow-light" : "bg-otc-card border-border shadow-light"
+        theme === "light" 
+          ? "bg-white border-gray-200 shadow-sm" 
+          : "bg-otc-card border-border shadow-light"
       )}>
         <Calendar
           mode="single"
           selected={date}
           onSelect={setDate}
           initialFocus
-          className={theme === "light" ? "bg-card text-foreground" : "bg-otc-card text-foreground"}
+          className={theme === "light" 
+            ? "bg-white text-gray-900" 
+            : "bg-otc-card text-foreground"
+          }
         />
       </PopoverContent>
     </Popover>

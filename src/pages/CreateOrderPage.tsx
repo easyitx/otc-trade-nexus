@@ -18,6 +18,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ExchangeRates } from "@/components/ExchangeRates";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ export default function CreateOrderPage() {
   const { currentUser } = useAuth();
   const { rateAdjustments, isLoading: isLoadingSettings } = usePlatformSettings();
   const { t } = useLanguage();
+  const { theme } = useTheme();
   
   const [orderType, setOrderType] = useState<string>("BUY");
   const [selectedPair, setSelectedPair] = useState<string>("");
@@ -110,25 +113,42 @@ export default function CreateOrderPage() {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-full">
-          <Card className="w-full max-w-2xl bg-otc-card border-otc-active">
+          <Card className={cn(
+            "w-full max-w-2xl",
+            theme === "light" ? "bg-white border-gray-200" : "bg-otc-card border-otc-active"
+          )}>
             <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 bg-green-900/20 rounded-full flex items-center justify-center mb-4">
+              <div className={cn(
+                "w-16 h-16 rounded-full flex items-center justify-center mb-4",
+                theme === "light" ? "bg-green-50" : "bg-green-900/20"
+              )}>
                 <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">{t("orderCreatedSuccess")}</h2>
+              <h2 className={cn(
+                "text-2xl font-bold mb-2",
+                theme === "light" ? "text-gray-900" : "text-white"
+              )}>{t("orderCreatedSuccess")}</h2>
               <p className="text-muted-foreground mb-6">
                 {t("orderSubmitted")}
               </p>
               <div className="flex space-x-4">
                 <Button 
                   variant="outline" 
-                  className="border-otc-active hover:bg-otc-active text-white"
+                  className={cn(
+                    theme === "light" 
+                      ? "border-gray-200 hover:bg-gray-50 text-gray-700" 
+                      : "border-otc-active hover:bg-otc-active text-white"
+                  )}
                   onClick={() => setIsSuccess(false)}
                 >
                   {t("createAnotherOrder")}
                 </Button>
                 <Button 
-                  className="bg-otc-primary text-black hover:bg-otc-primary/90"
+                  className={cn(
+                    theme === "light" 
+                      ? "bg-primary text-white hover:bg-primary/90" 
+                      : "bg-otc-primary text-black hover:bg-otc-primary/90"
+                  )}
                   asChild
                 >
                   <a href="/orders">{t("viewAllOrders")}</a>
@@ -149,11 +169,21 @@ export default function CreateOrderPage() {
         </div>
       
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">{t("createNewOrder")}</h1>
+          <h1 className={cn(
+            "text-2xl font-bold",
+            theme === "light" ? "text-gray-900" : "text-white"
+          )}>{t("createNewOrder")}</h1>
         </div>
         
-        <Alert className="bg-otc-secondary/20 border-otc-icon text-white">
-          <Info className="h-4 w-4 text-otc-icon" />
+        <Alert className={cn(
+          theme === "light" 
+            ? "bg-blue-50 border-blue-200 text-blue-800" 
+            : "bg-otc-secondary/20 border-otc-icon text-white"
+        )}>
+          <Info className={cn(
+            "h-4 w-4",
+            theme === "light" ? "text-blue-600" : "text-otc-icon"
+          )} />
           <AlertTitle>{t("minOrderSize")}</AlertTitle>
           <AlertDescription>
             {t("otcMinimumReq")}
@@ -161,9 +191,13 @@ export default function CreateOrderPage() {
         </Alert>
         
         <form onSubmit={handleSubmit}>
-          <Card className="bg-otc-card border-otc-active">
+          <Card className={cn(
+            theme === "light" ? "bg-white border-gray-200" : "bg-otc-card border-otc-active"
+          )}>
             <CardHeader>
-              <CardTitle className="text-white">{t("orderDetails")}</CardTitle>
+              <CardTitle className={theme === "light" ? "text-gray-900" : "text-white"}>
+                {t("orderDetails")}
+              </CardTitle>
               <CardDescription>
                 {t("enterOrderDetails")}
               </CardDescription>
@@ -171,7 +205,9 @@ export default function CreateOrderPage() {
             <CardContent className="space-y-6">
               {/* Order Type */}
               <div className="space-y-2">
-                <Label>{t("orderType")}</Label>
+                <Label className={theme === "light" ? "text-gray-800" : ""}>
+                  {t("orderType")}
+                </Label>
                 <RadioGroup 
                   defaultValue="BUY" 
                   value={orderType}
@@ -179,24 +215,75 @@ export default function CreateOrderPage() {
                   className="flex space-x-4"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="BUY" id="buy" className="border-otc-active text-otc-primary" />
-                    <Label htmlFor="buy" className="cursor-pointer">{t("buy")}</Label>
+                    <RadioGroupItem 
+                      value="BUY" 
+                      id="buy" 
+                      className={cn(
+                        theme === "light" 
+                          ? "border-gray-300 text-primary" 
+                          : "border-otc-active text-otc-primary"
+                      )} 
+                    />
+                    <Label 
+                      htmlFor="buy" 
+                      className={cn(
+                        "cursor-pointer",
+                        theme === "light" ? "text-gray-800" : ""
+                      )}
+                    >
+                      {t("buy")}
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="SELL" id="sell" className="border-otc-active text-otc-primary" />
-                    <Label htmlFor="sell" className="cursor-pointer">{t("sell")}</Label>
+                    <RadioGroupItem 
+                      value="SELL" 
+                      id="sell" 
+                      className={cn(
+                        theme === "light" 
+                          ? "border-gray-300 text-primary" 
+                          : "border-otc-active text-otc-primary"
+                      )} 
+                    />
+                    <Label 
+                      htmlFor="sell" 
+                      className={cn(
+                        "cursor-pointer",
+                        theme === "light" ? "text-gray-800" : ""
+                      )}
+                    >
+                      {t("sell")}
+                    </Label>
                   </div>
                 </RadioGroup>
               </div>
               
               {/* Trading Pair */}
               <div className="space-y-2">
-                <Label htmlFor="tradingPair">{t("tradingPair")}</Label>
+                <Label 
+                  htmlFor="tradingPair"
+                  className={theme === "light" ? "text-gray-800" : ""}
+                >
+                  {t("tradingPair")}
+                </Label>
                 <Select value={selectedPair} onValueChange={setSelectedPair}>
-                  <SelectTrigger id="tradingPair" className="bg-otc-active border-otc-active text-white">
+                  <SelectTrigger 
+                    id="tradingPair" 
+                    className={cn(
+                      theme === "light" 
+                        ? "bg-white border-gray-200 text-gray-800" 
+                        : "bg-otc-active border-otc-active text-white"
+                    )}
+                  >
                     <SelectValue placeholder={t("selectTradingPair")} />
                   </SelectTrigger>
-                  <SelectContent className="bg-otc-card border-otc-active max-h-[300px]">
+                  <SelectContent 
+                    className={cn(
+                      "max-h-[300px]",
+                      theme === "light" 
+                        ? "bg-white border-gray-200" 
+                        : "bg-otc-card border-otc-active"
+                    )}
+                  >
                     {Object.entries(groupedPairs).map(([group, pairs]) => (
                       <div key={group}>
                         <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase">
@@ -298,14 +385,22 @@ export default function CreateOrderPage() {
               <Button 
                 type="button" 
                 variant="outline" 
-                className="border-otc-active hover:bg-otc-active text-white"
+                className={cn(
+                  theme === "light" 
+                    ? "border-gray-200 hover:bg-gray-50 text-gray-700" 
+                    : "border-otc-active hover:bg-otc-active text-white"
+                )}
                 onClick={() => window.history.back()}
               >
                 {t("cancel")}
               </Button>
               <Button 
                 type="submit"
-                className="bg-otc-primary text-black hover:bg-otc-primary/90"
+                className={cn(
+                  theme === "light" 
+                    ? "bg-primary text-white hover:bg-primary/90" 
+                    : "bg-otc-primary text-black hover:bg-otc-primary/90"
+                )}
                 disabled={isSubmitting || !selectedPair || !amount || !rateSource}
               >
                 {isSubmitting ? t("creatingOrder") : t("createOrder")}
