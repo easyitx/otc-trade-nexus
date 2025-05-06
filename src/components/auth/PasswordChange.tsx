@@ -23,7 +23,7 @@ const formSchema = z.object({
 });
 
 export function PasswordChange() {
-  const { updatePassword } = useAuth();
+  const { changePassword } = useAuth();
   const { toast } = useToast();
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
@@ -43,7 +43,12 @@ export function PasswordChange() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      await updatePassword(values.currentPassword, values.newPassword);
+      const result = await changePassword(values.currentPassword, values.newPassword);
+      
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      
       toast({
         title: "Password updated",
         description: "Your password has been updated successfully.",
