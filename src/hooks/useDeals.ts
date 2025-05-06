@@ -1,6 +1,7 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Deal } from '@/types';
+import { Deal, User } from '@/types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -118,7 +119,9 @@ export function useDeals() {
       
       // Отправляем автоматическое сообщение от системы с деталями заказа
       // Get user name from either property
-      const userName = currentUser?.full_name || currentUser?.fullName || 'Клиент';
+      // Cast currentUser to any to avoid TypeScript errors
+      const user = currentUser as any;
+      const userName = user.full_name || user.fullName || 'Клиент';
       let systemMessage = `Создана заявка: ${dealData.id.slice(-6)} ${userName} <> MP ${dealType}`;
       
       if (reserveAmount) {
