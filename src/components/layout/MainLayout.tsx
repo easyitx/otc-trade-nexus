@@ -31,13 +31,15 @@ export function MainLayout({ children, requireAuth = true }: MainLayoutProps) {
         <Navbar />
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-4">
+        <main className="flex-1 overflow-auto p-6">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : (
-            children
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
           )}
         </main>
       </div>

@@ -2,6 +2,7 @@
 import { Message } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -9,11 +10,12 @@ interface ChatMessagesProps {
 
 export function ChatMessages({ messages }: ChatMessagesProps) {
   const { currentUser } = useAuth();
+  const { theme } = useTheme();
 
   if (!messages?.length) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        No messages yet. Start the conversation!
+        Сообщений пока нет. Начните разговор!
       </div>
     );
   }
@@ -34,7 +36,7 @@ export function ChatMessages({ messages }: ChatMessagesProps) {
       {Object.entries(messagesByDate).map(([date, dateMessages]) => (
         <div key={date} className="space-y-4">
           <div className="flex justify-center">
-            <div className="text-xs text-muted-foreground bg-otc-active/20 px-2 py-1 rounded-full">
+            <div className="text-xs text-muted-foreground bg-accent/30 px-3 py-1 rounded-full">
               {new Date(date).toLocaleDateString()}
             </div>
           </div>
@@ -48,14 +50,14 @@ export function ChatMessages({ messages }: ChatMessagesProps) {
                 className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
+                  className={`max-w-[80%] rounded-lg p-3 shadow-sm ${
                     isOwn
-                      ? 'bg-otc-primary text-black ml-auto'
-                      : 'bg-otc-active text-white'
+                      ? 'bg-primary text-primary-foreground ml-auto'
+                      : 'bg-accent/70 text-foreground'
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                  <p className="text-xs opacity-70 mt-1 text-right">
+                  <p className={`text-xs mt-1 text-right ${isOwn ? 'text-primary-foreground/70' : 'text-foreground/70'}`}>
                     {format(new Date(message.timestamp), 'HH:mm')}
                   </p>
                 </div>

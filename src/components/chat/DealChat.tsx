@@ -25,6 +25,7 @@ export function DealChat({ dealId }: DealChatProps) {
   const { messages, sendMessage, isLoadingMessages } = useMessages(dealId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSending, setIsSending] = useState(false);
+  const { theme } = useTheme();
 
   // Fetch full deal information
   const { data: dealData } = useQuery({
@@ -78,10 +79,10 @@ export function DealChat({ dealId }: DealChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-card rounded-lg shadow-light p-4 border border-border">
       <div className="flex items-center space-x-2 mb-4">
-        <MessageSquare className="w-5 h-5 text-otc-primary" />
-        <h3 className="text-lg font-semibold text-white">Чат</h3>
+        <MessageSquare className="w-5 h-5 text-primary" />
+        <h3 className="text-lg font-semibold">Чат</h3>
       </div>
 
       {dealData && <DealStatus deal={dealData} />}
@@ -89,7 +90,7 @@ export function DealChat({ dealId }: DealChatProps) {
       <div className="flex-1 overflow-y-auto mb-4 pr-2">
         {isLoadingMessages ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 text-otc-primary animate-spin" />
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
           </div>
         ) : (
           <>
@@ -104,7 +105,7 @@ export function DealChat({ dealId }: DealChatProps) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Введите сообщение..."
-          className="bg-otc-active border-otc-active text-white"
+          className="bg-accent/30 border-border text-foreground"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -114,7 +115,7 @@ export function DealChat({ dealId }: DealChatProps) {
         />
         <Button
           onClick={handleSend}
-          className="bg-otc-primary text-black hover:bg-otc-primary/90"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 btn-hover-effect"
           disabled={!message.trim() || isSending}
         >
           {isSending ? (

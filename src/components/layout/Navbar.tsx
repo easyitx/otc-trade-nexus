@@ -24,7 +24,7 @@ export function Navbar() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="bg-card border-b border-border p-4 shadow-sm">
+    <header className="bg-card border-b border-border p-4 shadow-light">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Desktop Logo */}
@@ -45,9 +45,9 @@ export function Navbar() {
         <div className="flex items-center space-x-4">
           {/* Theme Toggle */}
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon" 
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
             {theme === "light" ? (
@@ -61,18 +61,18 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="icon" 
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
               >
                 <Globe className="w-5 h-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setLanguage('en')}>
+            <DropdownMenuContent align="end" className="bg-card shadow-light border-border">
+              <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-accent">
                 <span className={language === 'en' ? 'font-bold' : ''}>English</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage('ru')}>
+              <DropdownMenuItem onClick={() => setLanguage('ru')} className="hover:bg-accent">
                 <span className={language === 'ru' ? 'font-bold' : ''}>Русский</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -81,16 +81,20 @@ export function Navbar() {
           {currentUser ? (
             <>
               {/* Notification */}
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect relative"
+              >
                 <BellIcon className="w-5 h-5" />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
               </Button>
 
               {/* Messages */}
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="icon" 
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
                 asChild
               >
                 <Link to="/deals">

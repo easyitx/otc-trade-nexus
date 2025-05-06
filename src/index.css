@@ -5,45 +5,45 @@
 
 @layer base {
   :root {
-    /* Light theme by default */
-    --background: 218 33% 94%; /* #D7DFFF */
-    --foreground: 0 0% 5%; /* #0D0D0D */
+    /* Improved Light theme */
+    --background: 210 33% 98%; /* #f4f8fc - светло-голубой фон */
+    --foreground: 210 40% 20%; /* #1a2c40 - тёмно-синий текст */
 
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 0 0% 5%; /* #0D0D0D */
+    --card: 0 0% 100%; /* #FFFFFF - белые карточки */
+    --card-foreground: 210 40% 20%; /* #1a2c40 - тёмно-синий текст */
 
     --popover: 0 0% 100%; /* #FFFFFF */
-    --popover-foreground: 0 0% 5%; /* #0D0D0D */
+    --popover-foreground: 210 40% 20%; /* #1a2c40 */
 
-    --primary: 227 88% 62%; /* #4C71F0 */
+    --primary: 220 80% 56%; /* #3b5eeb - яркий синий */
     --primary-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --secondary: 29 100% 54%; /* #F7931A */
+    --secondary: 30 98% 54%; /* #f7941d - оранжевый */
     --secondary-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --muted: 220 14% 66%; /* #9BA1B9 */
-    --muted-foreground: 220 14% 46%; /* #646B87 */
+    --muted: 210 15% 85%; /* #d4dce6 - приглушенный светлый */
+    --muted-foreground: 210 30% 40%; /* #4a6585 - приглушенный текст */
 
-    --accent: 217 100% 97%; /* #F0F5FF */
-    --accent-foreground: 227 88% 62%; /* #4C71F0 */
+    --accent: 210 85% 96%; /* #edf5ff - светло-голубой акцент */
+    --accent-foreground: 220 80% 56%; /* #3b5eeb - яркий синий */
 
     --destructive: 0 84.2% 60.2%; /* #EF4444 */
     --destructive-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --border: 218 33% 90%; /* #CCD6F8 */
-    --input: 218 33% 90%; /* #CCD6F8 */
-    --ring: 227 88% 62%; /* #4C71F0 */
+    --border: 210 20% 88%; /* #dce3ec - светлая граница */
+    --input: 210 20% 88%; /* #dce3ec */
+    --ring: 220 80% 56%; /* #3b5eeb */
 
     --radius: 0.5rem;
 
     /* Light theme sidebar */
-    --sidebar-background: 227 88% 62%; /* #4C71F0 */
+    --sidebar-background: 220 80% 56%; /* #3b5eeb - синий */
     --sidebar-foreground: 0 0% 100%; /* #FFFFFF */
     --sidebar-primary: 0 0% 100%; /* #FFFFFF */
-    --sidebar-primary-foreground: 227 88% 62%; /* #4C71F0 */
-    --sidebar-accent: 29 100% 54%; /* #F7931A */
+    --sidebar-primary-foreground: 220 80% 56%; /* #3b5eeb */
+    --sidebar-accent: 30 98% 54%; /* #f7941d - оранжевый */
     --sidebar-accent-foreground: 0 0% 100%; /* #FFFFFF */
-    --sidebar-border: 227 50% 70%; /* #A3B3F7 */
+    --sidebar-border: 220 70% 70%; /* #a3b3f7 - светлее основного */
     --sidebar-ring: 0 0% 100%; /* #FFFFFF */
   }
 

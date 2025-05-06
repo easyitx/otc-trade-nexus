@@ -61,14 +61,14 @@ export function EnhancedDatePicker({
             {date ? format(date, "PPP") : <span>{placeholder}</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-otc-card border-otc-active">
+        <PopoverContent className="w-auto p-0 bg-card border-border shadow-light">
           <Calendar
             mode="single"
             selected={date}
             onSelect={setDate}
             initialFocus
             disabled={(date) => date < new Date()}
-            className="bg-otc-card text-white"
+            className="bg-card text-foreground"
           />
         </PopoverContent>
       </Popover>
@@ -78,18 +78,18 @@ export function EnhancedDatePicker({
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="px-3 border-otc-active text-white hover:bg-otc-active"
+              className="px-3"
             >
               <span className="sr-only">Quick select</span>
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-otc-card border-otc-active">
+          <DropdownMenuContent align="end" className="bg-card border-border shadow-light">
             {quickOptions.map((option) => (
               <DropdownMenuItem
                 key={option.days}
                 onClick={() => handleQuickSelect(option.days)}
-                className="cursor-pointer hover:bg-otc-active"
+                className="cursor-pointer hover:bg-accent"
               >
                 {option.label}
               </DropdownMenuItem>

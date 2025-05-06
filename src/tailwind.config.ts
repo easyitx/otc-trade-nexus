@@ -53,25 +53,25 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-                // OTC Desk custom colors - add light theme colors
+                // OTC Desk custom colors
                 otc: {
-                    background: '#D7DFFF',
-                    card: '#FFFFFF',
-                    active: '#F0F5FF',
-                    'icon-bg': '#E6EDFF',
-                    icon: '#4C71F0',
-                    text: '#646B87',
-                    primary: '#4C71F0',
-                    secondary: '#F7931A',
+                    background: 'hsl(var(--background))',
+                    card: 'hsl(var(--card))',
+                    active: 'hsl(var(--accent))',
+                    'icon-bg': 'hsl(var(--accent))',
+                    icon: 'hsl(var(--primary))',
+                    text: 'hsl(var(--foreground))',
+                    primary: 'hsl(var(--primary))',
+                    secondary: 'hsl(var(--secondary))',
                     light: {
-                        background: '#D7DFFF',
+                        background: '#f4f8fc',
                         card: '#FFFFFF',
-                        active: '#F0F5FF',
-                        'icon-bg': '#E6EDFF',
-                        icon: '#4C71F0',
-                        text: '#646B87',
-                        primary: '#4C71F0',
-                        secondary: '#F7931A',
+                        active: '#edf5ff',
+                        'icon-bg': '#edf5ff',
+                        icon: '#3b5eeb',
+                        text: '#1a2c40',
+                        primary: '#3b5eeb',
+                        secondary: '#f7941d',
                     },
                     dark: {
                         background: '#0D0D0D',
@@ -120,7 +120,12 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+			},
+            boxShadow: {
+                'card': '0 2px 10px rgba(0, 0, 0, 0.08)',
+                'hover': '0 5px 15px rgba(0, 0, 0, 0.1)',
+                'active': '0 1px 5px rgba(0, 0, 0, 0.1)',
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
