@@ -2,6 +2,7 @@
 export interface User {
   id: string;
   fullName: string;
+  full_name: string; // Adding this property for compatibility
   company: string;
   email: string;
   telegramId?: string;

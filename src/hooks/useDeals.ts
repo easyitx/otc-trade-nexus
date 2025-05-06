@@ -118,7 +118,8 @@ export function useDeals() {
         });
       
       // Отправляем автоматическое сообщение от системы с деталями заказа
-      let systemMessage = `Создана заявка: ${dealData.id.slice(-6)} ${currentUser.full_name || 'Клиент'} <> MP ${dealType}`;
+      const userName = currentUser.full_name || currentUser.fullName || 'Клиент';
+      let systemMessage = `Создана заявка: ${dealData.id.slice(-6)} ${userName} <> MP ${dealType}`;
       
       if (reserveAmount) {
         systemMessage += `\nРезерв: $${reserveAmount.toLocaleString()} из $${Number(orderData.amount).toLocaleString()}`;
