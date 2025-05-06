@@ -1,10 +1,54 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* OTC Desk theme colors - Dark theme by default */
+    /* Light theme by default */
+    --background: 218 33% 94%; /* #D7DFFF */
+    --foreground: 0 0% 5%; /* #0D0D0D */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 0 0% 5%; /* #0D0D0D */
+
+    --popover: 0 0% 100%; /* #FFFFFF */
+    --popover-foreground: 0 0% 5%; /* #0D0D0D */
+
+    --primary: 227 88% 62%; /* #4C71F0 */
+    --primary-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --secondary: 29 100% 54%; /* #F7931A */
+    --secondary-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --muted: 220 14% 66%; /* #9BA1B9 */
+    --muted-foreground: 220 14% 46%; /* #646B87 */
+
+    --accent: 217 100% 97%; /* #F0F5FF */
+    --accent-foreground: 227 88% 62%; /* #4C71F0 */
+
+    --destructive: 0 84.2% 60.2%; /* #EF4444 */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --border: 218 33% 90%; /* #CCD6F8 */
+    --input: 218 33% 90%; /* #CCD6F8 */
+    --ring: 227 88% 62%; /* #4C71F0 */
+
+    --radius: 0.5rem;
+
+    /* Light theme sidebar */
+    --sidebar-background: 227 88% 62%; /* #4C71F0 */
+    --sidebar-foreground: 0 0% 100%; /* #FFFFFF */
+    --sidebar-primary: 0 0% 100%; /* #FFFFFF */
+    --sidebar-primary-foreground: 227 88% 62%; /* #4C71F0 */
+    --sidebar-accent: 29 100% 54%; /* #F7931A */
+    --sidebar-accent-foreground: 0 0% 100%; /* #FFFFFF */
+    --sidebar-border: 227 50% 70%; /* #A3B3F7 */
+    --sidebar-ring: 0 0% 100%; /* #FFFFFF */
+  }
+
+  .dark {
+    /* OTC Desk theme colors - Dark theme */
     --background: 0 0% 5%; /* #0D0D0D */
     --foreground: 0 0% 100%; /* #FFFFFF */
 
@@ -33,8 +77,6 @@
     --input: 220 3% 20%; /* #2A2B2C */
     --ring: 42 100% 55%; /* #F8B822 */
 
-    --radius: 0.5rem;
-
     --sidebar-background: 0 0% 5%; /* #0D0D0D */
     --sidebar-foreground: 220 2% 66%; /* #A6A8AE */
     --sidebar-primary: 42 100% 55%; /* #F8B822 */
@@ -43,46 +85,6 @@
     --sidebar-accent-foreground: 0 0% 100%; /* #FFFFFF */
     --sidebar-border: 220 3% 20%; /* #2A2B2C */
     --sidebar-ring: 42 100% 55%; /* #F8B822 */
-  }
-
-  .light {
-    /* Light theme overrides - for potential future use */
-    --background: 0 0% 97%;
-    --foreground: 0 0% 5%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 5%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
-
-    --primary: 42 100% 55%; 
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 180 33% 80%;
-    --secondary-foreground: 174 54% 30%;
-
-    --muted: 220 2% 40%; 
-    --muted-foreground: 220 2% 30%;
-
-    --accent: 168 54% 45%;
-    --accent-foreground: 0 0% 5%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 220 3% 80%;
-    --input: 220 3% 80%;
-    --ring: 42 100% 55%;
-    
-    --sidebar-background: 0 0% 97%;
-    --sidebar-foreground: 220 2% 40%;
-    --sidebar-primary: 42 100% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 168 54% 45%;
-    --sidebar-accent-foreground: 0 0% 5%;
-    --sidebar-border: 220 3% 80%;
-    --sidebar-ring: 42 100% 55%;
   }
 }
 
