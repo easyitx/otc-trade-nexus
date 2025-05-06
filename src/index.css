@@ -45,6 +45,15 @@
     --sidebar-accent-foreground: 0 0% 100%; /* #FFFFFF */
     --sidebar-border: 220 70% 70%; /* #a3b3f7 - светлее основного */
     --sidebar-ring: 0 0% 100%; /* #FFFFFF */
+    
+    /* OTC Desk custom colors - Light theme */
+    --otc-background: 210 33% 98%; /* #f4f8fc - Light blue background */
+    --otc-card: 0 0% 100%; /* #FFFFFF - White cards */
+    --otc-active: 210 85% 96%; /* #edf5ff - Light blue accent */
+    --otc-icon-bg: 210 85% 96%; /* #edf5ff - Light blue icon background */
+    --otc-icon: 220 80% 56%; /* #3b5eeb - Bright blue for icons */
+    --otc-text: 210 40% 20%; /* #1a2c40 - Dark blue text */
+    --otc-primary: 220 80% 56%; /* #3b5eeb - Primary blue */
   }
 
   .dark {
@@ -71,7 +80,7 @@
     --accent-foreground: 0 0% 100%; /* #FFFFFF */
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+    --destructive-foreground: 0 0% 98%; /* #FFFFFF */
 
     --border: 220 3% 20%; /* #2A2B2C */
     --input: 220 3% 20%; /* #2A2B2C */
@@ -85,6 +94,15 @@
     --sidebar-accent-foreground: 0 0% 100%; /* #FFFFFF */
     --sidebar-border: 220 3% 20%; /* #2A2B2C */
     --sidebar-ring: 42 100% 55%; /* #F8B822 */
+    
+    /* OTC Desk custom colors - Dark theme */
+    --otc-background: 0 0% 5%; /* #0D0D0D */
+    --otc-card: 0 0% 10%; /* #1A1A1A */
+    --otc-active: 220 3% 20%; /* #2A2B2C */
+    --otc-icon-bg: 180 33% 19%; /* #1E312F */
+    --otc-icon: 174 54% 45%; /* #33B3A4 */
+    --otc-text: 220 2% 66%; /* #A6A8AE */
+    --otc-primary: 42 100% 55%; /* #F8B822 */
   }
 }
 

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,15 +53,15 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-                // OTC Desk custom colors
+                // OTC Desk custom colors - now using CSS variables
                 otc: {
-                    background: '#0D0D0D',
-                    card: '#1A1A1A',
-                    active: '#2A2B2C',
-                    'icon-bg': '#1E312F',
-                    icon: '#33B3A4',
-                    text: '#A6A8AE',
-                    primary: '#F8B822',
+                    background: 'hsl(var(--otc-background))',
+                    card: 'hsl(var(--otc-card))',
+                    active: 'hsl(var(--otc-active))',
+                    'icon-bg': 'hsl(var(--otc-icon-bg))',
+                    icon: 'hsl(var(--otc-icon))',
+                    text: 'hsl(var(--otc-text))',
+                    primary: 'hsl(var(--otc-primary))',
                 },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
