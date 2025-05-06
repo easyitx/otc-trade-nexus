@@ -1,4 +1,3 @@
-
 import { User, Order, TradePair, Deal, Message, TradePairGroup } from "../types";
 
 // Trade Pairs
@@ -95,6 +94,7 @@ export const users: User[] = [
   {
     id: "user1",
     fullName: "Alexei Ivanov",
+    full_name: "Alexei Ivanov", // Added for compatibility
     company: "Global Finance Ltd",
     email: "a.ivanov@example.com",
     telegramId: "@alexei_trader",
@@ -106,6 +106,7 @@ export const users: User[] = [
   {
     id: "user2",
     fullName: "Marina Petrova",
+    full_name: "Marina Petrova", // Added for compatibility
     company: "Eastern Export Co",
     email: "m.petrova@example.com",
     telegramId: "@marina_trade",
@@ -117,6 +118,7 @@ export const users: User[] = [
   {
     id: "user3",
     fullName: "Dmitry Sokolov",
+    full_name: "Dmitry Sokolov", // Added for compatibility
     company: "Crypto Exchange LLC",
     email: "d.sokolov@example.com",
     registrationDate: new Date("2025-02-20"),
