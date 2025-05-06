@@ -33,6 +33,16 @@ export function DealChat({ dealId }: DealChatProps) {
         console.error("Error fetching deal details:", error);
         return null;
       }
+      
+      // Parse deal metadata if it exists
+      if (data && data.deal_metadata) {
+        try {
+          data.dealMetadata = JSON.parse(data.deal_metadata);
+        } catch (err) {
+          console.error("Error parsing deal metadata:", err);
+        }
+      }
+      
       return data;
     },
     enabled: !!dealId,

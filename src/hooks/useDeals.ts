@@ -118,7 +118,7 @@ export function useDeals() {
         });
       
       // Отправляем автоматическое сообщение от системы с деталями заказа
-      let systemMessage = `Создана заявка: ${dealData.id.slice(-6)} ${currentUser.company || 'Клиент'} <> MP ${dealType}`;
+      let systemMessage = `Создана заявка: ${dealData.id.slice(-6)} ${currentUser.full_name || 'Клиент'} <> MP ${dealType}`;
       
       if (reserveAmount) {
         systemMessage += `\nРезерв: $${reserveAmount.toLocaleString()} из $${Number(orderData.amount).toLocaleString()}`;

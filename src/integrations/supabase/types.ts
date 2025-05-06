@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           buyer_id: string
           created_at: string
+          deal_metadata: Json | null
           id: string
           order_id: string
           seller_id: string
@@ -23,6 +24,7 @@ export type Database = {
         Insert: {
           buyer_id: string
           created_at?: string
+          deal_metadata?: Json | null
           id?: string
           order_id: string
           seller_id: string
@@ -33,6 +35,7 @@ export type Database = {
         Update: {
           buyer_id?: string
           created_at?: string
+          deal_metadata?: Json | null
           id?: string
           order_id?: string
           seller_id?: string
