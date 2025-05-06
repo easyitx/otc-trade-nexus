@@ -57,4 +57,9 @@ export interface Deal {
   createdAt: Date;
   updatedAt: Date;
   telegramChatId?: string;
+  dealMetadata?: {
+    dealType: "OTC" | "CROSS-BOARD" | "INVOICE";
+    reserveAmount?: number;
+    isWithManager?: boolean;
+  };
 }

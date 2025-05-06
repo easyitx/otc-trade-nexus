@@ -9,7 +9,7 @@ import { Separator } from "../components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "../components/ui/sheet";
 import { Textarea } from "../components/ui/textarea";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, MessageSquare, Share, AlertTriangle, Clock } from "lucide-react";
+import { ArrowLeft, MessageSquare, Share, AlertTriangle, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,14 +18,19 @@ import { useDeals } from "@/hooks/useDeals";
 import { tradePairs } from "@/data/mockData";
 import { useProfile } from "@/hooks/useProfile";
 import { ExchangeRates } from "@/components/ExchangeRates";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [isContactSheetOpen, setIsContactSheetOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [reserveAmount, setReserveAmount] = useState("");
+  const [dealType, setDealType] = useState<string>("OTC");
   const { toast } = useToast();
   const { currentUser } = useAuth();
-  const { createDeal, getDealByOrderId } = useDeals();
+  const { createDealWithManager, getDealByOrderId } = useDeals();
   const navigate = useNavigate();
   
   // Fetch order details
@@ -78,8 +83,8 @@ export default function OrderDetailPage() {
   const handleContactSubmit = async () => {
     if (!message.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a message",
+        title: "Ошибка",
+        description: "Пожалуйста, введите сообщение",
         variant: "destructive"
       });
       return;
@@ -88,27 +93,28 @@ export default function OrderDetailPage() {
     if (!order) return;
 
     try {
-      // Create a new deal
-      const { data: newDeal, error } = await createDeal(order.id, order.user_id);
+      // Create a new deal with manager
+      const { data: newDeal, error } = await createDealWithManager(order.id, message, reserveAmount ? Number(reserveAmount) : undefined, dealType);
       if (error) throw new Error(error);
       
       if (!newDeal || !newDeal.id) {
-        throw new Error("Failed to create deal");
+        throw new Error("Не удалось создать сделку");
       }
 
       setMessage("");
+      setReserveAmount("");
       setIsContactSheetOpen(false);
 
       toast({
-        title: "Deal created",
-        description: "You've been redirected to the chat",
+        title: "Заявка создана",
+        description: "Вы были перенаправлены в чат с менеджером",
       });
 
       // Redirect to the chat page
       navigate(`/deals?deal=${newDeal.id}`);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Ошибка",
         description: error.message,
         variant: "destructive"
       });
@@ -118,7 +124,7 @@ export default function OrderDetailPage() {
   if (isLoadingOrder || isLoadingProfile) {
     return (
       <MainLayout>
-        <div>Loading order details...</div>
+        <div>Загрузка деталей заказа...</div>
       </MainLayout>
     );
   }
@@ -127,10 +133,10 @@ export default function OrderDetailPage() {
     return (
       <MainLayout>
         <div className="flex flex-col items-center justify-center h-[60vh]">
-          <h2 className="text-xl font-semibold text-white mb-2">Order not found</h2>
-          <p className="text-muted-foreground mb-4">The order you're looking for doesn't exist or has been removed.</p>
+          <h2 className="text-xl font-semibold text-white mb-2">Заказ не найден</h2>
+          <p className="text-muted-foreground mb-4">Заказа, который вы ищете, не существует или он был удален.</p>
           <Button asChild>
-            <Link to="/orders">Back to Orders</Link>
+            <Link to="/orders">Вернуться к заказам</Link>
           </Button>
         </div>
       </MainLayout>
@@ -139,26 +145,26 @@ export default function OrderDetailPage() {
 
   // Find the trade pair for this order (falling back to a generic one if not found)
   // Since tradePairId doesn't exist in the DB, we'll use a default pair
-  const pair = tradePairs[0] || { displayName: "Crypto Pair" };
+  const pair = tradePairs[0] || { displayName: "Криптовалютная пара" };
   
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `OTC Desk - ${pair?.displayName} Order`,
-        text: `Check out this ${order?.type} order for ${pair?.displayName}`,
+        title: `OTC Desk - ${pair?.displayName} Заказ`,
+        text: `Проверьте этот ${order?.type === "BUY" ? "запрос на покупку" : "запрос на продажу"} для ${pair?.displayName}`,
         url: window.location.href,
       }).catch(err => {
         toast({
-          title: "Copied to clipboard",
-          description: "Order link copied to clipboard",
+          title: "Скопировано в буфер обмена",
+          description: "Ссылка на заказ скопирована в буфер обмена",
         });
         navigator.clipboard.writeText(window.location.href);
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast({
-        title: "Copied to clipboard",
-        description: "Order link copied to clipboard",
+        title: "Скопировано в буфер обмена",
+        description: "Ссылка на заказ скопирована в буфер обмена",
       });
     }
   };
@@ -175,7 +181,7 @@ export default function OrderDetailPage() {
           <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
             <Link to="/orders">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Orders
+              Вернуться к заказам
             </Link>
           </Button>
         </div>
@@ -186,11 +192,11 @@ export default function OrderDetailPage() {
             <h1 className="text-2xl font-bold text-white flex items-center">
               {pair.displayName}
               <Badge className={`ml-3 ${order.type === "BUY" ? "bg-green-900/70 text-green-400" : "bg-red-900/70 text-red-400"}`}>
-                {order.type}
+                {order.type === "BUY" ? "ПОКУПКА" : "ПРОДАЖА"}
               </Badge>
             </h1>
             <p className="text-muted-foreground">
-              Created {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })} by {userProfile?.company || "Unknown"}
+              Создан {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })} пользователем {userProfile?.company || "Неизвестно"}
             </p>
           </div>
           
@@ -201,7 +207,7 @@ export default function OrderDetailPage() {
               onClick={handleShare}
             >
               <Share className="mr-2 h-4 w-4" />
-              Share
+              Поделиться
             </Button>
             
             <Button 
@@ -210,7 +216,7 @@ export default function OrderDetailPage() {
               disabled={!!deal || currentUser?.id === order.user_id}
             >
               <MessageSquare className="mr-2 h-4 w-4" />
-              Contact Counterparty
+              Связаться с менеджером
             </Button>
           </div>
         </div>
@@ -220,38 +226,38 @@ export default function OrderDetailPage() {
           {/* Main Order Info */}
           <Card className="col-span-1 md:col-span-2 bg-otc-card border-otc-active">
             <CardHeader>
-              <CardTitle>Order Details</CardTitle>
+              <CardTitle>Детали заказа</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
                 <div>
-                  <p className="text-sm text-muted-foreground">Amount</p>
+                  <p className="text-sm text-muted-foreground">Сумма</p>
                   <p className="text-xl font-semibold text-white">${Number(order.amount).toLocaleString()}</p>
                 </div>
                 
                 <div>
-                  <p className="text-sm text-muted-foreground">Rate</p>
+                  <p className="text-sm text-muted-foreground">Курс</p>
                   <p className="text-xl font-semibold text-white">{order.rate}</p>
                 </div>
                 
                 <div>
-                  <p className="text-sm text-muted-foreground">Created Date</p>
+                  <p className="text-sm text-muted-foreground">Дата создания</p>
                   <p className="text-white">{new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
                 
                 <div>
-                  <p className="text-sm text-muted-foreground">Last Updated</p>
+                  <p className="text-sm text-muted-foreground">Последнее обновление</p>
                   <p className="text-white">{new Date(order.updated_at).toLocaleDateString()}</p>
                 </div>
                 
                 <div>
-                  <p className="text-sm text-muted-foreground">Expires</p>
+                  <p className="text-sm text-muted-foreground">Срок действия</p>
                   <div className="flex items-center">
                     <p className="text-white">{new Date(order.expires_at).toLocaleDateString()}</p>
                     {new Date(order.expires_at) < new Date(Date.now() + 24 * 60 * 60 * 1000) && (
                       <Badge className="ml-2 bg-yellow-900/70 text-yellow-400">
                         <Clock className="mr-1 h-3 w-3" />
-                        Expiring soon
+                        Скоро истечёт
                       </Badge>
                     )}
                   </div>
@@ -262,14 +268,14 @@ export default function OrderDetailPage() {
               
               {order.purpose && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Payment Purpose</p>
+                  <p className="text-sm text-muted-foreground mb-1">Цель платежа</p>
                   <p className="text-white">{order.purpose}</p>
                 </div>
               )}
               
               {order.notes && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Additional Notes</p>
+                  <p className="text-sm text-muted-foreground mb-1">Дополнительные заметки</p>
                   <p className="text-white">{order.notes}</p>
                 </div>
               )}
@@ -277,10 +283,10 @@ export default function OrderDetailPage() {
               <div className="bg-otc-active/50 rounded-md p-4 flex items-start space-x-3">
                 <AlertTriangle className="text-yellow-500 h-5 w-5 mt-0.5" />
                 <div>
-                  <p className="text-white font-medium">Important Notice</p>
+                  <p className="text-white font-medium">Важное уведомление</p>
                   <p className="text-muted-foreground text-sm">
-                    All transactions are subject to compliance checks. Ensure all details are accurate 
-                    before proceeding with any transaction.
+                    Все транзакции подлежат проверке соответствия. Убедитесь, что все 
+                    детали верны, прежде чем приступать к какой-либо транзакции.
                   </p>
                 </div>
               </div>
@@ -290,26 +296,26 @@ export default function OrderDetailPage() {
           {/* User Info */}
           <Card className="bg-otc-card border-otc-active">
             <CardHeader>
-              <CardTitle>Counterparty</CardTitle>
+              <CardTitle>Контрагент</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {userProfile ? (
                 <>
                   <div>
-                    <p className="text-sm text-muted-foreground">Company</p>
-                    <p className="font-medium text-white">{userProfile.company || "Not specified"}</p>
+                    <p className="text-sm text-muted-foreground">Компания</p>
+                    <p className="font-medium text-white">{userProfile.company || "Не указано"}</p>
                   </div>
                   
                   <div>
-                    <p className="text-sm text-muted-foreground">Member since</p>
+                    <p className="text-sm text-muted-foreground">Участник с</p>
                     <p className="text-white">{new Date(userProfile.created_at).toLocaleDateString()}</p>
                   </div>
                   
                   <div>
-                    <p className="text-sm text-muted-foreground">Verification</p>
+                    <p className="text-sm text-muted-foreground">Верификация</p>
                     <div className="flex items-center space-x-2">
                       <div className={`w-2 h-2 rounded-full bg-green-500`} />
-                      <span className="text-white">Verified</span>
+                      <span className="text-white">Верифицирован</span>
                     </div>
                   </div>
                   
@@ -320,13 +326,13 @@ export default function OrderDetailPage() {
                         onClick={() => setIsContactSheetOpen(true)}
                       >
                         <MessageSquare className="mr-2 h-4 w-4" />
-                        Contact Counterparty
+                        Связаться с менеджером
                       </Button>
                     </div>
                   )}
                 </>
               ) : (
-                <p className="text-muted-foreground">User information not available</p>
+                <p className="text-muted-foreground">Информация о пользователе недоступна</p>
               )}
             </CardContent>
           </Card>
@@ -337,42 +343,79 @@ export default function OrderDetailPage() {
       <Sheet open={isContactSheetOpen} onOpenChange={setIsContactSheetOpen}>
         <SheetContent className="bg-otc-card border-l border-otc-active w-full sm:max-w-md">
           <SheetHeader>
-            <SheetTitle className="text-white">Contact Counterparty</SheetTitle>
+            <SheetTitle className="text-white">Связаться с менеджером</SheetTitle>
             <SheetDescription>
-              Send a message to the counterparty to discuss this order.
+              Отправить сообщение менеджеру для обсуждения этого заказа.
             </SheetDescription>
           </SheetHeader>
           
           <div className="py-6">
             <div className="bg-otc-active/50 rounded-md p-4 mb-6">
-              <p className="text-white font-medium">Order Details</p>
+              <p className="text-white font-medium">Детали заказа</p>
               <div className="text-sm text-muted-foreground">
-                <p>{pair.displayName} • {order.type}</p>
-                <p>Amount: ${Number(order.amount).toLocaleString()}</p>
-                <p>Rate: {order.rate}</p>
+                <p>{pair.displayName} • {order.type === "BUY" ? "ПОКУПКА" : "ПРОДАЖА"}</p>
+                <p>Сумма: ${Number(order.amount).toLocaleString()}</p>
+                <p>Курс: {order.rate}</p>
               </div>
             </div>
             
             <div className="space-y-4">
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-white mb-1">
-                  Your Message
-                </label>
+                <Label htmlFor="message" className="block text-sm font-medium text-white mb-1">
+                  Ваше сообщение
+                </Label>
                 <Textarea 
                   id="message"
-                  placeholder="Introduce yourself and explain your interest in this order..."
-                  className="min-h-[150px] bg-otc-active border-otc-active text-white"
+                  placeholder="Представьтесь и объясните свой интерес к этому заказу..."
+                  className="min-h-[120px] bg-otc-active border-otc-active text-white"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
               
+              <div className="space-y-2">
+                <Label htmlFor="reserveAmount" className="block text-sm font-medium text-white mb-1">
+                  Сумма для резервирования (опционально)
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                  <Input
+                    id="reserveAmount"
+                    placeholder="Введите сумму для резервирования"
+                    className="pl-8 bg-otc-active border-otc-active text-white"
+                    value={reserveAmount}
+                    onChange={(e) => setReserveAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                    type="text"
+                    inputMode="numeric"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Оставьте пустым, если хотите обсудить полную сумму заказа: ${Number(order.amount).toLocaleString()}
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dealType" className="block text-sm font-medium text-white mb-1">
+                  Тип сделки
+                </Label>
+                <Select value={dealType} onValueChange={setDealType}>
+                  <SelectTrigger id="dealType" className="bg-otc-active border-otc-active text-white">
+                    <SelectValue placeholder="Выберите тип сделки" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-otc-card border-otc-active">
+                    <SelectItem value="OTC">OTC</SelectItem>
+                    <SelectItem value="CROSS-BOARD">CROSS-BOARD</SelectItem>
+                    <SelectItem value="INVOICE">INVOICE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={() => setIsContactSheetOpen(false)} className="border-otc-active text-white">
-                  Cancel
+                  Отмена
                 </Button>
                 <Button onClick={handleContactSubmit} className="bg-otc-primary text-black hover:bg-otc-primary/90">
-                  Send Message
+                  Отправить запрос
                 </Button>
               </div>
             </div>
