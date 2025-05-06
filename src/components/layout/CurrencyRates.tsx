@@ -8,6 +8,8 @@ import {
   PopoverTrigger,
 } from "../ui/popover";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 interface ExchangeRatesData {
   cbr: number;
@@ -20,6 +22,7 @@ export const CurrencyRates: React.FC = () => {
   const [rates, setRates] = useState<ExchangeRatesData | null>(null);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
+  const { theme } = useTheme();
   
   useEffect(() => {
     const fetchRates = async () => {
@@ -48,7 +51,10 @@ export const CurrencyRates: React.FC = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="px-3 py-1.5 bg-otc-active hover:bg-otc-active/80 rounded-md text-sm font-medium flex items-center transition-colors">
+        <button className={cn(
+          "px-3 py-1.5 rounded-md text-sm font-medium flex items-center transition-colors",
+          theme === "light" ? "bg-accent hover:bg-accent/80" : "bg-otc-active hover:bg-otc-active/80"
+        )}>
           {loading ? (
             <Skeleton className="w-16 h-5" />
           ) : (
@@ -59,7 +65,10 @@ export const CurrencyRates: React.FC = () => {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-0 bg-otc-card border-otc-active">
+      <PopoverContent className={cn(
+        "w-72 p-0",
+        theme === "light" ? "bg-card border-border" : "bg-otc-card border-otc-active"
+      )}>
         <div className="p-4">
           <h3 className="font-medium mb-2">{t('exchangeRates')}</h3>
           <div className="space-y-2">

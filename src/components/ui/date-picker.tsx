@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useTheme } from "@/contexts/ThemeContext"
 
 interface DatePickerProps {
   date: Date | undefined
@@ -18,6 +19,8 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ date, setDate, className }: DatePickerProps) {
+  const { theme } = useTheme();
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -33,13 +36,16 @@ export function DatePicker({ date, setDate, className }: DatePickerProps) {
           {date ? format(date, "PPP") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-card border-border shadow-light">
+      <PopoverContent className={cn(
+        "w-auto p-0 border", 
+        theme === "light" ? "bg-card border-border shadow-light" : "bg-otc-card border-border shadow-light"
+      )}>
         <Calendar
           mode="single"
           selected={date}
           onSelect={setDate}
           initialFocus
-          className="bg-card text-foreground"
+          className={theme === "light" ? "bg-card text-foreground" : "bg-otc-card text-foreground"}
         />
       </PopoverContent>
     </Popover>

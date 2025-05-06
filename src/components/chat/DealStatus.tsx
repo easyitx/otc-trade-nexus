@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 interface DealStatusProps {
   deal: any; // This should be typed properly in a future refactoring
@@ -23,6 +26,7 @@ export function DealStatus({ deal }: DealStatusProps) {
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
+  const { theme } = useTheme();
   
   const isManager = async () => {
     if (!currentUser) return false;
@@ -186,11 +190,14 @@ export function DealStatus({ deal }: DealStatusProps) {
   };
   
   return (
-    <Card className="bg-otc-active/30 border-otc-active mb-4">
+    <Card className={cn(
+      "mb-4 border",
+      theme === "light" ? "bg-accent/30 border-accent" : "bg-otc-active/30 border-otc-active"
+    )}>
       <CardContent className="p-4">
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-center">
-            <h3 className="font-medium text-white">Заявка #{deal.id.slice(-6)}</h3>
+            <h3 className="font-medium">Заявка #{deal.id.slice(-6)}</h3>
             <div className="flex space-x-2">
               {getDealTypeBadge()}
               {getStatusBadge()}
@@ -208,7 +215,7 @@ export function DealStatus({ deal }: DealStatusProps) {
               <Button 
                 size="sm"
                 variant="outline" 
-                className="border-green-700 text-green-400 hover:bg-green-900/30"
+                className={theme === "light" ? "border-green-700 text-green-700 hover:bg-green-50" : "border-green-700 text-green-400 hover:bg-green-900/30"}
                 onClick={() => handleStatusUpdate('AGREED')}
                 disabled={isUpdating}
               >
@@ -218,7 +225,7 @@ export function DealStatus({ deal }: DealStatusProps) {
               <Button 
                 size="sm"
                 variant="outline"
-                className="border-amber-700 text-amber-400 hover:bg-amber-900/30"
+                className={theme === "light" ? "border-amber-700 text-amber-700 hover:bg-amber-50" : "border-amber-700 text-amber-400 hover:bg-amber-900/30"}
                 onClick={createTelegramChat}
                 disabled={isUpdating || !!deal.telegram_chat_id}
               >
@@ -228,7 +235,7 @@ export function DealStatus({ deal }: DealStatusProps) {
               <Button 
                 size="sm"
                 variant="outline"
-                className="border-red-700 text-red-400 hover:bg-red-900/30"
+                className={theme === "light" ? "border-red-700 text-red-700 hover:bg-red-50" : "border-red-700 text-red-400 hover:bg-red-900/30"}
                 onClick={() => handleStatusUpdate('CANCELLED')}
                 disabled={isUpdating}
               >
@@ -242,7 +249,7 @@ export function DealStatus({ deal }: DealStatusProps) {
               <Button 
                 size="sm"
                 variant="outline" 
-                className="border-green-700 text-green-400 hover:bg-green-900/30"
+                className={theme === "light" ? "border-green-700 text-green-700 hover:bg-green-50" : "border-green-700 text-green-400 hover:bg-green-900/30"}
                 onClick={() => handleStatusUpdate('COMPLETED')}
                 disabled={isUpdating}
               >
@@ -252,7 +259,7 @@ export function DealStatus({ deal }: DealStatusProps) {
               <Button 
                 size="sm"
                 variant="outline"
-                className="border-red-700 text-red-400 hover:bg-red-900/30"
+                className={theme === "light" ? "border-red-700 text-red-700 hover:bg-red-50" : "border-red-700 text-red-400 hover:bg-red-900/30"}
                 onClick={() => handleStatusUpdate('CANCELLED')}
                 disabled={isUpdating}
               >

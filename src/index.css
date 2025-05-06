@@ -97,3 +97,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add light/dark theme specific utility classes */
+@layer utilities {
+  .shadow-light {
+    @apply shadow-card;
+  }
+  
+  .theme-card {
+    @apply bg-card border border-border rounded-lg shadow-light p-4;
+  }
+
+  /* Glass card styles for both themes */
+  .glass-card {
+    @apply backdrop-blur-md rounded-lg border;
+  }
+  
+  .glass-card.light {
+    @apply bg-white/85 border-gray-200/50;
+  }
+  
+  .glass-card.dark {
+    @apply bg-black/30 border-gray-800/30;
+  }
+}

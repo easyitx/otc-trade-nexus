@@ -18,6 +18,7 @@ import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -29,6 +30,7 @@ interface NavItemProps {
 const NavItem = ({ icon: Icon, label, href, isCollapsed }: NavItemProps) => {
   const { pathname } = useLocation();
   const isActive = pathname === href;
+  const { theme } = useTheme();
 
   return (
     <Link
@@ -36,8 +38,10 @@ const NavItem = ({ icon: Icon, label, href, isCollapsed }: NavItemProps) => {
       className={cn(
         "flex items-center py-2 px-3 rounded-lg mb-1 group transition-colors",
         isActive 
-          ? "bg-otc-active text-white" 
-          : "text-muted-foreground hover:bg-otc-active hover:text-white"
+          ? theme === "light" ? "bg-accent text-primary" : "bg-otc-active text-white" 
+          : theme === "light" 
+            ? "text-primary-foreground hover:bg-accent/70 hover:text-primary"
+            : "text-muted-foreground hover:bg-otc-active hover:text-white"
       )}
     >
       <Icon className="w-5 h-5 mr-2" />
@@ -51,6 +55,7 @@ export function Sidebar() {
   const { userRoles, isLoadingRoles } = usePlatformSettings();
   const isManager = userRoles?.isManager || userRoles?.isAdmin;
   const { t } = useLanguage();
+  const { theme } = useTheme();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -59,7 +64,10 @@ export function Sidebar() {
   return (
     <div 
       className={cn(
-        "bg-otc-card border-r border-otc-active flex flex-col transition-all duration-300",
+        "border-r flex flex-col transition-all duration-300",
+        theme === "light" 
+          ? "bg-primary text-primary-foreground border-border/30" 
+          : "bg-otc-card border-otc-active",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
@@ -67,20 +75,27 @@ export function Sidebar() {
       <div className="p-4 flex justify-between items-center">
         {!isCollapsed && (
           <div className="flex-1">
-            <span className="text-otc-primary font-bold text-xl">OTC DESK</span>
+            <span className={cn(
+              "font-bold text-xl",
+              theme === "light" ? "text-white" : "text-otc-primary"
+            )}>OTC DESK</span>
           </div>
         )}
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={toggleSidebar}
-          className="text-muted-foreground hover:text-white"
+          className={cn(
+            theme === "light" 
+              ? "text-white/70 hover:text-white hover:bg-primary-foreground/10" 
+              : "text-muted-foreground hover:text-white"
+          )}
         >
           {isCollapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
         </Button>
       </div>
 
-      <Separator className="bg-otc-active" />
+      <Separator className={theme === "light" ? "bg-white/20" : "bg-otc-active"} />
 
       {/* Navigation */}
       <div className="flex-1 py-4 px-3 overflow-y-auto">
@@ -94,9 +109,9 @@ export function Sidebar() {
           <NavItem icon={SendIcon} label={t('connectTelegram')} href="/telegram" isCollapsed={isCollapsed} />
           
           {isManager && !isLoadingRoles && (
-            <div className="mt-4 pt-4 border-t border-otc-active/50">
+            <div className="mt-4 pt-4 border-t border-white/20">
               <div className="px-3 py-2">
-                {!isCollapsed && <p className="text-xs text-muted-foreground uppercase font-semibold">Админ</p>}
+                {!isCollapsed && <p className="text-xs text-primary-foreground/70 uppercase font-semibold">Админ</p>}
               </div>
               <NavItem 
                 icon={SlidersIcon} 
@@ -113,7 +128,10 @@ export function Sidebar() {
       <div className="p-4">
         <Button
           className={cn(
-            "w-full bg-otc-primary text-black hover:bg-otc-primary/90",
+            "w-full hover:bg-opacity-90 btn-hover-effect",
+            theme === "light" 
+              ? "bg-white text-primary" 
+              : "bg-otc-primary text-black",
             isCollapsed ? "px-0" : ""
           )}
           asChild

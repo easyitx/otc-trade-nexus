@@ -19,6 +19,8 @@ import {
 } from "../ui/avatar";
 import { Skeleton } from "../ui/skeleton";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 export function UserProfile() {
   const { currentUser, logout, profile: authProfile } = useAuth();
@@ -26,6 +28,7 @@ export function UserProfile() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { theme } = useTheme();
 
   // Use profile from auth context if available (fast path), otherwise use profile from query (with loading state)
   const profile = authProfile || queryProfile;
@@ -56,7 +59,9 @@ export function UserProfile() {
         <Button variant="ghost" asChild>
           <Link to="/login">{t('login')}</Link>
         </Button>
-        <Button className="bg-otc-primary text-black" asChild>
+        <Button className={cn(
+          theme === "light" ? "bg-primary text-white" : "bg-otc-primary text-black"
+        )} asChild>
           <Link to="/register">{t('register')}</Link>
         </Button>
       </div>
@@ -66,7 +71,10 @@ export function UserProfile() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" className="flex items-center space-x-2 hover:bg-otc-active">
+        <Button variant="ghost" className={cn(
+          "flex items-center space-x-2", 
+          theme === "light" ? "hover:bg-accent" : "hover:bg-otc-active"
+        )}>
           {isLoading ? (
             <>
               <Skeleton className="h-8 w-8 rounded-full" />
@@ -76,7 +84,9 @@ export function UserProfile() {
             <>
               <Avatar className="h-8 w-8">
                 <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name || ''} />
-                <AvatarFallback className="bg-otc-icon-bg text-otc-icon">
+                <AvatarFallback className={cn(
+                  theme === "light" ? "bg-accent text-primary" : "bg-otc-icon-bg text-otc-icon"
+                )}>
                   {getInitials(profile?.full_name)}
                 </AvatarFallback>
               </Avatar>
@@ -87,9 +97,15 @@ export function UserProfile() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-56 p-0 bg-otc-card border-otc-active">
+      <PopoverContent className={cn(
+        "w-56 p-0 border",
+        theme === "light" ? "bg-card border-border" : "bg-otc-card border-otc-active"
+      )}>
         <div className="p-2">
-          <div className="px-4 py-3 border-b border-otc-active mb-1">
+          <div className={cn(
+            "px-4 py-3 border-b mb-1",
+            theme === "light" ? "border-border" : "border-otc-active"
+          )}>
             {isLoading ? (
               <>
                 <Skeleton className="h-5 w-24 mb-1" />
@@ -102,18 +118,30 @@ export function UserProfile() {
               </>
             )}
           </div>
-          <Link to="/profile" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
+          <Link to="/profile" className={cn(
+            "block px-4 py-2 text-sm rounded-md",
+            theme === "light" ? "hover:bg-accent" : "hover:bg-otc-active"
+          )}>
             {t('profile')}
           </Link>
-          <Link to="/settings" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
+          <Link to="/settings" className={cn(
+            "block px-4 py-2 text-sm rounded-md",
+            theme === "light" ? "hover:bg-accent" : "hover:bg-otc-active"
+          )}>
             {t('settings')}
           </Link>
-          <Link to="/telegram" className="block px-4 py-2 text-sm rounded-md hover:bg-otc-active">
+          <Link to="/telegram" className={cn(
+            "block px-4 py-2 text-sm rounded-md",
+            theme === "light" ? "hover:bg-accent" : "hover:bg-otc-active"
+          )}>
             {t('connectTelegram')}
           </Link>
           <button 
             onClick={handleLogout}
-            className="w-full text-left px-4 py-2 text-sm rounded-md hover:bg-otc-active text-red-400"
+            className={cn(
+              "w-full text-left px-4 py-2 text-sm rounded-md text-red-400",
+              theme === "light" ? "hover:bg-accent" : "hover:bg-otc-active"
+            )}
           >
             {t('logout')}
           </button>

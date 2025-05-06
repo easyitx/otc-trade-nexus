@@ -9,6 +9,7 @@ import { MessageSquare, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 interface DealChatProps {
   dealId: string;
@@ -80,7 +81,10 @@ export function DealChat({ dealId }: DealChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-card rounded-lg shadow-light p-4 border border-border">
+    <div className={cn(
+      "flex flex-col h-full rounded-lg shadow-light p-4 border",
+      theme === "light" ? "bg-card border-border" : "bg-card border-border"
+    )}>
       <div className="flex items-center space-x-2 mb-4">
         <MessageSquare className="w-5 h-5 text-primary" />
         <h3 className="text-lg font-semibold">Чат</h3>
@@ -106,7 +110,10 @@ export function DealChat({ dealId }: DealChatProps) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Введите сообщение..."
-          className="bg-accent/30 border-border text-foreground"
+          className={cn(
+            "border text-foreground",
+            theme === "light" ? "bg-accent/30 border-border" : "bg-accent/30 border-border"
+          )}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -116,7 +123,12 @@ export function DealChat({ dealId }: DealChatProps) {
         />
         <Button
           onClick={handleSend}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 btn-hover-effect"
+          className={cn(
+            "btn-hover-effect",
+            theme === "light" 
+              ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
+          )}
           disabled={!message.trim() || isSending}
         >
           {isSending ? (

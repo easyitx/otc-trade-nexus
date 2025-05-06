@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -53,16 +52,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-                // OTC Desk custom colors
+                // OTC Desk custom colors - now with proper theme support
                 otc: {
-                    background: 'hsl(var(--background))',
-                    card: 'hsl(var(--card))',
-                    active: 'hsl(var(--accent))',
-                    'icon-bg': 'hsl(var(--accent))',
-                    icon: 'hsl(var(--primary))',
-                    text: 'hsl(var(--foreground))',
-                    primary: 'hsl(var(--primary))',
-                    secondary: 'hsl(var(--secondary))',
+                    // These will now reference the appropriate light theme values by default
+                    background: '#f4f8fc', // Light blue background
+                    card: '#FFFFFF', // White cards
+                    active: '#edf5ff', // Light blue accent
+                    'icon-bg': '#edf5ff', // Light blue icon background
+                    icon: '#3b5eeb', // Bright blue for icons
+                    text: '#1a2c40', // Dark blue text
+                    primary: '#3b5eeb', // Primary blue
+                    secondary: '#f7941d', // Orange accent
+                    // We keep the theme-specific objects for reference and theme extensions
                     light: {
                         background: '#f4f8fc',
                         card: '#FFFFFF',
