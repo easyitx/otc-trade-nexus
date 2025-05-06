@@ -118,10 +118,16 @@ export function useDeals() {
         });
       
       // Отправляем автоматическое сообщение от системы с деталями заказа
-      // Get user name from either property
-      // Cast currentUser to any to avoid TypeScript errors
-      const user = currentUser as any;
-      const userName = user.full_name || user.fullName || 'Клиент';
+      // Безопасно получаем имя пользователя с TypeScript
+      const userName = typeof currentUser === 'object' && currentUser !== null
+        ? (
+            // Проверяем наличие свойств и предоставляем запасное значение
+            'full_name' in currentUser ? currentUser.full_name as string : 
+            'fullName' in currentUser ? currentUser.fullName as string : 
+            'Клиент'
+          ) 
+        : 'Клиент';
+      
       let systemMessage = `Создана заявка: ${dealData.id.slice(-6)} ${userName} <> MP ${dealType}`;
       
       if (reserveAmount) {

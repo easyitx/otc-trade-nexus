@@ -10,6 +10,7 @@ export interface User {
   registrationDate: Date;
   lastUpdated: Date;
   isVerified: boolean;
+  [key: string]: any; // Добавляем индексную сигнатуру для безопасного доступа к произвольным свойствам
 }
 
 export type OrderType = "BUY" | "SELL";
