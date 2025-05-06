@@ -8,6 +8,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface DealChatProps {
   dealId: string;
