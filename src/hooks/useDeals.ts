@@ -118,7 +118,7 @@ export function useDeals() {
       
       // Отправляем автоматическое сообщение от системы с деталями заказа
       // Get user name from either property
-      const userName = currentUser.full_name || currentUser.fullName || 'Клиент';
+      const userName = currentUser?.full_name || currentUser?.fullName || 'Клиент';
       let systemMessage = `Создана заявка: ${dealData.id.slice(-6)} ${userName} <> MP ${dealType}`;
       
       if (reserveAmount) {
