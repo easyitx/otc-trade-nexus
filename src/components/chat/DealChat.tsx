@@ -13,6 +13,13 @@ interface DealChatProps {
   dealId: string;
 }
 
+// Define an interface for the parsed metadata
+interface DealMetadata {
+  dealType: "OTC" | "CROSS-BOARD" | "INVOICE";
+  reserveAmount?: number;
+  isWithManager?: boolean;
+}
+
 export function DealChat({ dealId }: DealChatProps) {
   const [message, setMessage] = useState("");
   const { messages, sendMessage, isLoadingMessages } = useMessages(dealId);
@@ -34,11 +41,15 @@ export function DealChat({ dealId }: DealChatProps) {
         return null;
       }
       
-      // Parse deal metadata if it exists
+      // Parse deal metadata if it exists and attach it as a property
       if (data && data.deal_metadata) {
         try {
-          // Store parsed metadata in a separate property for easier access
-          data.dealMetadata = JSON.parse(data.deal_metadata as string);
+          const parsedMetadata = typeof data.deal_metadata === 'string' 
+            ? JSON.parse(data.deal_metadata) 
+            : data.deal_metadata;
+            
+          // Attach the parsed metadata as a property of data
+          Object.assign(data, { parsedDealMetadata: parsedMetadata as DealMetadata });
         } catch (err) {
           console.error("Error parsing deal metadata:", err);
         }

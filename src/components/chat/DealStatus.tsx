@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +9,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface DealStatusProps {
-  deal: any;
+  deal: any; // This should be typed properly in a future refactoring
+}
+
+interface DealMetadata {
+  dealType: "OTC" | "CROSS-BOARD" | "INVOICE";
+  reserveAmount?: number;
+  isWithManager?: boolean;
 }
 
 export function DealStatus({ deal }: DealStatusProps) {
@@ -139,17 +144,23 @@ export function DealStatus({ deal }: DealStatusProps) {
   };
   
   // Parse deal metadata if it exists
-  let dealMetadata = {};
+  let dealMetadata: DealMetadata | null = null;
   try {
     if (deal.deal_metadata) {
-      dealMetadata = JSON.parse(deal.deal_metadata);
+      if (typeof deal.deal_metadata === 'string') {
+        dealMetadata = JSON.parse(deal.deal_metadata);
+      } else {
+        dealMetadata = deal.deal_metadata as DealMetadata;
+      }
+    } else if (deal.parsedDealMetadata) {
+      dealMetadata = deal.parsedDealMetadata;
     }
   } catch (e) {
     console.error("Ошибка при разборе метаданных сделки", e);
   }
   
   const getDealTypeBadge = () => {
-    const type = (dealMetadata as any).dealType || 'OTC';
+    const type = dealMetadata?.dealType || 'OTC';
     
     switch (type) {
       case 'CROSS-BOARD':
@@ -186,9 +197,9 @@ export function DealStatus({ deal }: DealStatusProps) {
             </div>
           </div>
           
-          {(dealMetadata as any).reserveAmount && (
+          {dealMetadata?.reserveAmount && (
             <div className="text-sm text-muted-foreground">
-              <span>Сумма: ${Number((dealMetadata as any).reserveAmount).toLocaleString()}</span>
+              <span>Сумма: ${Number(dealMetadata.reserveAmount).toLocaleString()}</span>
             </div>
           )}
           
