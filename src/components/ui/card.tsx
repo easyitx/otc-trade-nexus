@@ -15,8 +15,8 @@ const Card = React.forwardRef<
       className={cn(
         "rounded-lg border shadow-sm",
         theme === "light" 
-          ? "bg-white border-gray-200" 
-          : "bg-card text-card-foreground",
+          ? "bg-card border-border" 
+          : "bg-card border-border",
         className
       )}
       {...props}
@@ -48,7 +48,7 @@ const CardTitle = React.forwardRef<
       ref={ref}
       className={cn(
         "text-2xl font-semibold leading-none tracking-tight",
-        theme === "light" ? "text-gray-900" : "",
+        theme === "light" ? "text-foreground" : "text-card-foreground",
         className
       )}
       {...props}

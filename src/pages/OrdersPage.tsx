@@ -13,6 +13,8 @@ import { useOrders } from "@/hooks/useOrders";
 import { Order } from "@/types";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 export default function OrdersPage() {
   const { orders, isLoadingOrders } = useOrders();
@@ -25,6 +27,7 @@ export default function OrdersPage() {
   const [volumeRange, setVolumeRange] = useState([0, 100]);
   const [sortBy, setSortBy] = useState<string>("newest");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const { theme } = useTheme();
 
   // Calculate actual volume range based on orders
   useEffect(() => {
@@ -135,7 +138,10 @@ export default function OrdersPage() {
     <MainLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">ОТС Заявки</h1>
+          <h1 className={cn(
+            "text-2xl font-bold", 
+            theme === "light" ? "text-foreground" : "text-white"
+          )}>ОТС Заявки</h1>
           <Button className="bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
             <Link to="/create-order">
               <Plus className="mr-2 h-4 w-4" />
@@ -145,7 +151,12 @@ export default function OrdersPage() {
         </div>
         
         {/* Filters */}
-        <Card className="bg-otc-card border-otc-active p-4">
+        <Card className={cn(
+          "p-4",
+          theme === "light" 
+            ? "bg-card border-border" 
+            : "bg-otc-card border-otc-active"
+        )}>
           <div className="flex flex-col space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
@@ -154,17 +165,30 @@ export default function OrdersPage() {
                   placeholder="Поиск заявок..."
                   value={searchTerm}
                   onChange={handleSearch}
-                  className="pl-10 bg-otc-active border-otc-active text-white"
+                  className={cn(
+                    "pl-10",
+                    theme === "light" 
+                      ? "bg-accent/50 border-accent" 
+                      : "bg-otc-active border-otc-active text-white"
+                  )}
                 />
               </div>
               
               <div className="flex gap-4">
                 <div className="w-40">
                   <Select value={selectedType} onValueChange={value => setSelectedType(value)}>
-                    <SelectTrigger className="bg-otc-active border-otc-active text-white">
+                    <SelectTrigger className={cn(
+                      theme === "light" 
+                        ? "bg-accent/50 border-accent" 
+                        : "bg-otc-active border-otc-active text-white"
+                    )}>
                       <SelectValue placeholder="Тип заявки" />
                     </SelectTrigger>
-                    <SelectContent className="bg-otc-card border-otc-active">
+                    <SelectContent className={cn(
+                      theme === "light" 
+                        ? "bg-card border-border" 
+                        : "bg-otc-card border-otc-active"
+                    )}>
                       <SelectItem value="all">Все типы</SelectItem>
                       <SelectItem value="BUY">Покупка</SelectItem>
                       <SelectItem value="SELL">Продажа</SelectItem>
@@ -174,10 +198,18 @@ export default function OrdersPage() {
                 
                 <div className="w-40">
                   <Select value={selectedPairGroup} onValueChange={value => setSelectedPairGroup(value)}>
-                    <SelectTrigger className="bg-otc-active border-otc-active text-white">
+                    <SelectTrigger className={cn(
+                      theme === "light" 
+                        ? "bg-accent/50 border-accent" 
+                        : "bg-otc-active border-otc-active text-white"
+                    )}>
                       <SelectValue placeholder="Группа пар" />
                     </SelectTrigger>
-                    <SelectContent className="bg-otc-card border-otc-active">
+                    <SelectContent className={cn(
+                      theme === "light" 
+                        ? "bg-card border-border" 
+                        : "bg-otc-card border-otc-active"
+                    )}>
                       <SelectItem value="all">Все группы</SelectItem>
                       <SelectItem value="RUB_NR">RUB (NR)</SelectItem>
                       <SelectItem value="RUB_CASH">RUB (Cash)</SelectItem>
@@ -191,9 +223,14 @@ export default function OrdersPage() {
                 <Button 
                   variant={viewMode === "cards" ? "default" : "outline"} 
                   size="icon"
-                  className={viewMode === "cards" 
-                    ? "bg-otc-primary text-black hover:bg-otc-primary/90" 
-                    : "border-otc-active hover:bg-otc-active text-white"}
+                  className={cn(
+                    viewMode === "cards"
+                      ? "bg-otc-primary hover:bg-otc-primary/90"
+                      : theme === "light" 
+                        ? "border-border hover:bg-accent" 
+                        : "border-otc-active hover:bg-otc-active",
+                    theme === "light" && viewMode !== "cards" ? "text-foreground" : "text-black",
+                  )}
                   onClick={() => setViewMode("cards")}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -201,9 +238,14 @@ export default function OrdersPage() {
                 <Button 
                   variant={viewMode === "table" ? "default" : "outline"} 
                   size="icon"
-                  className={viewMode === "table" 
-                    ? "bg-otc-primary text-black hover:bg-otc-primary/90" 
-                    : "border-otc-active hover:bg-otc-active text-white"}
+                  className={cn(
+                    viewMode === "table"
+                      ? "bg-otc-primary hover:bg-otc-primary/90"
+                      : theme === "light" 
+                        ? "border-border hover:bg-accent" 
+                        : "border-otc-active hover:bg-otc-active",
+                    theme === "light" && viewMode !== "table" ? "text-foreground" : "text-black",
+                  )}
                   onClick={() => setViewMode("table")}
                 >
                   <List className="h-4 w-4" />
@@ -227,11 +269,19 @@ export default function OrdersPage() {
               </div>
               <div className="w-40 md:w-56">
                 <Select value={sortBy} onValueChange={value => setSortBy(value)}>
-                  <SelectTrigger className="bg-otc-active border-otc-active text-white">
+                  <SelectTrigger className={cn(
+                    theme === "light" 
+                      ? "bg-accent/50 border-accent" 
+                      : "bg-otc-active border-otc-active text-white"
+                  )}>
                     <ArrowDownUp className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Сортировка" />
                   </SelectTrigger>
-                  <SelectContent className="bg-otc-card border-otc-active">
+                  <SelectContent className={cn(
+                    theme === "light" 
+                      ? "bg-card border-border" 
+                      : "bg-otc-card border-otc-active"
+                  )}>
                     <SelectItem value="newest">Новые заявки</SelectItem>
                     <SelectItem value="oldest">Старые заявки</SelectItem>
                     <SelectItem value="highest_rate">Лучший курс (макс)</SelectItem>
@@ -246,12 +296,23 @@ export default function OrdersPage() {
         </Card>
         
         {/* Orders table with stats */}
-        <div className="bg-otc-card border border-otc-active rounded-lg overflow-hidden">
-          <div className="p-4 border-b border-otc-active flex flex-wrap gap-4 justify-between">
+        <div className={cn(
+          "border rounded-lg overflow-hidden",
+          theme === "light" 
+            ? "bg-card border-border" 
+            : "bg-otc-card border-otc-active"
+        )}>
+          <div className={cn(
+            "p-4 border-b flex flex-wrap gap-4 justify-between",
+            theme === "light" ? "border-border" : "border-otc-active"
+          )}>
             <div className="flex gap-6">
               <div>
                 <p className="text-xs text-muted-foreground">Всего заявок</p>
-                <p className="text-xl font-bold text-white">{filteredOrders.length}</p>
+                <p className={cn(
+                  "text-xl font-bold",
+                  theme === "light" ? "text-foreground" : "text-white"
+                )}>{filteredOrders.length}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Покупка</p>
@@ -268,7 +329,10 @@ export default function OrdersPage() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Общий объем</p>
-              <p className="text-xl font-bold text-white">
+              <p className={cn(
+                "text-xl font-bold",
+                theme === "light" ? "text-foreground" : "text-white"
+              )}>
                 {new Intl.NumberFormat("ru-RU", {
                   style: "decimal",
                   maximumFractionDigits: 0,

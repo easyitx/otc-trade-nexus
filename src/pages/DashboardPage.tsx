@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -13,14 +14,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { OrderStatistics } from "@/components/dashboard/OrderStatistics";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 // Order card component for the dashboard
 const OrderCard = ({ order }: { order: Order }) => {
+  const { theme } = useTheme();
   // Since tradePairId doesn't exist in the DB yet, we'll use a default pair
   const pair = tradePairs[0];
   
   return (
-    <Card className="bg-otc-card border-otc-active">
+    <Card className={cn(
+      theme === "light" ? "bg-card border-border" : "bg-otc-card border-otc-active"
+    )}>
       <CardContent className="pt-6">
         <div className="flex justify-between items-start mb-2">
           <div className="flex items-center">
@@ -29,7 +35,10 @@ const OrderCard = ({ order }: { order: Order }) => {
             }`}>
               {order.type}
             </span>
-            <span className="ml-2 text-white font-medium">
+            <span className={cn(
+              "ml-2 font-medium",
+              theme === "light" ? "text-foreground" : "text-white"
+            )}>
               {pair?.displayName || "Unknown Pair"}
             </span>
           </div>
@@ -41,22 +50,34 @@ const OrderCard = ({ order }: { order: Order }) => {
         <div className="mt-4 space-y-2">
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Amount:</span>
-            <span className="text-white font-medium">${Number(order.amount).toLocaleString()}</span>
+            <span className={cn(
+              "font-medium",
+              theme === "light" ? "text-foreground" : "text-white"
+            )}>${Number(order.amount).toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Rate:</span>
-            <span className="text-white font-medium">{order.rate}</span>
+            <span className={cn(
+              "font-medium",
+              theme === "light" ? "text-foreground" : "text-white"
+            )}>{order.rate}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Expires:</span>
-            <span className="text-white font-medium">
+            <span className={cn(
+              "font-medium",
+              theme === "light" ? "text-foreground" : "text-white"
+            )}>
               {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}
             </span>
           </div>
           {order.purpose && (
             <div className="flex justify-between">
               <span className="text-muted-foreground text-sm">Purpose:</span>
-              <span className="text-white font-medium">{order.purpose}</span>
+              <span className={cn(
+                "font-medium",
+                theme === "light" ? "text-foreground" : "text-white"
+              )}>{order.purpose}</span>
             </div>
           )}
         </div>
@@ -64,7 +85,10 @@ const OrderCard = ({ order }: { order: Order }) => {
         <div className="mt-6">
           <Button 
             variant="outline" 
-            className="w-full border-otc-active hover:bg-otc-active hover:text-white"
+            className={cn(
+              "w-full",
+              theme === "light" ? "border-border hover:bg-accent" : "border-otc-active hover:bg-otc-active hover:text-white"
+            )}
             asChild
           >
             <Link to={`/orders/${order.id}`}>
@@ -86,28 +110,40 @@ interface StatsCardProps {
   trend?: number;
 }
 
-const StatsCard = ({ title, value, description, icon, trend }: StatsCardProps) => (
-  <Card className="bg-otc-card border-otc-active">
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      <div className="h-8 w-8 rounded-full bg-otc-icon-bg flex items-center justify-center">
-        {icon}
-      </div>
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold text-white">{value}</div>
-      <p className="text-xs text-muted-foreground mt-1 flex items-center">
-        {description}
-        {trend && (
-          <span className={`ml-2 flex items-center ${trend > 0 ? "text-green-500" : "text-red-500"}`}>
-            {trend > 0 ? "+" : ""}{trend}%
-            <ArrowUpRight className="h-3 w-3 ml-0.5" />
-          </span>
-        )}
-      </p>
-    </CardContent>
-  </Card>
-);
+const StatsCard = ({ title, value, description, icon, trend }: StatsCardProps) => {
+  const { theme } = useTheme();
+  
+  return (
+    <Card className={cn(
+      theme === "light" ? "bg-card border-border" : "bg-otc-card border-otc-active"
+    )}>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <div className={cn(
+          "h-8 w-8 rounded-full flex items-center justify-center",
+          theme === "light" ? "bg-accent" : "bg-otc-icon-bg" 
+        )}>
+          {icon}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className={cn(
+          "text-2xl font-bold",
+          theme === "light" ? "text-foreground" : "text-white"
+        )}>{value}</div>
+        <p className="text-xs text-muted-foreground mt-1 flex items-center">
+          {description}
+          {trend && (
+            <span className={`ml-2 flex items-center ${trend > 0 ? "text-green-500" : "text-red-500"}`}>
+              {trend > 0 ? "+" : ""}{trend}%
+              <ArrowUpRight className="h-3 w-3 ml-0.5" />
+            </span>
+          )}
+        </p>
+      </CardContent>
+    </Card>
+  );
+};
 
 // Define a type for our platform statistics
 interface PlatformStats {
@@ -121,6 +157,7 @@ export default function DashboardPage() {
   const { currentUser, profile } = useAuth();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("all");
+  const { theme } = useTheme();
 
   // Fetch active orders
   const { data: activeOrders = [], isLoading: isLoadingOrders } = useQuery({
@@ -234,10 +271,18 @@ export default function DashboardPage() {
     <MainLayout>
       <div className="space-y-6">
         {/* Welcome Banner */}
-        <div className="rounded-lg bg-gradient-to-r from-otc-active to-otc-card p-6 border border-otc-active">
+        <div className={cn(
+          "rounded-lg p-6 border",
+          theme === "light"
+            ? "bg-gradient-to-r from-accent to-accent/50 border-accent"
+            : "bg-gradient-to-r from-otc-active to-otc-card border-otc-active"
+        )}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className={cn(
+                "text-2xl font-bold",
+                theme === "light" ? "text-foreground" : "text-white"
+              )}>
                 {t('welcome')}, {profile?.full_name ? profile.full_name.split(' ')[0] : 'User'}
               </h1>
               <p className="text-muted-foreground mt-1">
@@ -259,39 +304,56 @@ export default function DashboardPage() {
             title={t('tradeVolume')}
             value={`$${(stats?.totalVolume || 0).toLocaleString()}`}
             description={t('last30Days')}
-            icon={<CircleDollarSign className="h-5 w-5 text-otc-icon" />}
+            icon={<CircleDollarSign className={cn(
+              "h-5 w-5",
+              theme === "light" ? "text-primary" : "text-otc-icon"
+            )} />}
           />
           <StatsCard 
             title={t('activeOrders')}
             value={String(stats?.activeOrders || 0)}
             description={t('acrossMarkets')}
-            icon={<TrendingUp className="h-5 w-5 text-otc-icon" />}
+            icon={<TrendingUp className={cn(
+              "h-5 w-5",
+              theme === "light" ? "text-primary" : "text-otc-icon"
+            )} />}
           />
           <StatsCard 
             title={t('avgSettlement')}
             value={stats?.avgSettlement || "N/A"}
             description={t('orderToCompletion')}
-            icon={<Clock className="h-5 w-5 text-otc-icon" />}
+            icon={<Clock className={cn(
+              "h-5 w-5",
+              theme === "light" ? "text-primary" : "text-otc-icon"
+            )} />}
           />
           <StatsCard 
             title={t('activeTraders')}
             value={String(stats?.activeTraders || 0)}
             description={t('thisWeek')}
-            icon={<Users className="h-5 w-5 text-otc-icon" />}
+            icon={<Users className={cn(
+              "h-5 w-5",
+              theme === "light" ? "text-primary" : "text-otc-icon"
+            )} />}
           />
         </div>
         
         {/* Market Orders */}
         <div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-            <h2 className="text-xl font-semibold text-white">{t('activeMarketOrders')}</h2>
+            <h2 className={cn(
+              "text-xl font-semibold",
+              theme === "light" ? "text-foreground" : "text-white"
+            )}>{t('activeMarketOrders')}</h2>
             <Link to="/orders" className="text-otc-primary hover:underline text-sm flex items-center">
               {t('viewAllOrders')} <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
           
           <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="bg-otc-active mb-6">
+            <TabsList className={cn(
+              theme === "light" ? "bg-accent mb-6" : "bg-otc-active mb-6"
+            )}>
               <TabsTrigger value="all">{t('allPairs')}</TabsTrigger>
               <TabsTrigger value="RUB_NR">RUB (NR)</TabsTrigger>
               <TabsTrigger value="RUB_CASH">RUB (Cash)</TabsTrigger>
@@ -306,7 +368,10 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 bg-otc-card rounded-lg border border-otc-active">
+                <div className={cn(
+                  "text-center py-10 rounded-lg border",
+                  theme === "light" ? "bg-card border-border" : "bg-otc-card border-otc-active"
+                )}>
                   <p className="text-muted-foreground">{t('noActiveOrders')}</p>
                   <Button className="mt-4 bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
                     <Link to="/create-order">{t('create')}</Link>

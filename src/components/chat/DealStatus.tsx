@@ -197,7 +197,10 @@ export function DealStatus({ deal }: DealStatusProps) {
       <CardContent className="p-4">
         <div className="flex flex-col space-y-3">
           <div className="flex justify-between items-center">
-            <h3 className="font-medium">Заявка #{deal.id.slice(-6)}</h3>
+            <h3 className={cn(
+              "font-medium",
+              theme === "light" ? "text-foreground" : "text-white"
+            )}>Заявка #{deal.id.slice(-6)}</h3>
             <div className="flex space-x-2">
               {getDealTypeBadge()}
               {getStatusBadge()}

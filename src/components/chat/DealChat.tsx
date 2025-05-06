@@ -87,7 +87,10 @@ export function DealChat({ dealId }: DealChatProps) {
     )}>
       <div className="flex items-center space-x-2 mb-4">
         <MessageSquare className="w-5 h-5 text-primary" />
-        <h3 className="text-lg font-semibold">Чат</h3>
+        <h3 className={cn(
+          "text-lg font-semibold",
+          theme === "light" ? "text-foreground" : "text-white"
+        )}>Чат</h3>
       </div>
 
       {dealData && <DealStatus deal={dealData} />}

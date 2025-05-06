@@ -100,7 +100,12 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+			},
+            boxShadow: {
+                'card': '0 2px 10px rgba(0, 0, 0, 0.08)',
+                'hover': '0 5px 15px rgba(0, 0, 0, 0.1)',
+                'active': '0 1px 5px rgba(0, 0, 0, 0.1)',
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
