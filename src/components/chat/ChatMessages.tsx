@@ -57,9 +57,7 @@ export function ChatMessages({ messages }: ChatMessagesProps) {
                   className={cn(
                     "max-w-[80%] rounded-lg p-3 shadow-sm",
                     isOwn
-                      ? theme === "light" 
-                        ? "bg-primary text-primary-foreground" 
-                        : "bg-primary text-primary-foreground ml-auto"
+                      ? "bg-primary text-primary-foreground"
                       : theme === "light" 
                         ? "bg-accent/70 text-foreground" 
                         : "bg-accent/70 text-foreground"
