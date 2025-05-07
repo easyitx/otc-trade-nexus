@@ -128,16 +128,17 @@ export function SearchBar() {
   }, []);
 
   return (
-    <div className="flex-grow mx-4 max-w-2xl">
+    <div className="flex-grow max-w-md">
       <Button
         variant="outline"
-        className="w-full justify-start text-sm text-muted-foreground bg-otc-active border-otc-active"
+        size="sm"
+        className="w-full justify-start text-xs text-muted-foreground h-8 bg-otc-active border-otc-active"
         onClick={() => setOpen(true)}
       >
-        <SearchIcon className="mr-2 h-4 w-4" />
+        <SearchIcon className="mr-1 h-3 w-3" />
         {t('search')}
-        <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-          <span className="text-xs">⌘</span>K
+        <kbd className="ml-auto pointer-events-none inline-flex h-4 select-none items-center gap-1 rounded border bg-muted px-1 font-mono text-[8px] font-medium text-muted-foreground opacity-100">
+          <span className="text-[8px]">⌘</span>K
         </kbd>
       </Button>
       

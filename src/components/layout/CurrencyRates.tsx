@@ -48,21 +48,44 @@ export const CurrencyRates: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Compact view that shows multiple rates in a single row
+  const CompactRatesView = () => (
+    <div className="flex items-center space-x-2 text-sm">
+      {loading ? (
+        <div className="flex space-x-2">
+          <Skeleton className="w-16 h-4" />
+          <Skeleton className="w-16 h-4" />
+          <Skeleton className="w-16 h-4" />
+        </div>
+      ) : (
+        <>
+          <span className="flex items-center">
+            <img src="/lovable-uploads/bc5cf6ea-c699-4ae0-b309-690868aa27a7.png" alt="CBR" className="h-3 w-3 mr-1" />
+            <span className="font-bold">{rates?.cbr ? rates.cbr.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—'}</span>
+          </span>
+          <span className="text-muted-foreground">|</span>
+          <span className="flex items-center">
+            <span className="h-3 w-3 bg-blue-500 text-white flex items-center justify-center text-[8px] mr-1 rounded-sm">PF</span>
+            <span>{rates?.profinance ? rates.profinance.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—'}</span>
+          </span>
+          <span className="text-muted-foreground">|</span>
+          <span className="flex items-center">
+            <span className="h-3 w-3 bg-black text-white flex items-center justify-center text-[8px] mr-1 rounded-sm">IV</span>
+            <span>{rates?.investing ? rates.investing.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—'}</span>
+          </span>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button className={cn(
-          "px-3 py-1.5 rounded-md text-sm font-medium flex items-center transition-colors",
+          "px-2 py-1 rounded-md text-xs font-medium flex items-center transition-colors",
           theme === "light" ? "bg-accent hover:bg-accent/80" : "bg-otc-active hover:bg-otc-active/80"
         )}>
-          {loading ? (
-            <Skeleton className="w-16 h-5" />
-          ) : (
-            <>
-              <span className="mr-1">USD/RUB:</span>
-              <span className="font-bold">{rates?.cbr ? rates.cbr.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—'}</span>
-            </>
-          )}
+          <CompactRatesView />
         </button>
       </PopoverTrigger>
       <PopoverContent className={cn(

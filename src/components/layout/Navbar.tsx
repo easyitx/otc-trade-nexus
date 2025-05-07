@@ -24,36 +24,38 @@ export function Navbar() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className="bg-card border-b border-border p-4 shadow-light">
+    <header className="bg-card border-b border-border p-2 shadow-light">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           {/* Desktop Logo */}
-          <Link to="/" className="hidden md:flex items-center space-x-2">
-            <span className="text-primary font-bold text-xl">OTC DESK</span>
+          <Link to="/" className="hidden md:flex items-center">
+            <span className="text-primary font-bold text-lg">OTC DESK</span>
           </Link>
 
-          {/* Currency Rates */}
-          <div className="hidden md:block">
+          {/* Currency Rates in compact view */}
+          <div className="hidden md:block ml-2">
             <CurrencyRates />
           </div>
         </div>
 
-        {/* Search Bar */}
-        <SearchBar />
+        {/* Search Bar - now more compact */}
+        <div className="mx-2 flex-grow max-w-md">
+          <SearchBar />
+        </div>
 
         {/* Right section - User actions */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           {/* Theme Toggle */}
           <Button 
             variant="outline" 
             size="icon" 
-            className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
+            className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
             {theme === "light" ? (
-              <Moon className="w-5 h-5" />
+              <Moon className="w-4 h-4" />
             ) : (
-              <Sun className="w-5 h-5" />
+              <Sun className="w-4 h-4" />
             )}
           </Button>
 
@@ -63,9 +65,9 @@ export function Navbar() {
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
+                className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
               >
-                <Globe className="w-5 h-5" />
+                <Globe className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-card shadow-light border-border">
@@ -84,9 +86,9 @@ export function Navbar() {
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect relative"
+                className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect relative"
               >
-                <BellIcon className="w-5 h-5" />
+                <BellIcon className="w-4 h-4" />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
               </Button>
 
@@ -94,11 +96,11 @@ export function Navbar() {
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
+                className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
                 asChild
               >
                 <Link to="/deals">
-                  <MessageCircleIcon className="w-5 h-5" />
+                  <MessageCircleIcon className="w-4 h-4" />
                 </Link>
               </Button>
 
