@@ -16,11 +16,23 @@ export type Order = {
   user_id: string;
   type: 'BUY' | 'SELL';
   amount: number;
+  amount_currency?: string;
   rate: string;
+  rate_details?: {
+    type: "dynamic" | "fixed";
+    source?: string;
+    value?: string;
+    adjustment?: number;
+    serviceFee: number;
+  };
   purpose: string | null;
   notes: string | null;
   status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
   expires_at: string;
   created_at: string;
   updated_at: string;
+  geography?: {
+    country?: string;
+    city?: string;
+  };
 };
