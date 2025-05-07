@@ -149,7 +149,6 @@ const StatsCard = ({ title, value, description, icon, trend }: StatsCardProps) =
 interface PlatformStats {
   totalVolume: number;
   activeOrders: number;
-  avgSettlement: string;
   activeTraders: number;
 }
 
@@ -197,7 +196,6 @@ export default function DashboardPage() {
   const { data: stats = { 
     totalVolume: 0,
     activeOrders: 0,
-    avgSettlement: "N/A",
     activeTraders: 0
   } } = useQuery<PlatformStats>({
     queryKey: ['platform-stats'],
@@ -211,7 +209,6 @@ export default function DashboardPage() {
         return {
           totalVolume: 0,
           activeOrders: 0,
-          avgSettlement: "N/A",
           activeTraders: 0
         };
       }
@@ -240,7 +237,6 @@ export default function DashboardPage() {
       return {
         totalVolume,
         activeOrders: activeOrdersCount,
-        avgSettlement: "4.2 hrs", // This would need real data calculation
         activeTraders
       };
     }
@@ -272,21 +268,21 @@ export default function DashboardPage() {
       <div className="space-y-6">
         {/* Welcome Banner */}
         <div className={cn(
-          "rounded-lg p-6 border",
-          theme === "light"
-            ? "bg-gradient-to-r from-accent to-accent/50 border-accent"
-            : "bg-gradient-to-r from-otc-active to-otc-card border-otc-active"
+            "rounded-lg p-6 border",
+            theme === "light"
+                ? "bg-gradient-to-r from-accent to-accent/70 border-accent"
+                : "bg-gradient-to-r from-otc-active to-otc-card border-otc-active"
         )}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
               <h1 className={cn(
-                "text-2xl font-bold",
-                theme === "light" ? "text-foreground" : "text-white"
+                  "text-2xl font-bold",
+                  theme === "light" ? "text-foreground" : "text-white"
               )}>
                 {t('welcome')}, {profile?.full_name ? profile.full_name.split(' ')[0] : 'User'}
               </h1>
               <p className="text-muted-foreground mt-1">
-                Торгуйте большими объемами с минимальным проскальзыванием через наш OTC деск.
+                Покупайте или продавайте большие объемы через наш OTC.
               </p>
             </div>
             <Button className="mt-4 md:mt-0 bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
@@ -294,52 +290,42 @@ export default function DashboardPage() {
             </Button>
           </div>
         </div>
-        
+
         {/* Order Statistics Component */}
-{/*         <OrderStatistics /> */}
-        
-        {/* Stats Grid - Keep for historical/comparison purposes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard 
-            title={t('tradeVolume')}
-            value={`$${(stats?.totalVolume || 0).toLocaleString()}`}
-            description={t('last30Days')}
-            icon={<CircleDollarSign className={cn(
-              "h-5 w-5",
-              theme === "light" ? "text-primary" : "text-otc-icon"
-            )} />}
+        {/*         <OrderStatistics /> */}
+
+        <div className="grid grid-cols-3 gap-4">
+          <StatsCard
+              title={t('tradeVolume')}
+              value={`$${(stats?.totalVolume || 0).toLocaleString()}`}
+              description={t('last30Days')}
+              icon={<CircleDollarSign className={cn(
+                  "h-5 w-5",
+                  theme === "light" ? "text-primary" : "text-otc-icon"
+              )}/>}
           />
-          <StatsCard 
-            title={t('activeOrders')}
-            value={String(stats?.activeOrders || 0)}
-            description={t('acrossMarkets')}
-            icon={<TrendingUp className={cn(
-              "h-5 w-5",
-              theme === "light" ? "text-primary" : "text-otc-icon"
-            )} />}
+          <StatsCard
+              title={t('activeOrders')}
+              value={String(stats?.activeOrders || 0)}
+              description={t('acrossMarkets')}
+              icon={<TrendingUp className={cn(
+                  "h-5 w-5",
+                  theme === "light" ? "text-primary" : "text-otc-icon"
+              )}/>}
           />
-          <StatsCard 
-            title={t('avgSettlement')}
-            value={stats?.avgSettlement || "N/A"}
-            description={t('orderToCompletion')}
-            icon={<Clock className={cn(
-              "h-5 w-5",
-              theme === "light" ? "text-primary" : "text-otc-icon"
-            )} />}
-          />
-          <StatsCard 
-            title={t('activeTraders')}
-            value={String(stats?.activeTraders || 0)}
-            description={t('thisWeek')}
-            icon={<Users className={cn(
-              "h-5 w-5",
-              theme === "light" ? "text-primary" : "text-otc-icon"
-            )} />}
+          <StatsCard
+              title={t('activeTraders')}
+              value={String(stats?.activeTraders || 0)}
+              description={t('thisWeek')}
+              icon={<Users className={cn(
+                  "h-5 w-5",
+                  theme === "light" ? "text-primary" : "text-otc-icon"
+              )}/>}
           />
         </div>
-        
+
         {/* Market Orders */}
-{/*         <div>
+        {/*         <div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
             <h2 className={cn(
               "text-xl font-semibold",

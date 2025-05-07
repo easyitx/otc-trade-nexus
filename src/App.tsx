@@ -41,7 +41,7 @@ const App = () => (
                 <Route path="/deals" element={<ChatPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/telegram" element={<ConnectTelegramPage />} />
+                {/*<Route path="/telegram" element={<ConnectTelegramPage />} />*/}
                 <Route path="/admin/rate-management" element={<RateManagementPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

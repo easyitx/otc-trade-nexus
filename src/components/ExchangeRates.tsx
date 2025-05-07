@@ -54,7 +54,7 @@ export const ExchangeRates: React.FC<ExchangeRatesProps> = ({ className }) => {
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       <RateCard
-        icon={<img src="/lovable-uploads/bc5cf6ea-c699-4ae0-b309-690868aa27a7.png" alt="CBR" className="h-6 w-6" />}
+        icon={<img src="/uploads/bc5cf6ea-c699-4ae0-b309-690868aa27a7.png" alt="CBR" className="h-6 w-6" />}
         source="CBR"
         rate={formatRate(rates?.cbr)}
         loading={loading}

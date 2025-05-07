@@ -130,12 +130,12 @@ export function UserProfile() {
           )}>
             {t('settings')}
           </Link>
-          <Link to="/telegram" className={cn(
-            "block px-4 py-2 text-sm rounded-md",
-            theme === "light" ? "hover:bg-accent" : "hover:bg-otc-active"
-          )}>
-            {t('connectTelegram')}
-          </Link>
+          {/*<Link to="/telegram" className={cn(*/}
+          {/*  "block px-4 py-2 text-sm rounded-md",*/}
+          {/*  theme === "light" ? "hover:bg-accent" : "hover:bg-otc-active"*/}
+          {/*)}>*/}
+          {/*  {t('connectTelegram')}*/}
+          {/*</Link>*/}
           <button 
             onClick={handleLogout}
             className={cn(

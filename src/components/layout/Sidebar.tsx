@@ -66,7 +66,7 @@ export function Sidebar() {
       className={cn(
         "border-r flex flex-col transition-all duration-300",
         theme === "light" 
-          ? "bg-primary text-primary-foreground border-border/30" 
+          ? "bg-primary text-primary-foreground border-border/30"
           : "bg-otc-card border-otc-active",
         isCollapsed ? "w-16" : "w-64"
       )}
@@ -74,21 +74,24 @@ export function Sidebar() {
       {/* Sidebar header */}
       <div className="p-4 flex justify-between items-center">
         {!isCollapsed && (
-          <div className="flex-1">
-            <span className={cn(
-              "font-bold text-xl",
-              theme === "light" ? "text-white" : "text-otc-primary"
-            )}>OTC DESK</span>
-          </div>
+            <div className="flex-1">
+              <Link to="/" className="hidden md:flex items-center">
+                <img
+                    className="w-40"
+                    src={theme === "light" ? "/logo-light.svg" : "/logo.svg"}
+                    alt={theme === "light" ? "Light Logo" : "Dark Logo"}
+                />
+              </Link>
+            </div>
         )}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleSidebar}
-          className={cn(
-            theme === "light" 
-              ? "text-white/70 hover:text-white hover:bg-primary-foreground/10" 
-              : "text-muted-foreground hover:text-white"
+        <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className={cn(
+                theme === "light"
+                    ? "text-white/70 hover:text-white hover:bg-primary-foreground/10"
+                    : "text-muted-foreground hover:text-white"
           )}
         >
           {isCollapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
@@ -106,7 +109,7 @@ export function Sidebar() {
           <NavItem icon={PlusCircleIcon} label={t('createNewOrder')} href="/create-order" isCollapsed={isCollapsed} />
           <NavItem icon={UserIcon} label={t('profile')} href="/profile" isCollapsed={isCollapsed} />
           <NavItem icon={Settings2Icon} label={t('settings')} href="/settings" isCollapsed={isCollapsed} />
-          <NavItem icon={SendIcon} label={t('connectTelegram')} href="/telegram" isCollapsed={isCollapsed} />
+          {/*<NavItem icon={SendIcon} label={t('connectTelegram')} href="/telegram" isCollapsed={isCollapsed} />*/}
           
           {isManager && !isLoadingRoles && (
             <div className="mt-4 pt-4 border-t border-white/20">
@@ -122,25 +125,6 @@ export function Sidebar() {
             </div>
           )}
         </div>
-      </div>
-      
-      {/* Create Order Button at bottom */}
-      <div className="p-4">
-        <Button
-          className={cn(
-            "w-full hover:bg-opacity-90 btn-hover-effect",
-            theme === "light" 
-              ? "bg-white text-primary" 
-              : "bg-otc-primary text-black",
-            isCollapsed ? "px-0" : ""
-          )}
-          asChild
-        >
-          <Link to="/create-order">
-            <PlusCircleIcon className="w-5 h-5 mr-2" />
-            {!isCollapsed && <span>{t('createNewOrder')}</span>}
-          </Link>
-        </Button>
       </div>
     </div>
   );

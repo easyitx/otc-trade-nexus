@@ -27,11 +27,6 @@ export function Navbar() {
     <header className="bg-card border-b border-border p-2 shadow-light">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          {/* Desktop Logo */}
-          <Link to="/" className="hidden md:flex items-center">
-            <span className="text-primary font-bold text-lg">OTC DESK</span>
-          </Link>
-
           {/* Currency Rates in compact view */}
           <div className="hidden md:block ml-2">
             <CurrencyRates />
