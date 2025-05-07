@@ -152,6 +152,11 @@ export const translations = {
     createAnotherOrder: "Create Another Order",
     serviceFee: "Service Fee",
     adjustment: "Adjustment",
+    geography: "Geography",
+    country: "Country",
+    city: "City",
+    selectCountry: "Select country",
+    selectCity: "Select city",
     
     // Deals page
     noChatsSelected: "No chat selected",
@@ -331,6 +336,11 @@ export const translations = {
     createAnotherOrder: "Создать еще один ордер",
     serviceFee: "Комиссия сервиса",
     adjustment: "Корректировка",
+    geography: "География",
+    country: "Страна",
+    city: "Город",
+    selectCountry: "Выберите страну",
+    selectCity: "Выберите город",
     
     // Deals page
     noChatsSelected: "Чат не выбран",
