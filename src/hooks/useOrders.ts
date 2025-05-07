@@ -25,7 +25,7 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     amount: Number(order.amount),
     amountCurrency: order.amount_currency || "USD",
     rate: order.rate,
-    rateDetails: order.rate_details,
+    rateDetails: order.rate_details ? order.rate_details : undefined,
     createdAt: new Date(order.created_at),
     updatedAt: new Date(order.updated_at),
     expiresAt: new Date(order.expires_at),

@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
 import { countries } from "@/data/countries";
 import { citiesByCountry } from "@/data/cities";
+import { TranslationKey } from "@/types";
 
 export default function CreateOrderPage() {
   const navigate = useNavigate();
@@ -140,7 +141,7 @@ export default function CreateOrderPage() {
 
     // Validate required fields
     if (!selectedPair || !amount || !country || (isCashPair() && !city)) {
-      alert(t("fillRequiredFields"));
+      alert("Please fill all required fields");
       setIsSubmitting(false);
       return;
     }
@@ -148,7 +149,7 @@ export default function CreateOrderPage() {
     // Validate minimum amount (500,000 USD)
     const parsedAmount = parseFloat(amount.replace(/,/g, ''));
     if (isNaN(parsedAmount) || parsedAmount < 500000) {
-      alert(t("otcMinimumReq"));
+      alert("Minimum order amount is 500,000 USD");
       setIsSubmitting(false);
       return;
     }
@@ -208,13 +209,14 @@ export default function CreateOrderPage() {
               <h2 className={cn(
                 "text-2xl font-bold mb-2",
                 theme === "light" ? "text-gray-900" : "text-white"
-              )}>{t("orderCreatedSuccess")}
+              )}>
+                Order Created Successfully
               </h2>
               <p className={cn(
                 "mb-6",
                 theme === "light" ? "text-gray-600" : "text-muted-foreground"
               )}>
-                {t("orderSubmitted")}
+                Your order has been submitted and is now active.
               </p>
               <div className="flex space-x-4">
                 <Button
@@ -226,7 +228,7 @@ export default function CreateOrderPage() {
                   )}
                   onClick={() => setIsSuccess(false)}
                 >
-                  {t("createAnotherOrder")}
+                  Create Another Order
                 </Button>
                 <Button
                   className={cn(
@@ -236,7 +238,7 @@ export default function CreateOrderPage() {
                   )}
                   asChild
                 >
-                  <a href="/orders">{t("viewAllOrders")}</a>
+                  <a href="/orders">View All Orders</a>
                 </Button>
               </div>
             </CardContent>
@@ -253,7 +255,7 @@ export default function CreateOrderPage() {
           <h1 className={cn(
             "text-2xl font-bold",
             theme === "light" ? "text-gray-900" : "text-white"
-          )}>{t("createNewOrder")}</h1>
+          )}>Create New Order</h1>
         </div>
 
         <Alert className={cn(
@@ -265,9 +267,9 @@ export default function CreateOrderPage() {
             "h-4 w-4",
             theme === "light" ? "text-blue-600" : "text-otc-icon"
           )} />
-          <AlertTitle>{t("minOrderSize")}</AlertTitle>
+          <AlertTitle>Minimum Order Size</AlertTitle>
           <AlertDescription>
-            {t("otcMinimumReq")}
+            Minimum order amount for OTC operations is 500,000 USD.
           </AlertDescription>
         </Alert>
 
@@ -277,10 +279,10 @@ export default function CreateOrderPage() {
           )}>
             <CardHeader>
               <CardTitle className={theme === "light" ? "text-gray-900" : "text-white"}>
-                {t("orderDetails")}
+                Order Details
               </CardTitle>
               <CardDescription className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t("enterOrderDetails")}
+                Enter the details of your order below
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -290,7 +292,7 @@ export default function CreateOrderPage() {
                   htmlFor="tradingPair"
                   className={theme === "light" ? "text-gray-800" : "text-white"}
                 >
-                  {t("tradingPair")} <span className="text-red-500">*</span>
+                  Trading Pair <span className="text-red-500">*</span>
                 </Label>
                 <Select value={selectedPair} onValueChange={setSelectedPair}>
                   <SelectTrigger
@@ -301,7 +303,7 @@ export default function CreateOrderPage() {
                         : "bg-otc-active border-otc-active text-white"
                     )}
                   >
-                    <SelectValue placeholder={t("selectTradingPair")} />
+                    <SelectValue placeholder="Select a trading pair" />
                   </SelectTrigger>
                   <SelectContent
                     className={cn(
@@ -317,7 +319,7 @@ export default function CreateOrderPage() {
                           "px-2 py-1.5 text-xs font-medium uppercase",
                           theme === "light" ? "text-gray-500" : "text-gray-400"
                         )}>
-                          {t(group as "RUB_NR" | "RUB_CASH" | "TOKENIZED")}
+                          {group}
                         </div>
                         {pairs.map((pair) => (
                           <SelectItem
@@ -343,7 +345,7 @@ export default function CreateOrderPage() {
                   {/* Order Type - Step 2 (Auto-determined based on pair) */}
                   <div className="space-y-2">
                     <Label className={theme === "light" ? "text-gray-800" : "text-white"}>
-                      {t("orderType")}
+                      Order Type
                     </Label>
                     <div className={cn(
                       "p-3 rounded-md",
@@ -352,13 +354,13 @@ export default function CreateOrderPage() {
                         : "bg-otc-active/30 border border-otc-active"
                     )}>
                       <div className="font-medium">
-                        {orderType === "BUY" ? t("buyUSD") : t("sellUSD")}
+                        {orderType === "BUY" ? "Buy USD" : "Sell USD"}
                       </div>
                       <div className={cn(
                         "text-sm mt-1",
                         theme === "light" ? "text-gray-600" : "text-gray-400"
                       )}>
-                        {t("autoSelectedBasedOnPair")}
+                        Auto-selected based on pair
                       </div>
                     </div>
                   </div>
@@ -366,7 +368,7 @@ export default function CreateOrderPage() {
                   {/* Amount - Step 3 */}
                   <div className="space-y-2">
                     <Label htmlFor="amount" className={theme === "light" ? "text-gray-800" : "text-white"}>
-                      {t("amount")} <span className="text-red-500">*</span>
+                      Amount <span className="text-red-500">*</span>
                     </Label>
                     <div className="flex space-x-3">
                       <div className="relative flex-grow">
@@ -374,7 +376,7 @@ export default function CreateOrderPage() {
                           id="amount"
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
-                          placeholder={t("minimumOrder")}
+                          placeholder="Minimum 500,000"
                           className={cn(
                             "pl-8",
                             theme === "light"
@@ -418,7 +420,7 @@ export default function CreateOrderPage() {
 
                   {/* Rate - Step 4 */}
                   <div className="space-y-4">
-                    <Label className={theme === "light" ? "text-gray-800" : "text-white"}>{t("rate")}</Label>
+                    <Label className={theme === "light" ? "text-gray-800" : "text-white"}>Rate</Label>
                     
                     {/* Rate Type Selection */}
                     <div className="space-y-2">
@@ -426,7 +428,7 @@ export default function CreateOrderPage() {
                         "text-sm",
                         theme === "light" ? "text-gray-700" : "text-gray-300"
                       )}>
-                        {t("rateType")}
+                        Rate Type
                       </Label>
                       <RadioGroup
                         value={rateType}
@@ -450,7 +452,7 @@ export default function CreateOrderPage() {
                               theme === "light" ? "text-gray-800" : "text-white"
                             )}
                           >
-                            {t("dynamicRate")}
+                            Dynamic Rate
                           </Label>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -470,7 +472,7 @@ export default function CreateOrderPage() {
                               theme === "light" ? "text-gray-800" : "text-white"
                             )}
                           >
-                            {t("fixedRate")}
+                            Fixed Rate
                           </Label>
                         </div>
                       </RadioGroup>
@@ -484,7 +486,7 @@ export default function CreateOrderPage() {
                           <Label htmlFor="rateSource" className={cn(
                             "text-sm mb-1 block",
                             theme === "light" ? "text-gray-600" : "text-gray-400"
-                          )}>{t("rateSource")}</Label>
+                          )}>Rate Source</Label>
                           <Select value={rateSource} onValueChange={setRateSource}>
                             <SelectTrigger
                               id="rateSource"
@@ -494,7 +496,7 @@ export default function CreateOrderPage() {
                                   : "bg-otc-active border-otc-active text-white"
                               )}
                             >
-                              <SelectValue placeholder={t("selectSource")} />
+                              <SelectValue placeholder="Select source" />
                             </SelectTrigger>
                             <SelectContent className={cn(
                               theme === "light"
@@ -535,7 +537,7 @@ export default function CreateOrderPage() {
                             <Label className={cn(
                               theme === "light" ? "text-gray-700" : "text-gray-300"
                             )}>
-                              {t("rateAdjustment")}: {rateAdjustment > 0 ? "+" : ""}{rateAdjustment}%
+                              Rate Adjustment: {rateAdjustment > 0 ? "+" : ""}{rateAdjustment}%
                             </Label>
                           </div>
                           <Slider
@@ -564,13 +566,13 @@ export default function CreateOrderPage() {
                         <Label htmlFor="fixedRate" className={cn(
                           theme === "light" ? "text-gray-700" : "text-gray-300"
                         )}>
-                          {t("enterFixedRate")}
+                          Enter Fixed Rate
                         </Label>
                         <Input
                           id="fixedRate"
                           value={customRateValue}
                           onChange={(e) => setCustomRateValue(e.target.value)}
-                          placeholder={t("enterRateValue")}
+                          placeholder="Enter rate value"
                           className={cn(
                             theme === "light"
                               ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
@@ -588,7 +590,7 @@ export default function CreateOrderPage() {
                         : "bg-otc-active/50 border border-otc-active text-white"
                     )}>
                       <div className="flex justify-between items-center">
-                        <Label>{t("platformAdjustment")}: </Label>
+                        <Label>Platform Adjustment: </Label>
                         <span className={cn(
                           "font-semibold",
                           theme === "light" ? "text-blue-600" : "text-otc-primary"
@@ -597,7 +599,7 @@ export default function CreateOrderPage() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center mt-1">
-                        <Label>{t("serviceFee")}: </Label>
+                        <Label>Service Fee: </Label>
                         <span className={cn(
                           "font-semibold",
                           theme === "light" ? "text-blue-600" : "text-otc-primary"
@@ -611,7 +613,7 @@ export default function CreateOrderPage() {
                           ? "border-t border-blue-100"
                           : "border-t border-otc-active"
                       )}>
-                        <Label>{t("finalRate")}: {formatRate()}</Label>
+                        <Label>Final Rate: {formatRate()}</Label>
                       </div>
                     </div>
                   </div>
@@ -619,12 +621,12 @@ export default function CreateOrderPage() {
                   {/* Order Lifetime - Step 5 (Replacing Expiry Date) */}
                   <div className="space-y-4">
                     <Label className={theme === "light" ? "text-gray-800" : "text-white"}>
-                      {t("orderLifetime")}
+                      Order Lifetime
                     </Label>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className={theme === "light" ? "text-gray-700" : "text-gray-300"}>
-                          {orderLifetime} {orderLifetime === 1 ? t("day") : t("days")}
+                          {orderLifetime} {orderLifetime === 1 ? "day" : "days"}
                         </span>
                       </div>
                       <Slider
@@ -639,16 +641,16 @@ export default function CreateOrderPage() {
                         )}
                       />
                       <div className="flex justify-between text-xs mt-1">
-                        <span>1 {t("day")}</span>
-                        <span>15 {t("days")}</span>
-                        <span>30 {t("days")}</span>
+                        <span>1 day</span>
+                        <span>15 days</span>
+                        <span>30 days</span>
                       </div>
                     </div>
                     <div className={cn(
                       "text-sm",
                       theme === "light" ? "text-gray-600" : "text-gray-400"
                     )}>
-                      {t("expiresOn")}: {calculateExpiryDate().toLocaleDateString()}
+                      Expires on: {calculateExpiryDate().toLocaleDateString()}
                     </div>
                   </div>
 
@@ -656,13 +658,13 @@ export default function CreateOrderPage() {
                   {!isCashPair() && (
                     <div className="space-y-2">
                       <Label htmlFor="purpose" className={theme === "light" ? "text-gray-800" : "text-white"}>
-                        {t("paymentPurpose")}
+                        Payment Purpose
                       </Label>
                       <Input
                         id="purpose"
                         value={purpose}
                         onChange={(e) => setPurpose(e.target.value)}
-                        placeholder={t("purposeExample")}
+                        placeholder="e.g. Contract Payment, Investment"
                         className={cn(
                           theme === "light"
                             ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
@@ -675,7 +677,7 @@ export default function CreateOrderPage() {
                   {/* Geography (Country/City) - Step 7 */}
                   <div className="space-y-4">
                     <Label className={theme === "light" ? "text-gray-800" : "text-white"}>
-                      {t("geography")}
+                      Geography
                     </Label>
                     
                     {/* Country (Required) */}
@@ -684,7 +686,7 @@ export default function CreateOrderPage() {
                         "text-sm",
                         theme === "light" ? "text-gray-700" : "text-gray-300"
                       )}>
-                        {t("country")} <span className="text-red-500">*</span>
+                        Country <span className="text-red-500">*</span>
                       </Label>
                       <Select value={country} onValueChange={(value) => {
                         setCountry(value);
@@ -698,7 +700,7 @@ export default function CreateOrderPage() {
                               : "bg-otc-active border-otc-active text-white"
                           )}
                         >
-                          <SelectValue placeholder={t("selectCountry")} />
+                          <SelectValue placeholder="Select country" />
                         </SelectTrigger>
                         <SelectContent
                           className={cn(
@@ -728,7 +730,7 @@ export default function CreateOrderPage() {
                           "text-sm flex items-center",
                           theme === "light" ? "text-gray-700" : "text-gray-300"
                         )}>
-                          {t("city")} 
+                          City 
                           {isCashPair() && <span className="text-red-500 ml-1">*</span>}
                         </Label>
                         <Select value={city} onValueChange={setCity}>
@@ -740,7 +742,7 @@ export default function CreateOrderPage() {
                                 : "bg-otc-active border-otc-active text-white"
                             )}
                           >
-                            <SelectValue placeholder={t("selectCity")} />
+                            <SelectValue placeholder="Select city" />
                           </SelectTrigger>
                           <SelectContent
                             className={cn(
@@ -768,13 +770,13 @@ export default function CreateOrderPage() {
                   {/* Additional Notes - Step 8 */}
                   <div className="space-y-2">
                     <Label htmlFor="notes" className={theme === "light" ? "text-gray-800" : "text-white"}>
-                      {t("additionalNotes")}
+                      Additional Notes
                     </Label>
                     <Textarea
                       id="notes"
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder={t("notesPlaceholder")}
+                      placeholder="Add any special requirements or information"
                       className={cn(
                         "min-h-[100px]",
                         theme === "light"
@@ -797,7 +799,7 @@ export default function CreateOrderPage() {
                 )}
                 onClick={() => window.history.back()}
               >
-                {t("cancel")}
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -808,7 +810,7 @@ export default function CreateOrderPage() {
                 )}
                 disabled={isSubmitting || !selectedPair || !amount || !country || (isCashPair() && !city)}
               >
-                {isSubmitting ? t("creatingOrder") : t("createOrder")}
+                {isSubmitting ? "Creating Order..." : "Create Order"}
               </Button>
             </CardFooter>
           </Card>

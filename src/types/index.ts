@@ -81,3 +81,19 @@ export interface Deal {
     isWithManager?: boolean;
   };
 }
+
+// Translation keys for our application
+export type TranslationKey = 
+  | "user" | "orders" | "deals" | "search" | "fullName" | "company" | "email"
+  | "RUB_NR" | "RUB_CASH" | "TOKENIZED" | "status" | "amount" | "rate" | "error"
+  | "security" | "createOrder" | "viewAllOrders" | "cancel" | "createAnotherOrder"
+  | "orderCreatedSuccess" | "orderSubmitted" | "creatingOrder"
+  | "fillRequiredFields" | "otcMinimumReq" | "createNewOrder" | "minOrderSize"
+  | "orderDetails" | "enterOrderDetails" | "tradingPair" | "selectTradingPair"
+  | "orderType" | "buyUSD" | "sellUSD" | "autoSelectedBasedOnPair"
+  | "minimumOrder" | "rateType" | "dynamicRate" | "fixedRate"
+  | "rateSource" | "selectSource" | "rateAdjustment" | "enterFixedRate"
+  | "enterRateValue" | "platformAdjustment" | "serviceFee" | "finalRate"
+  | "orderLifetime" | "day" | "days" | "expiresOn" | "paymentPurpose"
+  | "purposeExample" | "geography" | "country" | "city" | "selectCountry"
+  | "selectCity" | "additionalNotes" | "notesPlaceholder";
