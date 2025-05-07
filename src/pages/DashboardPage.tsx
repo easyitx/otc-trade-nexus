@@ -339,7 +339,7 @@ export default function DashboardPage() {
         </div>
         
         {/* Market Orders */}
-        <div>
+{/*         <div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
             <h2 className={cn(
               "text-xl font-semibold",
@@ -380,7 +380,7 @@ export default function DashboardPage() {
               )}
             </TabsContent>
           </Tabs>
-        </div>
+        </div> */}
       </div>
     </MainLayout>
   );
