@@ -51,6 +51,7 @@ export default function CreateOrderPage() {
   const [city, setCity] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [selectedPairInfo, setSelectedPairInfo] = useState<any>(null);
 
   const form = useForm({
     defaultValues: {
@@ -65,19 +66,15 @@ export default function CreateOrderPage() {
     return pair?.group === "RUB_CASH";
   };
 
-  // Determine order type based on selected pair
+  // Update selected pair info when pair changes
   useEffect(() => {
     if (selectedPair) {
       const pair = tradePairs.find(p => p.id === selectedPair);
       if (pair) {
-        // If pair contains USD as base, it's a SELL (user is selling USD)
-        // If pair contains USD as quote, it's a BUY (user is buying USD)
-        if (pair.baseCurrency === "USD") {
-          setOrderType("SELL");
-        } else if (pair.quoteCurrency === "USD") {
-          setOrderType("BUY");
-        }
+        setSelectedPairInfo(pair);
       }
+    } else {
+      setSelectedPairInfo(null);
     }
   }, [selectedPair]);
 
@@ -96,10 +93,15 @@ export default function CreateOrderPage() {
     return groups;
   }, {} as Record<string, typeof tradePairs>);
 
-  // Get rate adjustment based on selected source
-  const getAdjustmentPercent = () => {
-    if (isLoadingSettings) return 0;
-    return rateAdjustments[rateSource as keyof typeof rateAdjustments] || 0;
+  // Format currencies for display
+  const formatOrderTypeDescription = () => {
+    if (!selectedPairInfo) return "";
+    
+    if (orderType === "BUY") {
+      return `Buy ${selectedPairInfo.baseCurrency} with ${selectedPairInfo.quoteCurrency}`;
+    } else {
+      return `Sell ${selectedPairInfo.baseCurrency} for ${selectedPairInfo.quoteCurrency}`;
+    }
   };
 
   // Calculate expiry date based on order lifetime (days)
@@ -123,8 +125,8 @@ export default function CreateOrderPage() {
     };
 
     const sourceName = sourceMap[rateSource as keyof typeof sourceMap] || rateSource;
-    const baseAdjustment = getAdjustmentPercent();
-    const totalAdjustment = baseAdjustment + rateAdjustment + serviceFee;
+    // Only include user adjustment and service fee (removed platform adjustment)
+    const totalAdjustment = rateAdjustment + serviceFee;
 
     const sign = totalAdjustment >= 0 ? "+" : "";
     return `${sourceName}${sign}${totalAdjustment.toFixed(2)}%`;
@@ -342,27 +344,87 @@ export default function CreateOrderPage() {
 
               {selectedPair && (
                 <>
-                  {/* Order Type - Step 2 (Auto-determined based on pair) */}
+                  {/* Order Type - Step 2 (Now user selectable) */}
                   <div className="space-y-2">
                     <Label className={theme === "light" ? "text-gray-800" : "text-white"}>
-                      Order Type
+                      Order Type <span className="text-red-500">*</span>
                     </Label>
-                    <div className={cn(
-                      "p-3 rounded-md",
-                      theme === "light" 
-                        ? "bg-gray-50 border border-gray-200" 
-                        : "bg-otc-active/30 border border-otc-active"
-                    )}>
-                      <div className="font-medium">
-                        {orderType === "BUY" ? "Buy USD" : "Sell USD"}
-                      </div>
-                      <div className={cn(
-                        "text-sm mt-1",
-                        theme === "light" ? "text-gray-600" : "text-gray-400"
-                      )}>
-                        Auto-selected based on pair
-                      </div>
-                    </div>
+                    
+                    {selectedPairInfo && (
+                      <RadioGroup
+                        value={orderType}
+                        onValueChange={setOrderType}
+                        className="flex flex-col space-y-2"
+                      >
+                        <div className={cn(
+                          "flex items-center space-x-3 rounded-md p-3",
+                          theme === "light" 
+                            ? "bg-gray-50 border border-gray-200" 
+                            : "bg-otc-active/30 border border-otc-active"
+                        )}>
+                          <RadioGroupItem 
+                            value="BUY" 
+                            id="buy-option"
+                            className={cn(
+                              theme === "light"
+                                ? "border-gray-300 text-blue-600"
+                                : "border-otc-active text-otc-primary"
+                            )}
+                          />
+                          <Label 
+                            htmlFor="buy-option" 
+                            className={cn(
+                              "cursor-pointer flex-1",
+                              theme === "light" ? "text-gray-800" : "text-white"
+                            )}
+                          >
+                            <div className="font-medium">
+                              Buy {selectedPairInfo.baseCurrency}
+                            </div>
+                            <div className={cn(
+                              "text-sm mt-1",
+                              theme === "light" ? "text-gray-600" : "text-gray-400"
+                            )}>
+                              Pay with {selectedPairInfo.quoteCurrency}
+                            </div>
+                          </Label>
+                        </div>
+                        
+                        <div className={cn(
+                          "flex items-center space-x-3 rounded-md p-3",
+                          theme === "light" 
+                            ? "bg-gray-50 border border-gray-200" 
+                            : "bg-otc-active/30 border border-otc-active"
+                        )}>
+                          <RadioGroupItem 
+                            value="SELL" 
+                            id="sell-option"
+                            className={cn(
+                              theme === "light"
+                                ? "border-gray-300 text-blue-600"
+                                : "border-otc-active text-otc-primary"
+                            )}
+                          />
+                          <Label 
+                            htmlFor="sell-option" 
+                            className={cn(
+                              "cursor-pointer flex-1",
+                              theme === "light" ? "text-gray-800" : "text-white"
+                            )}
+                          >
+                            <div className="font-medium">
+                              Sell {selectedPairInfo.baseCurrency}
+                            </div>
+                            <div className={cn(
+                              "text-sm mt-1",
+                              theme === "light" ? "text-gray-600" : "text-gray-400"
+                            )}>
+                              Receive {selectedPairInfo.quoteCurrency}
+                            </div>
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    )}
                   </div>
 
                   {/* Amount - Step 3 */}
@@ -582,22 +644,13 @@ export default function CreateOrderPage() {
                       </div>
                     )}
 
-                    {/* Rate Summary */}
+                    {/* Rate Summary (Removed Platform Adjustment) */}
                     <div className={cn(
                       "rounded-md p-3 mt-2",
                       theme === "light"
                         ? "bg-blue-50 border border-blue-100 text-blue-800"
                         : "bg-otc-active/50 border border-otc-active text-white"
                     )}>
-                      <div className="flex justify-between items-center">
-                        <Label>Platform Adjustment: </Label>
-                        <span className={cn(
-                          "font-semibold",
-                          theme === "light" ? "text-blue-600" : "text-otc-primary"
-                        )}>
-                          {getAdjustmentPercent()}%
-                        </span>
-                      </div>
                       <div className="flex justify-between items-center mt-1">
                         <Label>Service Fee: </Label>
                         <span className={cn(
@@ -618,7 +671,7 @@ export default function CreateOrderPage() {
                     </div>
                   </div>
 
-                  {/* Order Lifetime - Step 5 (Replacing Expiry Date) */}
+                  {/* Order Lifetime - Step 5 */}
                   <div className="space-y-4">
                     <Label className={theme === "light" ? "text-gray-800" : "text-white"}>
                       Order Lifetime
