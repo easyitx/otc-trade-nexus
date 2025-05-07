@@ -26,11 +26,26 @@ export interface TradePair {
   displayName: string;
 }
 
+export interface RateDetails {
+  type: "dynamic" | "fixed";
+  source?: string;
+  value?: string;
+  adjustment?: number;
+  serviceFee: number;
+}
+
+export interface Geography {
+  country?: string;
+  city?: string;
+}
+
 export interface Order {
   id: string;
   type: OrderType;
   amount: number;
+  amountCurrency?: string;
   rate: string;
+  rateDetails?: RateDetails;
   createdAt: Date;
   updatedAt: Date;
   expiresAt: Date;
@@ -39,6 +54,7 @@ export interface Order {
   userId: string;
   tradePairId: string;
   status: "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED";
+  geography?: Geography;
 }
 
 export interface Message {

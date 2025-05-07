@@ -53,6 +53,36 @@ export type Database = {
           },
         ]
       }
+      exchange_rates: {
+        Row: {
+          cbr: number | null
+          id: number
+          investing: number | null
+          profinance: number | null
+          timestamp: string
+          updated_at: string
+          xe: number | null
+        }
+        Insert: {
+          cbr?: number | null
+          id?: number
+          investing?: number | null
+          profinance?: number | null
+          timestamp?: string
+          updated_at?: string
+          xe?: number | null
+        }
+        Update: {
+          cbr?: number | null
+          id?: number
+          investing?: number | null
+          profinance?: number | null
+          timestamp?: string
+          updated_at?: string
+          xe?: number | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string

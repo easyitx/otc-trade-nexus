@@ -23,7 +23,9 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     id: order.id,
     type: orderType,
     amount: Number(order.amount),
+    amountCurrency: order.amount_currency || "USD",
     rate: order.rate,
+    rateDetails: order.rate_details,
     createdAt: new Date(order.created_at),
     updatedAt: new Date(order.updated_at),
     expiresAt: new Date(order.expires_at),
@@ -31,6 +33,7 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     notes: order.notes || undefined,
     userId: order.user_id,
     status: orderStatus,
+    geography: order.geography || { country: undefined, city: undefined },
     // Use a default tradePairId until we implement proper pair selection
     tradePairId: "USD_USDT_PAIR" 
   };
@@ -41,11 +44,14 @@ const adaptOrderToSupabase = (order: Omit<FrontendOrder, 'id' | 'userId' | 'crea
   return {
     type: order.type,
     amount: order.amount,
+    amount_currency: order.amountCurrency || "USD",
     rate: order.rate,
+    rate_details: order.rateDetails || null,
     expires_at: order.expiresAt.toISOString(),
     purpose: order.purpose || null,
     notes: order.notes || null,
-    status: order.status
+    status: order.status,
+    geography: order.geography || null
   };
 };
 
