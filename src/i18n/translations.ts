@@ -35,6 +35,8 @@ export const translations = {
     tradingPairs: "Trading Pairs",
     buy: "BUY",
     sell: "SELL",
+    with: "with",
+    for: "for",
     loggedOut: "Logged out",
     loggedOutSuccess: "You have been successfully logged out",
     user: "User",
@@ -129,6 +131,7 @@ export const translations = {
     amount: "Amount (USD equivalent)",
     minimumOrder: "500,000 minimum",
     rate: "Rate",
+    rateType: "Rate Type",
     rateSource: "Rate Source",
     selectSource: "Select Source",
     platformAdjustment: "Platform Adjustment",
@@ -147,6 +150,8 @@ export const translations = {
     orderCreatedSuccess: "Order Created Successfully",
     orderSubmitted: "Your order has been submitted to the OTC Desk and is now visible to potential counterparties.",
     createAnotherOrder: "Create Another Order",
+    serviceFee: "Service Fee",
+    adjustment: "Adjustment",
     
     // Deals page
     noChatsSelected: "No chat selected",
@@ -209,6 +214,8 @@ export const translations = {
     tradingPairs: "Торговые пары",
     buy: "ПОКУПКА",
     sell: "ПРОДАЖА",
+    with: "за",
+    for: "за",
     loggedOut: "Выход выполнен",
     loggedOutSuccess: "Вы успешно вышли из системы",
     user: "Пользователь",
@@ -303,6 +310,7 @@ export const translations = {
     amount: "Сумма (эквивалент в USD)",
     minimumOrder: "Минимум 500 000",
     rate: "Курс",
+    rateType: "Тип курса",
     rateSource: "Источник курса",
     selectSource: "Выбрать источник",
     platformAdjustment: "Процент платформы",
@@ -321,6 +329,8 @@ export const translations = {
     orderCreatedSuccess: "Ордер успешно создан",
     orderSubmitted: "Ваш ордер был отправлен в OTC Desk и теперь виден потенциальным контрагентам.",
     createAnotherOrder: "Создать еще один ордер",
+    serviceFee: "Комиссия сервиса",
+    adjustment: "Корректировка",
     
     // Deals page
     noChatsSelected: "Чат не выбран",
