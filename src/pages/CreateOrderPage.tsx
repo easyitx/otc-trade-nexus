@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -14,7 +13,6 @@ import { CheckCircle, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
-import { ExchangeRates } from "@/components/ExchangeRates";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -110,7 +108,7 @@ export default function CreateOrderPage() {
 
   if (isSuccess) {
     return (
-        <MainLayout>
+        <>
           <div className="flex items-center justify-center h-full">
             <Card className={cn(
                 "w-full max-w-2xl",
@@ -160,12 +158,12 @@ export default function CreateOrderPage() {
               </CardContent>
             </Card>
           </div>
-        </MainLayout>
+        </>
     );
   }
 
   return (
-      <MainLayout>
+      <>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h1 className={cn(
@@ -493,6 +491,6 @@ export default function CreateOrderPage() {
             </Card>
           </form>
         </div>
-      </MainLayout>
+      </>
   );
 }

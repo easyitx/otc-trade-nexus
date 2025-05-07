@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { MainLayout } from "../components/layout/MainLayout";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -114,11 +113,9 @@ export default function OrdersPage() {
 
   if (isLoadingOrders) {
     return (
-      <MainLayout>
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-otc-primary"></div>
         </div>
-      </MainLayout>
     );
   }
   
@@ -135,7 +132,6 @@ export default function OrdersPage() {
   };
 
   return (
-    <MainLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className={cn(
@@ -344,6 +340,5 @@ export default function OrdersPage() {
           <OrdersTable orders={filteredOrders} showDetailedView={viewMode === "table"} />
         </div>
       </div>
-    </MainLayout>
   );
 }

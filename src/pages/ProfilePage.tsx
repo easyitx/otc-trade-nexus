@@ -1,4 +1,4 @@
-import { MainLayout } from "../components/layout/MainLayout";
+
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
@@ -19,7 +19,7 @@ export default function ProfilePage() {
   if (!currentUser) return null;
 
   return (
-      <MainLayout>
+      <>
         <div className="space-y-6">
           <h1 className={cn(
               "text-2xl font-bold",
@@ -119,6 +119,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
-      </MainLayout>
+      </>
   );
 }

@@ -1,4 +1,4 @@
-import { MainLayout } from "../components/layout/MainLayout";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
@@ -22,7 +22,7 @@ export default function SettingsPage() {
 
   if (!isAuthenticated) {
     return (
-        <MainLayout>
+        <>
           <div className="flex items-center justify-center h-full">
             <Card className={cn(
                 theme === "light" ? "bg-white border-gray-200" : "bg-otc-card border-otc-active"
@@ -40,12 +40,12 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </div>
-        </MainLayout>
+        </>
     );
   }
 
   return (
-      <MainLayout>
+      <>
         <div className="space-y-6">
           <h1 className={cn("text-2xl font-bold", theme === "light" ? "text-gray-900" : "text-white")}>Settings</h1>
 
@@ -162,6 +162,6 @@ export default function SettingsPage() {
             </TabsContent>
           </Tabs>
         </div>
-      </MainLayout>
+      </>
   );
 }

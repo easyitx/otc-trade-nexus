@@ -1,6 +1,5 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { MainLayout } from "@/components/layout/MainLayout";
 import { DealChat } from "@/components/chat/DealChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,17 +60,17 @@ export default function ChatPage() {
 
   if (isLoading) {
     return (
-        <MainLayout>
+        <>
           <div className="flex items-center justify-center h-[60vh]">
             <Loader2 className="h-10 w-10 text-otc-primary animate-spin" />
           </div>
-        </MainLayout>
+        </>
     );
   }
 
   if (!deals?.length) {
     return (
-        <MainLayout>
+        <>
           <div className="flex flex-col items-center justify-center h-[60vh] text-center">
             <h2 className={cn(
                 "text-xl font-semibold mb-2",
@@ -86,7 +85,7 @@ export default function ChatPage() {
               When you start a deal with someone, your chat will appear here.
             </p>
           </div>
-        </MainLayout>
+        </>
     );
   }
 
@@ -100,7 +99,7 @@ export default function ChatPage() {
   }
 
   return (
-      <MainLayout>
+      <>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-[calc(100vh-10rem)]">
           {/* Deals List */}
           <div className={cn(
@@ -191,6 +190,6 @@ export default function ChatPage() {
             )}
           </div>
         </div>
-      </MainLayout>
+      </>
   );
 }

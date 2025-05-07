@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { MainLayout } from "../../components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -51,7 +50,7 @@ export default function RateManagementPage() {
   // Check if user has permissions
   if (!isLoadingRoles && !userRoles?.isManager && !userRoles?.isAdmin) {
     return (
-      <MainLayout>
+      <>
         <div className="flex items-center justify-center h-full">
           <Card className="w-full max-w-md bg-otc-card border-otc-active">
             <CardHeader>
@@ -79,22 +78,22 @@ export default function RateManagementPage() {
             </CardFooter>
           </Card>
         </div>
-      </MainLayout>
+      </>
     );
   }
   
   if (isLoading || isLoadingRoles) {
     return (
-      <MainLayout>
+      <>
         <div className="flex items-center justify-center h-full">
           <p className="text-white">Загрузка...</p>
         </div>
-      </MainLayout>
+      </>
     );
   }
   
   return (
-    <MainLayout>
+    <>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">Управление курсами</h1>
@@ -215,6 +214,6 @@ export default function RateManagementPage() {
           </CardContent>
         </Card>
       </div>
-    </MainLayout>
+    </>
   );
 }

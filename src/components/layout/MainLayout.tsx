@@ -3,12 +3,12 @@ import { ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
 import { useAuth } from "../../contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import {Navigate, Outlet} from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
   requireAuth?: boolean;
 }
 
@@ -45,7 +45,7 @@ export function MainLayout({ children, requireAuth = true }: MainLayoutProps) {
             </div>
           ) : (
             <div className="max-w-7xl mx-auto">
-              {children}
+              {children ?? <Outlet />}
             </div>
           )}
         </main>

@@ -116,12 +116,12 @@ export function Sidebar() {
               <div className="px-3 py-2">
                 {!isCollapsed && <p className="text-xs text-primary-foreground/70 uppercase font-semibold">Админ</p>}
               </div>
-              <NavItem 
-                icon={SlidersIcon} 
-                label="Управление курсами" 
-                href="/admin/rate-management" 
-                isCollapsed={isCollapsed} 
-              />
+              {/*<NavItem */}
+              {/*  icon={SlidersIcon} */}
+              {/*  label="Управление курсами" */}
+              {/*  href="/admin/rate-management" */}
+              {/*  isCollapsed={isCollapsed} */}
+              {/*/>*/}
             </div>
           )}
         </div>
