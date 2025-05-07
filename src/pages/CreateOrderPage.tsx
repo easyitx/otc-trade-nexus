@@ -44,7 +44,7 @@ export default function CreateOrderPage() {
   const [customRateValue, setCustomRateValue] = useState<string>("");
   const [rateAdjustment, setRateAdjustment] = useState<number>(0);
   const [serviceFee] = useState<number>(1); // Fixed 1% service fee
-  const [orderLifetime, setOrderLifetime] = useState<number>(7); // Default 7 days
+  const [expiryDate, setExpiryDate] = useState<Date>(getDefaultExpiryDate());
   const [purpose, setPurpose] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [country, setCountry] = useState<string>("");
@@ -52,13 +52,25 @@ export default function CreateOrderPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [selectedPairInfo, setSelectedPairInfo] = useState<any>(null);
+  const [currentRates, setCurrentRates] = useState<Record<string, string>>({
+    cbr: "",
+    profinance: "",
+    investing: "",
+    xe: ""
+  });
 
   const form = useForm({
     defaultValues: {
       rateAdjustment: 0,
-      orderLifetime: 7,
     }
   });
+
+  // Function to get default expiry date (7 days from now)
+  function getDefaultExpiryDate(): Date {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date;
+  }
 
   // Check if the selected pair involves cash
   const isCashPair = () => {
@@ -77,6 +89,24 @@ export default function CreateOrderPage() {
       setSelectedPairInfo(null);
     }
   }, [selectedPair]);
+
+  // Simulate fetching current rates (in a real app, this would come from an API)
+  useEffect(() => {
+    // Mock data for demonstration
+    setCurrentRates({
+      cbr: "90.50",
+      profinance: "91.25",
+      investing: "90.75",
+      xe: "91.00"
+    });
+  }, []);
+
+  // Apply selected rate source value to custom rate when in fixed mode
+  const applyRateSourceToFixed = (source: string) => {
+    if (currentRates[source]) {
+      setCustomRateValue(currentRates[source]);
+    }
+  };
 
   // Get cities based on selected country
   const getCitiesForCountry = () => {
@@ -104,13 +134,6 @@ export default function CreateOrderPage() {
     }
   };
 
-  // Calculate expiry date based on order lifetime (days)
-  const calculateExpiryDate = (): Date => {
-    const date = new Date();
-    date.setDate(date.getDate() + orderLifetime);
-    return date;
-  };
-
   // Format rate string based on selected source and adjustments
   const formatRate = () => {
     if (rateType === "fixed") {
@@ -125,7 +148,7 @@ export default function CreateOrderPage() {
     };
 
     const sourceName = sourceMap[rateSource as keyof typeof sourceMap] || rateSource;
-    // Only include user adjustment and service fee (removed platform adjustment)
+    // Only include user adjustment and service fee
     const totalAdjustment = rateAdjustment + serviceFee;
 
     const sign = totalAdjustment >= 0 ? "+" : "";
@@ -170,8 +193,6 @@ export default function CreateOrderPage() {
       adjustment: rateType === "dynamic" ? rateAdjustment : undefined,
       serviceFee
     };
-
-    const expiryDate = calculateExpiryDate();
 
     const { error } = await createOrder({
       type: orderType as "BUY" | "SELL",
@@ -622,25 +643,90 @@ export default function CreateOrderPage() {
                       </>
                     )}
 
-                    {/* Fixed Rate Input */}
+                    {/* Fixed Rate Input with Source Selection */}
                     {rateType === "fixed" && (
-                      <div className="space-y-2">
-                        <Label htmlFor="fixedRate" className={cn(
-                          theme === "light" ? "text-gray-700" : "text-gray-300"
-                        )}>
-                          Enter Fixed Rate
-                        </Label>
-                        <Input
-                          id="fixedRate"
-                          value={customRateValue}
-                          onChange={(e) => setCustomRateValue(e.target.value)}
-                          placeholder="Enter rate value"
-                          className={cn(
-                            theme === "light"
-                              ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
-                              : "bg-otc-active border-otc-active text-white"
-                          )}
-                        />
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className={cn(
+                            "text-sm mb-1 block",
+                            theme === "light" ? "text-gray-600" : "text-gray-400"
+                          )}>
+                            Select Rate Source
+                          </Label>
+                          <div className="flex flex-wrap gap-2">
+                            <Button 
+                              type="button"
+                              size="sm" 
+                              variant={theme === "light" ? "outline" : "secondary"}
+                              onClick={() => applyRateSourceToFixed("cbr")}
+                              className={cn(
+                                theme === "light" 
+                                  ? "border-gray-200 bg-white" 
+                                  : "border-otc-active bg-otc-active"
+                              )}
+                            >
+                              ЦБ: {currentRates.cbr || "N/A"}
+                            </Button>
+                            <Button 
+                              type="button"
+                              size="sm" 
+                              variant={theme === "light" ? "outline" : "secondary"}
+                              onClick={() => applyRateSourceToFixed("profinance")}
+                              className={cn(
+                                theme === "light" 
+                                  ? "border-gray-200 bg-white" 
+                                  : "border-otc-active bg-otc-active"
+                              )}
+                            >
+                              PF: {currentRates.profinance || "N/A"}
+                            </Button>
+                            <Button 
+                              type="button"
+                              size="sm" 
+                              variant={theme === "light" ? "outline" : "secondary"}
+                              onClick={() => applyRateSourceToFixed("investing")}
+                              className={cn(
+                                theme === "light" 
+                                  ? "border-gray-200 bg-white" 
+                                  : "border-otc-active bg-otc-active"
+                              )}
+                            >
+                              IV: {currentRates.investing || "N/A"}
+                            </Button>
+                            <Button 
+                              type="button"
+                              size="sm" 
+                              variant={theme === "light" ? "outline" : "secondary"}
+                              onClick={() => applyRateSourceToFixed("xe")}
+                              className={cn(
+                                theme === "light" 
+                                  ? "border-gray-200 bg-white" 
+                                  : "border-otc-active bg-otc-active"
+                              )}
+                            >
+                              XE: {currentRates.xe || "N/A"}
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="fixedRate" className={cn(
+                            theme === "light" ? "text-gray-700" : "text-gray-300"
+                          )}>
+                            Fixed Rate Value (editable)
+                          </Label>
+                          <Input
+                            id="fixedRate"
+                            value={customRateValue}
+                            onChange={(e) => setCustomRateValue(e.target.value)}
+                            placeholder="Enter or select rate value"
+                            className={cn(
+                              theme === "light"
+                                ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
+                                : "bg-otc-active border-otc-active text-white"
+                            )}
+                          />
+                        </div>
                       </div>
                     )}
 
@@ -671,39 +757,36 @@ export default function CreateOrderPage() {
                     </div>
                   </div>
 
-                  {/* Order Lifetime - Step 5 */}
+                  {/* Order Lifetime - Step 5 with Date Picker */}
                   <div className="space-y-4">
                     <Label className={theme === "light" ? "text-gray-800" : "text-white"}>
-                      Order Lifetime
+                      Order Expiry Date
                     </Label>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className={theme === "light" ? "text-gray-700" : "text-gray-300"}>
-                          {orderLifetime} {orderLifetime === 1 ? "day" : "days"}
-                        </span>
-                      </div>
-                      <Slider
-                        defaultValue={[7]}
-                        min={1}
-                        max={30}
-                        step={1}
-                        value={[orderLifetime]}
-                        onValueChange={(values) => setOrderLifetime(values[0])}
+                      <p className={cn(
+                        "text-sm",
+                        theme === "light" ? "text-gray-600" : "text-gray-400"
+                      )}>
+                        Order starts today and expires on the selected date:
+                      </p>
+                      <EnhancedDatePicker 
+                        date={expiryDate}
+                        setDate={(date) => date && setExpiryDate(date)}
+                        placeholder="Select expiry date"
                         className={cn(
-                          theme === "light" ? "text-blue-600" : "text-otc-primary"
+                          "w-full",
+                          theme === "light" 
+                            ? "bg-white border-gray-300 text-gray-900" 
+                            : "bg-otc-active border-otc-active text-white"
                         )}
                       />
-                      <div className="flex justify-between text-xs mt-1">
-                        <span>1 day</span>
-                        <span>15 days</span>
-                        <span>30 days</span>
-                      </div>
-                    </div>
-                    <div className={cn(
-                      "text-sm",
-                      theme === "light" ? "text-gray-600" : "text-gray-400"
-                    )}>
-                      Expires on: {calculateExpiryDate().toLocaleDateString()}
+                      <p className={cn(
+                        "text-sm mt-2",
+                        theme === "light" ? "text-gray-500" : "text-gray-400"
+                      )}>
+                        Created: {new Date().toLocaleDateString()} · 
+                        Expires: {expiryDate?.toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
 
