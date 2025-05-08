@@ -1,5 +1,5 @@
+
 import { useState } from "react";
-import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -15,6 +15,7 @@ import { OrderStatistics } from "@/components/dashboard/OrderStatistics";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { Json } from "@/integrations/supabase/types";
 
 // Order card component for the dashboard
 const OrderCard = ({ order }: { order: Order }) => {
@@ -176,6 +177,8 @@ export default function DashboardPage() {
       return data.map(order => {
         // Convert geography from JSON to Geography type
         const geography: Geography = order.geography as unknown as Geography || { country: undefined, city: undefined };
+        // Convert rate_details from JSON to appropriate type
+        const rateDetails = order.rate_details as unknown as Order['rateDetails'];
 
         return {
           id: order.id,
@@ -183,7 +186,7 @@ export default function DashboardPage() {
           amount: Number(order.amount),
           amountCurrency: order.amount_currency || "USD",
           rate: order.rate,
-          rateDetails: order.rate_details ? order.rate_details : undefined,
+          rateDetails: rateDetails,
           createdAt: new Date(order.created_at),
           updatedAt: new Date(order.updated_at),
           expiresAt: new Date(order.expires_at),

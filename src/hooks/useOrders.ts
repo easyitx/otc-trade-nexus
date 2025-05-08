@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
-import type { Order as FrontendOrder, Geography } from '@/types';
+import type { Order as FrontendOrder, Geography, RateDetails } from '@/types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -23,13 +23,16 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
   // Convert geography from JSON to Geography type
   const geography: Geography = order.geography as unknown as Geography || { country: undefined, city: undefined };
 
+  // Convert rate_details from JSON to RateDetails type
+  const rateDetails: RateDetails | undefined = order.rate_details ? order.rate_details as unknown as RateDetails : undefined;
+
   return {
     id: order.id,
     type: orderType,
     amount: Number(order.amount),
     amountCurrency: order.amount_currency || "USD",
     rate: order.rate,
-    rateDetails: order.rate_details ? order.rate_details : undefined,
+    rateDetails: rateDetails,
     createdAt: new Date(order.created_at),
     updatedAt: new Date(order.updated_at),
     expiresAt: new Date(order.expires_at),
@@ -50,7 +53,7 @@ const adaptOrderToSupabase = (order: Omit<FrontendOrder, 'id' | 'userId' | 'crea
     amount: order.amount,
     amount_currency: order.amountCurrency || "USD",
     rate: order.rate,
-    rate_details: order.rateDetails || null,
+    rate_details: order.rateDetails as unknown as Json || null,
     expires_at: order.expiresAt.toISOString(),
     purpose: order.purpose || null,
     notes: order.notes || null,
