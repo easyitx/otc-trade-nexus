@@ -249,15 +249,6 @@ export default function OrderForm() {
     }
   };
 
-  // useEffect for default geography for cash pairs
-  useEffect(() => {
-    if (selectedPair && isCashPair()) {
-      // Default to Russia/Moscow for cash pairs
-      setCountry("Russia");
-      setCity("Moscow");
-    }
-  }, [selectedPair]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);

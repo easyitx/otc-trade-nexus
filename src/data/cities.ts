@@ -1,5 +1,4 @@
 
-// Country code to cities mapping
 export const citiesByCountry: Record<string, string[]> = {
   "RU": [
     "Moscow",
