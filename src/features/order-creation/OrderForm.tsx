@@ -1,16 +1,15 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useTheme } from "@/contexts/ThemeContext";
 import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
 import BasicDetailsStep from "./components/BasicDetailsStep";
 import AdditionalDetailsStep from "./components/AdditionalDetailsStep";
-import { getDefaultExpiryDate } from "./utils/dateUtils";
+import { getDefaultExpiryDate, getCurrencySymbol } from "./utils/dateUtils";
 import { tradePairs } from "@/data/mockData";
 
 export default function OrderForm() {
@@ -21,6 +20,7 @@ export default function OrderForm() {
   const { t, language } = useLanguage();
   const { theme } = useTheme();
 
+  
   // Form steps
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
@@ -59,6 +59,7 @@ export default function OrderForm() {
     finalRate: string;
     serviceFeeAmount: string;
     adjustmentAmount: string;
+    adjustmentPercentage: string; // Added field for adjustment percentage
     totalAmount: string;
     fromCurrency: string;
     toCurrency: string;
@@ -191,14 +192,14 @@ export default function OrderForm() {
         youReceive = amountValue * finalRate; // In base currency (RUB)
         serviceFeeAmount = (amountValue * baseRate * serviceFee / 100);
         adjustmentAmount = (amountValue * baseRate * rateAdjustment / 100);
-        totalAmount = youPay;
+        totalAmount = youReceive; // Total is what you receive
       } else {
         // Buying USDT/USD/etc. with RUB
         youPay = amountValue; // In quote currency (RUB)
         youReceive = amountValue / finalRate; // In base currency (USDT)
         serviceFeeAmount = (amountValue / baseRate * serviceFee / 100);
         adjustmentAmount = (amountValue / baseRate * rateAdjustment / 100);
-        totalAmount = youPay;
+        totalAmount = youReceive; // Total is what you receive
       }
     } else { // Selling base currency (e.g., RUB) for quote currency (e.g., USDT)
       if (selectedPairInfo.baseCurrency === "RUB") {
@@ -207,14 +208,14 @@ export default function OrderForm() {
         youReceive = amountValue / finalRate; // In quote currency (USDT)
         serviceFeeAmount = (youReceive * serviceFee / 100);
         adjustmentAmount = (youReceive * rateAdjustment / 100);
-        totalAmount = youPay;
+        totalAmount = youReceive; // Total is what you receive
       } else {
         // Selling USDT/USD/etc. for RUB
         youPay = amountValue; // In base currency (USDT)
         youReceive = amountValue * finalRate; // In quote currency (RUB)
         serviceFeeAmount = (youReceive * serviceFee / 100);
         adjustmentAmount = (youReceive * rateAdjustment / 100);
-        totalAmount = youPay;
+        totalAmount = youReceive; // Total is what you receive
       }
     }
 
@@ -236,6 +237,7 @@ export default function OrderForm() {
       finalRate: finalRate.toFixed(4),
       serviceFeeAmount: serviceFeeAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }),
       adjustmentAmount: adjustmentAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+      adjustmentPercentage: rateAdjustment.toFixed(2), // Store the adjustment percentage
       totalAmount: totalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }),
       fromCurrency,
       toCurrency

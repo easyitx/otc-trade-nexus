@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Settings, Calculator } from "lucide-react";
+import { ArrowRight, Calculator, EuroIcon, DollarSign, BadgePercent } from "lucide-react";
 
 export default function TransactionSummary({ 
   theme, t, calculationResult, getCurrencySymbol, setCurrentStep 
@@ -108,9 +108,10 @@ export default function TransactionSummary({
             : "bg-otc-active/30 border-otc-active"
         )}>
           <h4 className={cn(
-            "text-sm font-medium mb-4",
+            "text-sm font-medium mb-4 flex items-center",
             theme === "light" ? "text-gray-700" : "text-gray-300"
           )}>
+            <BadgePercent className="w-4 h-4 mr-1.5" />
             {t('calculationDetails')}
           </h4>
           
@@ -129,7 +130,7 @@ export default function TransactionSummary({
             
             <div className="grid grid-cols-2 gap-2">
               <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('adjustment')} ({parseFloat(calculationResult.adjustmentAmount) > 0 ? '+' : ''}{parseFloat(calculationResult.adjustmentAmount)}):
+                {t('adjustment')} ({parseFloat(calculationResult.adjustmentAmount) > 0 ? '+' : ''}{parseFloat(calculationResult.adjustmentAmount)}%):
               </div>
               <div className={cn(
                 "text-right font-mono",
@@ -165,14 +166,44 @@ export default function TransactionSummary({
                 "font-semibold",
                 theme === "light" ? "text-gray-700" : "text-gray-300"
               )}>
-                {t('finalRate')}:
+                {t('total')}:
               </div>
               <div className={cn(
-                "text-right font-mono font-semibold text-lg",
-                theme === "light" ? "text-blue-600" : "text-otc-primary"
+                "text-right font-mono font-semibold",
+                theme === "light" ? "text-gray-800" : "text-white"
               )}>
-                1 {calculationResult.fromCurrency} = {calculationResult.finalRate} {calculationResult.toCurrency}
+                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.totalAmount} {calculationResult.toCurrency}
               </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Final Exchange Rate (made more prominent) */}
+        <div className={cn(
+          "rounded-lg border p-4",
+          theme === "light" 
+            ? "bg-blue-50 border-blue-200" 
+            : "bg-otc-primary/20 border-otc-primary/40"
+        )}>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              {calculationResult.fromCurrency === "EUR" ? (
+                <EuroIcon className="w-5 h-5 mr-2 text-blue-600" />
+              ) : (
+                <DollarSign className="w-5 h-5 mr-2 text-blue-600" />
+              )}
+              <span className={cn(
+                "font-medium",
+                theme === "light" ? "text-blue-700" : "text-otc-primary"
+              )}>
+                {t('finalExchangeRate')}:
+              </span>
+            </div>
+            <div className={cn(
+              "text-right font-mono font-bold text-lg",
+              theme === "light" ? "text-blue-600" : "text-otc-primary"
+            )}>
+              1 {calculationResult.fromCurrency} = {calculationResult.finalRate} {calculationResult.toCurrency}
             </div>
           </div>
         </div>

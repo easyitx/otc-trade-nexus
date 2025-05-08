@@ -20,3 +20,8 @@ export function getCurrencySymbol(currency: string): string {
       return '';
   }
 }
+
+// Format percentage with sign for display
+export function formatPercentage(value: number): string {
+  return value > 0 ? `+${value.toFixed(2)}%` : `${value.toFixed(2)}%`;
+}
