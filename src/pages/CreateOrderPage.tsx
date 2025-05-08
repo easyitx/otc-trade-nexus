@@ -769,7 +769,7 @@ export default function CreateOrderPage() {
                       )}>
                         {language === 'en' 
                           ? 'Order starts today and expires on the selected date:' 
-                          : 'Ордер начинается сегодня и истекает в выбранную дату:'}
+                          : 'Заявка создается сегодня и истекает в выбранную дату:'}
                       </p>
                       <EnhancedDatePicker 
                         date={expiryDate}

@@ -206,7 +206,7 @@ export const OrderStatistics = () => {
         )}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Всего ордеров
+              Всего заявок
             </CardTitle>
             <div className={cn(
               "h-8 w-8 rounded-full flex items-center justify-center",
@@ -226,7 +226,7 @@ export const OrderStatistics = () => {
               {stats?.totalOrders}
             </div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              {stats?.activeOrders} активных ордеров
+              {stats?.activeOrders} активных заявок
               <span className="ml-2 flex items-center text-green-500">
                 <ArrowUpRightIcon className="h-3 w-3 ml-0.5" />
               </span>
@@ -239,7 +239,7 @@ export const OrderStatistics = () => {
         )}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Средний объем ордера
+              Средний объем заявки
             </CardTitle>
             <div className={cn(
               "h-8 w-8 rounded-full flex items-center justify-center",
@@ -259,7 +259,7 @@ export const OrderStatistics = () => {
               ${stats?.totalOrders ? Math.floor(stats.totalVolume / stats.totalOrders).toLocaleString() : 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              В среднем за ордер
+              В среднем за заявку
             </p>
           </CardContent>
         </Card>
@@ -363,7 +363,7 @@ export const OrderStatistics = () => {
                 )}>
                   <th className="text-left py-2 px-2 text-muted-foreground">Торговая пара</th>
                   <th className="text-right py-2 px-2 text-muted-foreground">Объем</th>
-                  <th className="text-right py-2 px-2 text-muted-foreground">Ордера</th>
+                  <th className="text-right py-2 px-2 text-muted-foreground">Заявки</th>
                 </tr>
               </thead>
               <tbody>

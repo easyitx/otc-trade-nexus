@@ -63,7 +63,7 @@ export function SearchBar() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error("Ошибка при получении активных ордеров:", error);
+        console.error("Ошибка при получении активных заявок:", error);
         return [];
       }
 
