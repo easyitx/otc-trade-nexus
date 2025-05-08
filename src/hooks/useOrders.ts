@@ -60,6 +60,45 @@ export function useOrders() {
   const { toast } = useToast();
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
+  
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: Omit<FrontendOrder, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'tradePairId'>) => {
+      if (!currentUser) {
+        throw new Error("Authentication required");
+      }
+      
+      const supabaseOrderData = adaptOrderToSupabase(orderData);
+      
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          ...supabaseOrderData,
+          user_id: currentUser.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      return data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Order created",
+        description: "Your order has been successfully created"
+      });
+      
+      // Invalidate and refetch orders query to update the list
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to create order",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
 
   const createOrder = async (orderData: Omit<FrontendOrder, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'tradePairId'>) => {
     if (!currentUser) {
@@ -73,33 +112,9 @@ export function useOrders() {
 
     setLoading(true);
     try {
-      const supabaseOrderData = adaptOrderToSupabase(orderData);
-
-      const { data, error } = await supabase
-        .from('orders')
-        .insert({
-          ...supabaseOrderData,
-          user_id: currentUser.id
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Order created",
-        description: "Your order has been successfully created"
-      });
-
-      // Convert the returned data to our frontend format
-      const adaptedData = data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
-      return { data: adaptedData, error: null };
+      const result = await createOrderMutation.mutateAsync(orderData);
+      return { data: result, error: null };
     } catch (error: any) {
-      toast({
-        title: "Failed to create order",
-        description: error.message,
-        variant: "destructive"
-      });
       return { data: null, error: error.message };
     } finally {
       setLoading(false);
@@ -118,12 +133,12 @@ export function useOrders() {
       
       // Convert all orders to our frontend format
       return data.map((order) => adaptOrderFromSupabase(order as SupabaseOrder));
-    }
+    },
+    enabled: !!currentUser // Only fetch orders if user is logged in
   });
 
-  const updateOrderStatus = async (orderId: string, status: FrontendOrder['status']) => {
-    setLoading(true);
-    try {
+  const updateOrderStatus = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: string, status: FrontendOrder['status'] }) => {
       const { data, error } = await supabase
         .from('orders')
         .update({ status })
@@ -132,32 +147,32 @@ export function useOrders() {
         .single();
 
       if (error) throw error;
-
+      
+      return data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
+    },
+    onSuccess: () => {
       toast({
         title: "Order updated",
-        description: `Order status has been updated to ${status}`
+        description: "Order status has been successfully updated"
       });
-
-      // Convert the returned data to our frontend format
-      const adaptedData = data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
-      return { data: adaptedData, error: null };
-    } catch (error: any) {
+      
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (error: any) => {
       toast({
         title: "Failed to update order",
         description: error.message,
         variant: "destructive"
       });
-      return { data: null, error: error.message };
-    } finally {
-      setLoading(false);
     }
-  };
+  });
 
   return {
     loading,
     orders,
     isLoadingOrders,
     createOrder,
-    updateOrderStatus
+    updateOrderStatus: (orderId: string, status: FrontendOrder['status']) => 
+      updateOrderStatus.mutateAsync({ orderId, status })
   };
 }
