@@ -147,18 +147,7 @@ export default function OrderFormSteps({
 
           {/* Step 2 - Additional Details */}
           {currentStep === 2 && (
-            <>
-              <AdditionalDetailsStep formProps={formProps} />
-              {calculationResult && showCalculation && (
-                <TransactionSummary
-                  theme={theme}
-                  t={t}
-                  calculationResult={calculationResult}
-                  getCurrencySymbol={formProps.getCurrencySymbol}
-                  setCurrentStep={setCurrentStep}
-                />
-              )}
-            </>
+            <AdditionalDetailsStep formProps={formProps} />
           )}
         </CardContent>
         
