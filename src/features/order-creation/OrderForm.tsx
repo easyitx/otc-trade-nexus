@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
@@ -8,8 +7,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
-import BasicDetailsStep from "./components/BasicDetailsStep";
-import AdditionalDetailsStep from "./components/AdditionalDetailsStep";
 import { getDefaultExpiryDate, getCurrencySymbol, formatPercentage } from "./utils/dateUtils";
 import { tradePairs } from "@/data/mockData";
 
@@ -367,9 +364,9 @@ export default function OrderForm() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className={`text-3xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+        <h1 className={`text-2xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
           {t('createNewOrder')}
         </h1>
       </div>

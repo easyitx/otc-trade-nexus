@@ -35,7 +35,7 @@ export default function OrderFormSteps({
   } = formProps;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Alert className={cn(
         "border-l-4 shadow-sm",
         theme === "light"
@@ -48,8 +48,8 @@ export default function OrderFormSteps({
             theme === "light" ? "text-blue-600" : "text-otc-primary"
           )} />
           <div className="ml-3">
-            <AlertTitle className="mb-1 font-semibold">{t('minOrderSize')}</AlertTitle>
-            <AlertDescription>
+            <AlertTitle className="mb-1 font-semibold text-sm">{t('minOrderSize')}</AlertTitle>
+            <AlertDescription className="text-sm">
               {t('otcMinimumReq')}
             </AlertDescription>
           </div>
@@ -62,34 +62,34 @@ export default function OrderFormSteps({
           ? "bg-white border-gray-200" 
           : "bg-otc-card border-otc-active"
       )}>
-        <CardHeader className="pb-6">
+        <CardHeader className="pb-4 pt-5">
           <CardTitle className={cn(
-            "text-2xl flex items-center gap-3",
+            "text-xl flex items-center gap-2",
             theme === "light" ? "text-gray-900" : "text-white"
           )}>
             {currentStep === 1 ? (
               <>
-                <CreditCard className="w-6 h-6" /> 
+                <CreditCard className="w-5 h-5" /> 
                 {t('basicDetails')}
               </>
             ) : (
               <>
-                <FileText className="w-6 h-6" /> 
+                <FileText className="w-5 h-5" /> 
                 {t('additionalDetails')}
               </>
             )}
           </CardTitle>
           <CardDescription className={cn(
-            "text-base",
+            "text-sm",
             theme === "light" ? "text-gray-600" : "text-gray-400"
           )}>
             {currentStep === 1 ? t('enterOrderDetails') : t('paymentDetails')}
           </CardDescription>
 
-          {/* Step indicator */}
-          <div className="mt-6 relative">
+          {/* Step indicator - more compact */}
+          <div className="mt-4 relative">
             <div className={cn(
-              "absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2",
+              "absolute top-1/2 left-0 right-0 h-0.5 -translate-y-1/2",
               theme === "light" ? "bg-gray-200" : "bg-otc-active"
             )}></div>
             <div className="flex justify-between relative z-10">
@@ -97,11 +97,11 @@ export default function OrderFormSteps({
                 <div key={i} className="flex flex-col items-center">
                   <div 
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300",
+                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300",
                       i + 1 === currentStep 
                         ? theme === "light" 
-                            ? "bg-blue-600 text-white shadow-md ring-4 ring-blue-100" 
-                            : "bg-otc-primary text-black shadow-md ring-4 ring-otc-primary/20"
+                            ? "bg-blue-600 text-white shadow-md ring-2 ring-blue-100" 
+                            : "bg-otc-primary text-black shadow-md ring-2 ring-otc-primary/20"
                         : i + 1 < currentStep
                           ? theme === "light" 
                               ? "bg-green-500 text-white" 
@@ -112,13 +112,13 @@ export default function OrderFormSteps({
                     )}
                   >
                     {i + 1 < currentStep ? (
-                      <CheckCircle className="w-5 h-5" />
+                      <CheckCircle className="w-4 h-4" />
                     ) : (
                       i + 1
                     )}
                   </div>
                   <span className={cn(
-                    "mt-2 text-sm font-medium transition-colors",
+                    "mt-1 text-xs font-medium transition-colors",
                     i + 1 === currentStep
                       ? theme === "light" ? "text-blue-600" : "text-otc-primary"
                       : theme === "light" ? "text-gray-500" : "text-gray-400"
@@ -131,7 +131,7 @@ export default function OrderFormSteps({
           </div>
         </CardHeader>
         
-        <CardContent className="space-y-8 pt-4">
+        <CardContent className="space-y-6 pt-2">
           {/* Step 1 - Basic Details */}
           {currentStep === 1 && (
             <BasicDetailsStep formProps={formProps} />
@@ -143,30 +143,35 @@ export default function OrderFormSteps({
           )}
         </CardContent>
         
-        <CardFooter className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
+        <CardFooter className="flex flex-row justify-end gap-3 pt-4 pb-5 border-t">
+          {/* Simplified button layout - removed duplicates */}
           {currentStep === 1 ? (
-            // Only show the Back button on step 1
+            /* Only show Continue/Calculate button on step 1 */
             <Button
               type="button"
-              variant="outline"
+              variant={theme === "light" ? "gradient" : "default"}
               className={cn(
-                "flex-1 py-6",
+                "py-2 px-4 group",
                 theme === "light"
-                  ? "border-gray-300 hover:bg-gray-100 text-gray-700"
-                  : "border-otc-active hover:bg-otc-active/30 text-white"
+                  ? ""
+                  : "bg-otc-primary text-black hover:bg-otc-primary/90"
               )}
-              onClick={() => window.history.back()}
+              onClick={() => showCalculation && calculationResult ? setCurrentStep(2) : calculateOrder()}
+              disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
             >
-              {t('cancel')}
+              <span className="flex items-center gap-2 text-sm">
+                {showCalculation && calculationResult ? t('continue') : t('calculateSummary')}
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </span>
             </Button>
           ) : (
-            // On step 2, show Back and Submit buttons
+            /* On step 2, show Back and Submit buttons */
             <>
               <Button
                 type="button"
                 variant="outline"
                 className={cn(
-                  "flex-1 py-6",
+                  "py-2 px-4",
                   theme === "light"
                     ? "border-gray-300 hover:bg-gray-100 text-gray-700"
                     : "border-otc-active hover:bg-otc-active/30 text-white"
@@ -180,42 +185,21 @@ export default function OrderFormSteps({
                 type="submit"
                 variant={theme === "light" ? "gradient" : "default"}
                 className={cn(
-                  "flex-1 py-6 group",
+                  "py-2 px-4 group",
                   theme === "light"
                     ? ""
                     : "bg-otc-primary text-black hover:bg-otc-primary/90"
                 )}
                 disabled={isSubmitting || !selectedPair || !amount || !country || (isCashPair() && !city)}
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2 text-sm">
                   {isSubmitting ? t('creatingOrder') : t('createOrder')}
                   {!isSubmitting && (
-                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   )}
                 </span>
               </Button>
             </>
-          )}
-          
-          {/* On step 1, show Continue button (if calculation is shown) or Calculate button (if not shown) */}
-          {currentStep === 1 && (
-            <Button
-              type="button"
-              variant={theme === "light" ? "gradient" : "default"}
-              className={cn(
-                "flex-1 py-6 group",
-                theme === "light"
-                  ? ""
-                  : "bg-otc-primary text-black hover:bg-otc-primary/90"
-              )}
-              onClick={() => showCalculation && calculationResult ? setCurrentStep(2) : calculateOrder()}
-              disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
-            >
-              <span className="flex items-center gap-2">
-                {showCalculation && calculationResult ? t('continue') : t('calculateSummary')}
-                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Button>
           )}
         </CardFooter>
       </Card>
