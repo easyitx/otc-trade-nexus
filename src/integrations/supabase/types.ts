@@ -121,12 +121,15 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          amount_currency: string | null
           created_at: string
           expires_at: string
+          geography: Json | null
           id: string
           notes: string | null
           purpose: string | null
           rate: string
+          rate_details: Json | null
           status: string | null
           type: string
           updated_at: string
@@ -134,12 +137,15 @@ export type Database = {
         }
         Insert: {
           amount: number
+          amount_currency?: string | null
           created_at?: string
           expires_at: string
+          geography?: Json | null
           id?: string
           notes?: string | null
           purpose?: string | null
           rate: string
+          rate_details?: Json | null
           status?: string | null
           type: string
           updated_at?: string
@@ -147,12 +153,15 @@ export type Database = {
         }
         Update: {
           amount?: number
+          amount_currency?: string | null
           created_at?: string
           expires_at?: string
+          geography?: Json | null
           id?: string
           notes?: string | null
           purpose?: string | null
           rate?: string
+          rate_details?: Json | null
           status?: string | null
           type?: string
           updated_at?: string

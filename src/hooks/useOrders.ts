@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
-import type { Order as FrontendOrder } from '@/types';
+import type { Order as FrontendOrder, RateDetails, Geography } from '@/types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -25,7 +25,7 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     amount: Number(order.amount),
     amountCurrency: order.amount_currency || "USD",
     rate: order.rate,
-    rateDetails: order.rate_details ? order.rate_details : undefined,
+    rateDetails: order.rate_details as RateDetails | undefined,
     createdAt: new Date(order.created_at),
     updatedAt: new Date(order.updated_at),
     expiresAt: new Date(order.expires_at),
@@ -33,7 +33,7 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     notes: order.notes || undefined,
     userId: order.user_id,
     status: orderStatus,
-    geography: order.geography || { country: undefined, city: undefined },
+    geography: order.geography as Geography | undefined,
     // Use a default tradePairId until we implement proper pair selection
     tradePairId: "USD_USDT_PAIR" 
   };

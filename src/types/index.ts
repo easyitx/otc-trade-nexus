@@ -32,11 +32,13 @@ export interface RateDetails {
   value?: string;
   adjustment?: number;
   serviceFee: number;
+  [key: string]: any; // Add index signature for compatibility with JSON
 }
 
 export interface Geography {
   country?: string;
   city?: string;
+  [key: string]: any; // Add index signature for compatibility with JSON
 }
 
 export interface Order {
