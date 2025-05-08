@@ -30,7 +30,8 @@ export default function OrderFormSteps({
     country, 
     isCashPair, 
     city, 
-    setCurrentStep 
+    setCurrentStep,
+    showCalculation
   } = formProps;
 
   return (
@@ -157,7 +158,22 @@ export default function OrderFormSteps({
             {currentStep === 1 ? t('cancel') : t('back')}
           </Button>
           
-          {currentStep === 2 ? (
+          {currentStep === 1 ? (
+            <Button
+              type="button"
+              variant={theme === "light" ? "gradient" : "default"}
+              className={cn(
+                "flex-1 py-6 group",
+                theme === "light"
+                  ? ""
+                  : "bg-otc-primary text-black hover:bg-otc-primary/90"
+              )}
+              onClick={calculateOrder}
+              disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
+            >
+              {showCalculation ? t('recalculate') : t('calculateSummary')}
+            </Button>
+          ) : (
             <Button
               type="submit"
               variant={theme === "light" ? "gradient" : "default"}
@@ -175,21 +191,6 @@ export default function OrderFormSteps({
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 )}
               </span>
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant={theme === "light" ? "gradient" : "default"}
-              className={cn(
-                "flex-1 py-6",
-                theme === "light"
-                  ? ""
-                  : "bg-otc-primary text-black hover:bg-otc-primary/90"
-              )}
-              onClick={calculateOrder}
-              disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
-            >
-              {t('calculateSummary')}
             </Button>
           )}
         </CardFooter>

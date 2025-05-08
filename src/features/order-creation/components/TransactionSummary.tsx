@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Settings } from "lucide-react";
+import { ArrowRight, Settings, Calculator } from "lucide-react";
 
 export default function TransactionSummary({ 
   theme, t, calculationResult, getCurrencySymbol, setCurrentStep 
@@ -23,7 +23,7 @@ export default function TransactionSummary({
         "text-2xl font-semibold mb-6 flex items-center",
         theme === "light" ? "text-gray-900" : "text-white"
       )}>
-        <Settings className="w-5 h-5 mr-2" />
+        <Calculator className="w-5 h-5 mr-2" />
         {t('orderSummary')}
       </h3>
       
@@ -123,13 +123,13 @@ export default function TransactionSummary({
                 "text-right font-mono",
                 theme === "light" ? "text-gray-800" : "text-white"
               )}>
-                1:{calculationResult.baseRate}
+                1 {calculationResult.fromCurrency} = {calculationResult.baseRate} {calculationResult.toCurrency}
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
               <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('adjustment')}:
+                {t('adjustment')} ({parseFloat(calculationResult.adjustmentAmount) > 0 ? '+' : ''}{parseFloat(calculationResult.adjustmentAmount)}):
               </div>
               <div className={cn(
                 "text-right font-mono",
@@ -139,36 +139,39 @@ export default function TransactionSummary({
                     ? "text-red-500" 
                     : theme === "light" ? "text-gray-800" : "text-white"
               )}>
-                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.adjustmentAmount}
+                {getCurrencySymbol(calculationResult.toCurrency)}{Math.abs(parseFloat(calculationResult.adjustmentAmount)).toLocaleString()} {calculationResult.toCurrency}
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
               <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('serviceFee')}:
+                {t('serviceFee')} (1%):
               </div>
               <div className={cn(
                 "text-right font-mono",
                 theme === "light" ? "text-gray-800" : "text-white"
               )}>
-                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.serviceFeeAmount}
+                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.serviceFeeAmount} {calculationResult.toCurrency}
               </div>
             </div>
             
             <div className={cn(
-              "grid grid-cols-2 gap-2 pt-2 mt-2",
+              "grid grid-cols-2 gap-2 pt-3 mt-3",
               theme === "light"
                 ? "border-t border-gray-200"
                 : "border-t border-otc-active"
             )}>
-              <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
+              <div className={cn(
+                "font-semibold",
+                theme === "light" ? "text-gray-700" : "text-gray-300"
+              )}>
                 {t('finalRate')}:
               </div>
               <div className={cn(
-                "text-right font-mono font-medium",
+                "text-right font-mono font-semibold text-lg",
                 theme === "light" ? "text-blue-600" : "text-otc-primary"
               )}>
-                1:{calculationResult.finalRate}
+                1 {calculationResult.fromCurrency} = {calculationResult.finalRate} {calculationResult.toCurrency}
               </div>
             </div>
           </div>

@@ -66,6 +66,21 @@ export default function OrderForm() {
   
   const [showCalculation, setShowCalculation] = useState<boolean>(false);
 
+  // Helper function to get currency symbol
+  const getCurrencySymbol = (currency: string): string => {
+    switch (currency) {
+      case 'USD':
+      case 'USDT':
+        return '$';
+      case 'RUB':
+        return '₽';
+      case 'EUR':
+        return '€';
+      default:
+        return '';
+    }
+  };
+
   // Check if the selected pair involves cash
   const isCashPair = () => {
     const pair = tradePairs.find(p => p.id === selectedPair);
@@ -347,7 +362,8 @@ export default function OrderForm() {
     language,
     currentStep,
     setCurrentStep,
-    totalSteps
+    totalSteps,
+    getCurrencySymbol
   };
 
   return (
