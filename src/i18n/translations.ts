@@ -1,3 +1,7 @@
+
+// Define the Language type for TypeScript
+export type Language = "en" | "ru";
+
 // Define the TranslationKey type for TypeScript
 export type TranslationKey = 
   | "user" | "orders" | "deals" | "search" | "fullName" | "company" | "email"
@@ -13,7 +17,16 @@ export type TranslationKey =
   | "orderLifetime" | "day" | "days" | "expiresOn" | "paymentPurpose"
   | "purposeExample" | "geography" | "country" | "city" | "selectCountry"
   | "selectCity" | "additionalNotes" | "notesPlaceholder" | "in" | "buy" | "sell"
-  | "with" | "for" | "adjustment" | "expiryDate";
+  | "with" | "for" | "adjustment" | "expiryDate"
+  // Additional translation keys
+  | "dashboard" | "profile" | "settings" | "login" | "register" | "logout"
+  | "loggedOut" | "loggedOutSuccess"
+  | "exchangeRates" | "ratesUpdatedAutomatically"
+  | "searchPlaceholder" | "noResults" | "tradingPairs" | "quickNav" | "popularPairs"
+  | "personalInfo" | "notSet" | "memberSince" | "notAvailable" | "notConnected" | "editProfile"
+  | "error404" | "oopsNotFound" | "returnHome"
+  | "welcome" | "tradeVolume" | "last30Days" | "activeOrders" | "acrossMarkets" | "activeTraders" | "thisWeek"
+  | "selectWhenExpires";
 
 export const translations = {
   en: {
@@ -76,6 +89,39 @@ export const translations = {
     with: "with",
     for: "for",
     expiryDate: "Expiry Date",
+    // Additional translations in English
+    dashboard: "Dashboard",
+    profile: "Profile",
+    settings: "Settings",
+    login: "Login",
+    register: "Register",
+    logout: "Logout",
+    loggedOut: "Logged Out",
+    loggedOutSuccess: "You have been successfully logged out.",
+    exchangeRates: "Exchange Rates",
+    ratesUpdatedAutomatically: "Rates are updated automatically every 5 minutes",
+    searchPlaceholder: "Search for trading pairs, orders...",
+    noResults: "No results found",
+    tradingPairs: "Trading Pairs",
+    quickNav: "Quick Navigation",
+    popularPairs: "Popular Pairs",
+    personalInfo: "Personal Information",
+    notSet: "Not set",
+    memberSince: "Member since",
+    notAvailable: "Not available",
+    notConnected: "Not connected",
+    editProfile: "Edit Profile",
+    error404: "404 - Page Not Found",
+    oopsNotFound: "Oops! We couldn't find the page you're looking for.",
+    returnHome: "Return to Home",
+    welcome: "Welcome",
+    tradeVolume: "Trade Volume",
+    last30Days: "Last 30 Days",
+    activeOrders: "Active Orders",
+    acrossMarkets: "Across Markets",
+    activeTraders: "Active Traders",
+    thisWeek: "This Week",
+    selectWhenExpires: "Select when order expires",
   },
   ru: {
     user: "Пользователь",
@@ -137,6 +183,39 @@ export const translations = {
     with: "с",
     for: "за",
     expiryDate: "Дата истечения",
+    // Additional translations in Russian
+    dashboard: "Панель управления",
+    profile: "Профиль",
+    settings: "Настройки",
+    login: "Войти",
+    register: "Регистрация",
+    logout: "Выйти",
+    loggedOut: "Выход из системы",
+    loggedOutSuccess: "Вы успешно вышли из системы.",
+    exchangeRates: "Курсы валют",
+    ratesUpdatedAutomatically: "Курсы обновляются автоматически каждые 5 минут",
+    searchPlaceholder: "Поиск торговых пар, заказов...",
+    noResults: "Результаты не найдены",
+    tradingPairs: "Торговые пары",
+    quickNav: "Быстрая навигация",
+    popularPairs: "Популярные пары",
+    personalInfo: "Личная информация",
+    notSet: "Не указано",
+    memberSince: "Участник с",
+    notAvailable: "Недоступно",
+    notConnected: "Не подключено",
+    editProfile: "Редактировать профиль",
+    error404: "404 - Страница не найдена",
+    oopsNotFound: "Упс! Мы не смогли найти страницу, которую вы ищете.",
+    returnHome: "Вернуться на главную",
+    welcome: "Добро пожаловать",
+    tradeVolume: "Объем торгов",
+    last30Days: "За последние 30 дней",
+    activeOrders: "Активные заказы",
+    acrossMarkets: "По всем рынкам",
+    activeTraders: "Активные трейдеры",
+    thisWeek: "На этой неделе",
+    selectWhenExpires: "Выберите когда заказ истекает",
   }
 };
 
