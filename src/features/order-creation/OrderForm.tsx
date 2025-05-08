@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
-import { useLanguage } from "@/hooks/useLanguage";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
