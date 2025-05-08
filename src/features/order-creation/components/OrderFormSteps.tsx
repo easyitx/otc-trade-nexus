@@ -94,16 +94,17 @@ export default function OrderFormSteps({
               theme === "light" ? "bg-gray-200" : "bg-otc-active"
             )}></div>
             <div className="flex justify-between relative z-10">
-              {Array.from({length: totalSteps}, (_, i) => (
-                <div key={i} className="flex flex-col items-center">
+              {/* Render only 2 steps instead of totalSteps */}
+              {[1, 2].map((stepNumber) => (
+                <div key={stepNumber} className="flex flex-col items-center">
                   <div 
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300",
-                      i + 1 === currentStep 
+                      stepNumber === currentStep 
                         ? theme === "light" 
                             ? "bg-blue-600 text-white shadow-md ring-2 ring-blue-100" 
                             : "bg-otc-primary text-black shadow-md ring-2 ring-otc-primary/20"
-                        : i + 1 < currentStep
+                        : stepNumber < currentStep
                           ? theme === "light" 
                               ? "bg-green-500 text-white" 
                               : "bg-green-600 text-white"
@@ -112,25 +113,21 @@ export default function OrderFormSteps({
                               : "bg-otc-active text-gray-400 border border-otc-active"
                     )}
                   >
-                    {i + 1 < currentStep ? (
+                    {stepNumber < currentStep ? (
                       <CheckCircle className="w-4 h-4" />
                     ) : (
-                      i + 1
+                      stepNumber
                     )}
                   </div>
                   <span className={cn(
                     "mt-1 text-xs font-medium transition-colors",
-                    i + 1 === currentStep
+                    stepNumber === currentStep
                       ? theme === "light" ? "text-blue-600" : "text-otc-primary"
                       : theme === "light" ? "text-gray-500" : "text-gray-400"
                   )}>
-                    {i === 0 
+                    {stepNumber === 1 
                       ? t('basicDetails') 
-                      : i === 1 
-                        ? t('additionalDetails') 
-                        : i === 2 
-                          ? t('paymentDetails') 
-                          : t('additionalDetails')
+                      : t('additionalDetails')
                     }
                   </span>
                 </div>
@@ -152,7 +149,6 @@ export default function OrderFormSteps({
         </CardContent>
         
         <CardFooter className="flex flex-row justify-end gap-3 pt-4 pb-5 border-t">
-          {/* Simplified button layout - removed duplicates */}
           {currentStep === 1 ? (
             /* Only show Continue/Calculate button on step 1 */
             <Button

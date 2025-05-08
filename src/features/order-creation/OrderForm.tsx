@@ -21,9 +21,9 @@ export default function OrderForm() {
   // Auto calculation flag
   const [autoCalculate, setAutoCalculate] = useState<boolean>(true);
   
-  // Form steps
+  // Form steps - changed from 3 to 2 total steps
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
+  const totalSteps = 2;
 
   // Form state
   const [selectedPair, setSelectedPair] = useState<string>("");
@@ -358,7 +358,7 @@ export default function OrderForm() {
     language,
     currentStep,
     setCurrentStep,
-    totalSteps,
+    totalSteps, // This is now 2 instead of 3
     getCurrencySymbol,
     autoCalculate
   };
