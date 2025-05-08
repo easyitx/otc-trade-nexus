@@ -25,7 +25,12 @@ export type TranslationKey =
     | "personalInfo" | "notSet" | "memberSince" | "notAvailable" | "notConnected" | "editProfile"
     | "error404" | "oopsNotFound" | "returnHome"
     | "welcome" | "tradeVolume" | "last30Days" | "activeOrders" | "acrossMarkets" | "activeTraders" | "thisWeek"
-    | "selectWhenExpires";
+    | "selectWhenExpires"
+    // Calculation section keys
+    | "calculationTitle" | "youPay" | "youReceive" | "exchangeRate" | "totalFee" 
+    | "totalAmount" | "continue" | "calculateSummary" | "orderSummary" | "calculate"
+    | "serviceFeeAmount" | "adjustmentAmount" | "baseExchangeRate" | "calculationDetails"
+    | "paymentDetails" | "basicDetails" | "additionalDetails";
 
 export const translations = {
   en: {
@@ -121,6 +126,25 @@ export const translations = {
     activeTraders: "Active Traders",
     thisWeek: "This Week",
     selectWhenExpires: "Select when order expires",
+    
+    // Calculation section translations
+    calculationTitle: "Transaction Calculation",
+    youPay: "You Pay",
+    youReceive: "You Receive",
+    exchangeRate: "Exchange Rate",
+    totalFee: "Total Fee",
+    totalAmount: "Total Amount",
+    continue: "Continue",
+    calculateSummary: "Calculate and Review",
+    orderSummary: "Order Summary",
+    calculate: "Calculate",
+    serviceFeeAmount: "Service Fee Amount",
+    adjustmentAmount: "Adjustment Amount",
+    baseExchangeRate: "Base Exchange Rate",
+    calculationDetails: "Calculation Details",
+    paymentDetails: "Payment Details",
+    basicDetails: "Basic Details",
+    additionalDetails: "Additional Details"
   },
   ru: {
     welcome: "Добро пожаловать",
@@ -301,7 +325,26 @@ export const translations = {
     info: "Информация",
     pleaseEnterUsername: "Пожалуйста, введите ваше имя пользователя Telegram",
     verificationCodeSent: "Код подтверждения отправлен",
-    checkTelegram: "Пожалуйста, проверьте свой Telegram на наличие кода подтверждения"
+    checkTelegram: "Пожалуйста, проверьте свой Telegram на наличие кода подтверждения",
+    
+    // Calculation section translations
+    calculationTitle: "Расчет транзакции",
+    youPay: "Вы платите",
+    youReceive: "Вы получаете",
+    exchangeRate: "Обменный курс",
+    totalFee: "Общая комиссия",
+    totalAmount: "Общая сумма",
+    continue: "Продолжить",
+    calculateSummary: "Рассчитать и просмотреть",
+    orderSummary: "Сводка заказа",
+    calculate: "Рассчитать",
+    serviceFeeAmount: "Сумма комиссии сервиса",
+    adjustmentAmount: "Сумма корректировки",
+    baseExchangeRate: "Базовый обменный курс",
+    calculationDetails: "Детали расчета",
+    paymentDetails: "Детали платежа",
+    basicDetails: "Основные детали",
+    additionalDetails: "Дополнительные детали"
   }
 };
 
