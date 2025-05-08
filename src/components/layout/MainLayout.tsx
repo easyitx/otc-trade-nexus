@@ -24,7 +24,7 @@ export function MainLayout({ children, requireAuth = true }: MainLayoutProps) {
   return (
     <div className={cn(
       "flex h-screen",
-      theme === "light" ? "bg-gray-50" : "bg-background"
+      theme === "light" ? "bg-gray-50" : "bg-background",
     )}>
       {/* Sidebar */}
       <Sidebar />

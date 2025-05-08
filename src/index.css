@@ -111,6 +111,10 @@
     @apply border-border;
   }
 
+  html {
+    overflow: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
   }

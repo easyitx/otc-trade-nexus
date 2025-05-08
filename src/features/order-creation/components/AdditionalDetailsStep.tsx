@@ -312,7 +312,7 @@ function OrderSummary({ theme, t, calculationResult, getCurrencySymbol }: any) {
                 {getCurrencySymbol(calculationResult.fromCurrency)}{calculationResult.youPay} {calculationResult.fromCurrency}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
                 {t('youReceive')}:
@@ -324,7 +324,7 @@ function OrderSummary({ theme, t, calculationResult, getCurrencySymbol }: any) {
                 {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.youReceive} {calculationResult.toCurrency}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
                 {t('exchangeRate')}:
@@ -333,7 +333,7 @@ function OrderSummary({ theme, t, calculationResult, getCurrencySymbol }: any) {
                 "font-medium",
                 theme === "light" ? "text-blue-600" : "text-otc-primary"
               )}>
-                1:{calculationResult.finalRate}
+                {calculationResult.finalRate}
               </span>
             </div>
           </div>
