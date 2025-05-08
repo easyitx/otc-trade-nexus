@@ -187,7 +187,9 @@ export default function DashboardPage() {
         // Ensure status is cast to the proper union type
         status: ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED"].includes(order.status || "")
           ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED"
-          : "ACTIVE" // Default to ACTIVE if not matching
+          : "ACTIVE", // Default to ACTIVE if not matching
+        // Cast geography to the proper Geography type using the index signature
+        geography: order.geography as unknown as Geography
       }));
     }
   });
