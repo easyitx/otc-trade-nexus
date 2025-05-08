@@ -243,9 +243,9 @@ export default function OrderForm() {
     if (!selectedPairInfo) return "";
     
     if (orderType === "BUY") {
-      return `${t('buy')} ${selectedPairInfo.baseCurrency} ${t('with')} ${selectedPairInfo.quoteCurrency}`;
+      return `${t('buy')} ${selectedPairInfo.baseCurrency} ${t('receive')} ${selectedPairInfo.quoteCurrency}`;
     } else {
-      return `${t('sell')} ${selectedPairInfo.baseCurrency} ${t('for')} ${selectedPairInfo.quoteCurrency}`;
+      return `${t('sell')} ${selectedPairInfo.quoteCurrency} ${t('receive')} ${selectedPairInfo.baseCurrency}`;
     }
   };
 

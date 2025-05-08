@@ -1,3 +1,4 @@
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -194,7 +195,7 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
                         "text-sm mt-1",
                         theme === "light" ? "text-gray-600" : "text-gray-400"
                       )}>
-                        {t('with')} {selectedPairInfo.quoteCurrency}
+                        {t('receive')} {selectedPairInfo.quoteCurrency}
                       </div>
                     </div>
                   </label>
@@ -230,13 +231,13 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
                         "font-medium text-lg",
                         theme === "light" ? "text-gray-900" : "text-white"
                       )}>
-                        {t('sell')} {selectedPairInfo.baseCurrency}
+                        {t('sell')} {selectedPairInfo.quoteCurrency}
                       </div>
                       <div className={cn(
                         "text-sm mt-1",
                         theme === "light" ? "text-gray-600" : "text-gray-400"
                       )}>
-                        {t('for')} {selectedPairInfo.quoteCurrency}
+                        {t('receive')} {selectedPairInfo.baseCurrency}
                       </div>
                     </div>
                   </label>
