@@ -130,7 +130,7 @@ export default function TransactionSummary({
             
             <div className="grid grid-cols-2 gap-2">
               <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('adjustment')} ({parseFloat(calculationResult.adjustmentAmount) > 0 ? '+' : ''}{parseFloat(calculationResult.adjustmentAmount)}%):
+                {t('adjustment')} ({calculationResult.adjustmentPercentage}%):
               </div>
               <div className={cn(
                 "text-right font-mono",
@@ -166,10 +166,10 @@ export default function TransactionSummary({
                 "font-semibold",
                 theme === "light" ? "text-gray-700" : "text-gray-300"
               )}>
-                {t('total')}:
+                <span className="text-lg">{t('total')}:</span>
               </div>
               <div className={cn(
-                "text-right font-mono font-semibold",
+                "text-right font-mono font-semibold text-lg",
                 theme === "light" ? "text-gray-800" : "text-white"
               )}>
                 {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.totalAmount} {calculationResult.toCurrency}

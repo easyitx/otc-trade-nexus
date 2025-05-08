@@ -10,7 +10,7 @@ import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
 import BasicDetailsStep from "./components/BasicDetailsStep";
 import AdditionalDetailsStep from "./components/AdditionalDetailsStep";
-import { getDefaultExpiryDate, getCurrencySymbol } from "./utils/dateUtils";
+import { getDefaultExpiryDate, getCurrencySymbol, formatPercentage } from "./utils/dateUtils";
 import { tradePairs } from "@/data/mockData";
 
 export default function OrderForm() {
@@ -21,6 +21,8 @@ export default function OrderForm() {
   const { t, language } = useLanguage();
   const { theme } = useTheme();
 
+  // Auto calculation flag
+  const [autoCalculate, setAutoCalculate] = useState<boolean>(true);
   
   // Form steps
   const [currentStep, setCurrentStep] = useState(1);
@@ -68,21 +70,6 @@ export default function OrderForm() {
   
   const [showCalculation, setShowCalculation] = useState<boolean>(false);
 
-  // Helper function to get currency symbol
-  const getCurrencySymbol = (currency: string): string => {
-    switch (currency) {
-      case 'USD':
-      case 'USDT':
-        return '$';
-      case 'RUB':
-        return '₽';
-      case 'EUR':
-        return '€';
-      default:
-        return '';
-    }
-  };
-
   // Check if the selected pair involves cash
   const isCashPair = () => {
     const pair = tradePairs.find(p => p.id === selectedPair);
@@ -110,9 +97,14 @@ export default function OrderForm() {
   useEffect(() => {
     if (selectedPairInfo) {
       updateAmountCurrency(selectedPairInfo, orderType);
-      // Reset calculation when order type changes
-      setShowCalculation(false);
-      setCalculationResult(null);
+      // Re-calculate when order type changes if auto-calculate is enabled
+      if (autoCalculate && amount && parseFloat(amount) > 0) {
+        setTimeout(() => calculateOrder(), 100);
+      } else {
+        // Reset calculation when order type changes
+        setShowCalculation(false);
+        setCalculationResult(null);
+      }
     }
   }, [orderType]);
 
@@ -131,6 +123,10 @@ export default function OrderForm() {
   const applyRateSourceToFixed = (source: string) => {
     if (currentRates[source]) {
       setCustomRateValue(currentRates[source]);
+      // Re-calculate if auto-calculate is enabled
+      if (autoCalculate && selectedPair && amount && parseFloat(amount) > 0) {
+        setTimeout(() => calculateOrder(), 100);
+      }
     }
   };
 
@@ -366,7 +362,8 @@ export default function OrderForm() {
     currentStep,
     setCurrentStep,
     totalSteps,
-    getCurrencySymbol
+    getCurrencySymbol,
+    autoCalculate
   };
 
   return (

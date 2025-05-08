@@ -1,4 +1,3 @@
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -39,7 +38,8 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
     formatRate,
     applyRateSourceToFixed,
     calculateOrder,
-    setCurrentStep
+    setCurrentStep,
+    autoCalculate
   } = formProps;
 
   // Group trade pairs by category
@@ -79,7 +79,15 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
         >
           {t('tradingPair')} <span className="text-red-500">*</span>
         </Label>
-        <Select value={selectedPair} onValueChange={setSelectedPair}>
+        <Select 
+          value={selectedPair} 
+          onValueChange={(value) => {
+            setSelectedPair(value);
+            if (autoCalculate && amount && parseFloat(amount) > 0) {
+              setTimeout(() => calculateOrder(), 100);
+            }
+          }}
+        >
           <SelectTrigger
             id="tradingPair"
             className={cn(
@@ -142,7 +150,12 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
             {selectedPairInfo && (
               <RadioGroup
                 value={orderType}
-                onValueChange={setOrderType}
+                onValueChange={(value) => {
+                  setOrderType(value);
+                  if (autoCalculate && amount && parseFloat(amount) > 0) {
+                    setTimeout(() => calculateOrder(), 100);
+                  }
+                }}
                 className="flex flex-col sm:flex-row gap-3"
               >
                 <div className={cn(
@@ -245,7 +258,12 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
                 <Input
                   id="amount"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    if (autoCalculate && selectedPair && e.target.value && parseFloat(e.target.value) > 0) {
+                      calculateOrder();
+                    }
+                  }}
                   placeholder={t('minimumOrder')}
                   className={cn(
                     "pl-8 h-12 text-lg",
@@ -290,49 +308,78 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
             t={t} 
             language={language}
             rateType={rateType}
-            setRateType={setRateType}
+            setRateType={(value) => {
+              setRateType(value);
+              if (autoCalculate && amount && parseFloat(amount) > 0) {
+                setTimeout(() => calculateOrder(), 100);
+              }
+            }}
             rateSource={rateSource}
-            setRateSource={setRateSource}
+            setRateSource={(value) => {
+              setRateSource(value);
+              if (autoCalculate && amount && parseFloat(amount) > 0) {
+                setTimeout(() => calculateOrder(), 100);
+              }
+            }}
             customRateValue={customRateValue}
-            setCustomRateValue={setCustomRateValue}
+            setCustomRateValue={(value) => {
+              setCustomRateValue(value);
+              if (autoCalculate && amount && parseFloat(amount) > 0) {
+                setTimeout(() => calculateOrder(), 100);
+              }
+            }}
             rateAdjustment={rateAdjustment}
-            setRateAdjustment={setRateAdjustment}
+            setRateAdjustment={(value) => {
+              setRateAdjustment(value);
+              if (autoCalculate && amount && parseFloat(amount) > 0) {
+                setTimeout(() => calculateOrder(), 100);
+              }
+            }}
             serviceFee={serviceFee}
             currentRates={currentRates}
             formatRate={formatRate}
-            applyRateSourceToFixed={applyRateSourceToFixed}
+            applyRateSourceToFixed={(source) => {
+              applyRateSourceToFixed(source);
+              if (autoCalculate && amount && parseFloat(amount) > 0) {
+                setTimeout(() => calculateOrder(), 100);
+              }
+            }}
           />
 
-          {/* Calculate and show transaction details */}
-          <div className="mt-8">
-            <Button
-              type="button"
-              onClick={calculateOrder}
-              variant={theme === "light" ? "gradient" : "default"}
-              className={cn(
-                "w-full py-6 text-lg relative overflow-hidden group transition-all",
-                theme === "light"
-                  ? ""
-                  : "bg-otc-primary text-black hover:bg-otc-primary/90"
-              )}
-              disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                {t('calculateSummary')}
-                <ArrowRightCircle className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Button>
-          </div>
+          {/* Calculate button (show only if calculation is not yet displayed) */}
+          {!showCalculation && (
+            <div className="mt-8">
+              <Button
+                type="button"
+                onClick={calculateOrder}
+                variant={theme === "light" ? "gradient" : "default"}
+                className={cn(
+                  "w-full py-6 text-lg relative overflow-hidden group transition-all",
+                  theme === "light"
+                    ? ""
+                    : "bg-otc-primary text-black hover:bg-otc-primary/90"
+                )}
+                disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {t('calculateSummary')}
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Button>
+            </div>
+          )}
 
           {/* Transaction Calculation Results */}
           {showCalculation && calculationResult && (
-            <TransactionSummary 
-              theme={theme}
-              t={t}
-              calculationResult={calculationResult}
-              getCurrencySymbol={getCurrencySymbol}
-              setCurrentStep={setCurrentStep}
-            />
+            <div className="mt-6">
+              <TransactionSummary 
+                theme={theme}
+                t={t}
+                calculationResult={calculationResult}
+                getCurrencySymbol={getCurrencySymbol}
+                setCurrentStep={setCurrentStep}
+              />
+            </div>
           )}
         </>
       )}

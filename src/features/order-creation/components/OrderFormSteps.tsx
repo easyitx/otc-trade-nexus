@@ -144,21 +144,61 @@ export default function OrderFormSteps({
         </CardContent>
         
         <CardFooter className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(
-              "flex-1 py-6",
-              theme === "light"
-                ? "border-gray-300 hover:bg-gray-100 text-gray-700"
-                : "border-otc-active hover:bg-otc-active/30 text-white"
-            )}
-            onClick={() => currentStep === 1 ? window.history.back() : setCurrentStep(1)}
-          >
-            {currentStep === 1 ? t('cancel') : t('back')}
-          </Button>
-          
           {currentStep === 1 ? (
+            // Only show the Back button on step 1
+            <Button
+              type="button"
+              variant="outline"
+              className={cn(
+                "flex-1 py-6",
+                theme === "light"
+                  ? "border-gray-300 hover:bg-gray-100 text-gray-700"
+                  : "border-otc-active hover:bg-otc-active/30 text-white"
+              )}
+              onClick={() => window.history.back()}
+            >
+              {t('cancel')}
+            </Button>
+          ) : (
+            // On step 2, show Back and Submit buttons
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "flex-1 py-6",
+                  theme === "light"
+                    ? "border-gray-300 hover:bg-gray-100 text-gray-700"
+                    : "border-otc-active hover:bg-otc-active/30 text-white"
+                )}
+                onClick={() => setCurrentStep(1)}
+              >
+                {t('back')}
+              </Button>
+              
+              <Button
+                type="submit"
+                variant={theme === "light" ? "gradient" : "default"}
+                className={cn(
+                  "flex-1 py-6 group",
+                  theme === "light"
+                    ? ""
+                    : "bg-otc-primary text-black hover:bg-otc-primary/90"
+                )}
+                disabled={isSubmitting || !selectedPair || !amount || !country || (isCashPair() && !city)}
+              >
+                <span className="flex items-center gap-2">
+                  {isSubmitting ? t('creatingOrder') : t('createOrder')}
+                  {!isSubmitting && (
+                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  )}
+                </span>
+              </Button>
+            </>
+          )}
+          
+          {/* On step 1, show Continue button (if calculation is shown) or Calculate button (if not shown) */}
+          {currentStep === 1 && (
             <Button
               type="button"
               variant={theme === "light" ? "gradient" : "default"}
@@ -168,28 +208,12 @@ export default function OrderFormSteps({
                   ? ""
                   : "bg-otc-primary text-black hover:bg-otc-primary/90"
               )}
-              onClick={calculateOrder}
+              onClick={() => showCalculation && calculationResult ? setCurrentStep(2) : calculateOrder()}
               disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
             >
-              {showCalculation ? t('recalculate') : t('calculateSummary')}
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              variant={theme === "light" ? "gradient" : "default"}
-              className={cn(
-                "flex-1 py-6 group",
-                theme === "light"
-                  ? ""
-                  : "bg-otc-primary text-black hover:bg-otc-primary/90"
-              )}
-              disabled={isSubmitting || !selectedPair || !amount || !country || (isCashPair() && !city)}
-            >
               <span className="flex items-center gap-2">
-                {isSubmitting ? t('creatingOrder') : t('createOrder')}
-                {!isSubmitting && (
-                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                )}
+                {showCalculation && calculationResult ? t('continue') : t('calculateSummary')}
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </span>
             </Button>
           )}
