@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowRight, CreditCard, FileText, Info, CheckCircle } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import BasicDetailsStep from "./BasicDetailsStep";
 import AdditionalDetailsStep from "./AdditionalDetailsStep";
 import TransactionSummary from "./TransactionSummary";
@@ -59,7 +58,7 @@ export default function OrderFormSteps({
       </Alert>
 
       <Card className={cn(
-        "shadow-md border overflow-hidden",
+        "shadow-md border",
         theme === "light" 
           ? "bg-white border-gray-200" 
           : "bg-otc-card border-otc-active"
@@ -138,19 +137,17 @@ export default function OrderFormSteps({
         </CardHeader>
         
         <CardContent className="pt-2">
-          <ScrollArea className="h-[450px] pr-4">
-            <div className="space-y-6">
-              {/* Step 1 - Basic Details */}
-              {currentStep === 1 && (
-                <BasicDetailsStep formProps={formProps} />
-              )}
+          <div className="space-y-6">
+            {/* Step 1 - Basic Details */}
+            {currentStep === 1 && (
+              <BasicDetailsStep formProps={formProps} />
+            )}
 
-              {/* Step 2 - Additional Details */}
-              {currentStep === 2 && (
-                <AdditionalDetailsStep formProps={formProps} />
-              )}
-            </div>
-          </ScrollArea>
+            {/* Step 2 - Additional Details */}
+            {currentStep === 2 && (
+              <AdditionalDetailsStep formProps={formProps} />
+            )}
+          </div>
         </CardContent>
         
         <CardFooter className="flex flex-row justify-end gap-3 pt-4 pb-5 border-t">
