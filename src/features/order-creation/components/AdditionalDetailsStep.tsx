@@ -6,9 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { Calendar, FileText, Globe, CreditCard } from "lucide-react";
+import { Calendar, FileText, Globe, CreditCard, HelpCircle } from "lucide-react";
 import { countries } from "@/data/countries";
 import { citiesByCountry } from "@/data/cities";
+import { Button } from "@/components/ui/button";
+import { addDays, format } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function AdditionalDetailsStep({ formProps }: { formProps: any }) {
   const {
@@ -48,6 +56,35 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
     }
   };
 
+  // Preset date options
+  const datePresets = [
+    { days: 1, label: language === 'en' ? '1 day' : '1 день' },
+    { days: 3, label: language === 'en' ? '3 days' : '3 дня' },
+    { days: 7, label: language === 'en' ? '7 days' : '7 дней' },
+    { days: 15, label: language === 'en' ? '15 days' : '15 дней' }
+  ];
+
+  // Apply preset date
+  const applyDatePreset = (days: number) => {
+    const newDate = addDays(new Date(), days);
+    setExpiryDate(newDate);
+  };
+
+  // Set default country/city if needed
+  const handlePairChange = () => {
+    if (isCashPair() && !country) {
+      // Set Russia as default for cash pairs
+      setCountry("RU");
+      // Set Moscow as default city if Russia is selected
+      setCity("Moscow");
+    }
+  };
+
+  // Call this whenever isCashPair changes
+  React.useEffect(() => {
+    handlePairChange();
+  }, [isCashPair()]);
+
   return (
     <>
       {/* Order Lifetime with Date Picker */}
@@ -63,6 +100,35 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
           )}>
             {t('expiryDate')}
           </Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="h-6 w-6 p-0 rounded-full" 
+                  type="button"
+                >
+                  <HelpCircle className={cn(
+                    "h-4 w-4",
+                    theme === "light" ? "text-blue-600" : "text-otc-primary"
+                  )} />
+                  <span className="sr-only">Help</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className={cn(
+                  "max-w-xs",
+                  theme === "light" 
+                    ? "bg-white text-gray-700 border-gray-200"
+                    : "bg-otc-card text-white border-otc-active"
+                )}
+              >
+                {language === 'en' 
+                  ? 'Order expiry date indicates how long your order will be active. After this date, it will become inactive.'
+                  : 'Срок жизни заявки указывает на то сколько времени ваша заявка будет активна, по истечению срока жизни она станет не актуальна.'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="space-y-3">
           <p className={cn(
@@ -73,6 +139,32 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
               ? 'Order starts today and expires on the selected date:' 
               : 'Заявка создается сегодня и истекает в выбранную дату:'}
           </p>
+          
+          {/* Date picker presets */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {datePresets.map((preset) => (
+              <Button
+                key={preset.days}
+                type="button"
+                variant={theme === "light" ? "outline" : "secondary"}
+                size="sm"
+                onClick={() => applyDatePreset(preset.days)}
+                className={cn(
+                  "text-xs",
+                  expiryDate && format(expiryDate, 'yyyy-MM-dd') === format(addDays(new Date(), preset.days), 'yyyy-MM-dd')
+                    ? theme === "light" 
+                        ? "bg-blue-50 border-blue-300 text-blue-700" 
+                        : "bg-otc-primary/20 border-otc-primary text-otc-primary"
+                    : theme === "light"
+                        ? "bg-white"
+                        : "bg-otc-active"
+                )}
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
+          
           <EnhancedDatePicker 
             date={expiryDate}
             setDate={(date) => date && setExpiryDate(date)}
@@ -109,6 +201,35 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
           )}>
             {t('geography')}
           </Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="h-6 w-6 p-0 rounded-full" 
+                  type="button"
+                >
+                  <HelpCircle className={cn(
+                    "h-4 w-4",
+                    theme === "light" ? "text-blue-600" : "text-otc-primary"
+                  )} />
+                  <span className="sr-only">Help</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className={cn(
+                  "max-w-xs",
+                  theme === "light" 
+                    ? "bg-white text-gray-700 border-gray-200"
+                    : "bg-otc-card text-white border-otc-active"
+                )}
+              >
+                {language === 'en' 
+                  ? 'Location where the order will be executed. City is required for cash pairs.'
+                  : 'Местоположение, где будет выполнен заказ. Город обязателен для наличных пар.'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         
         {/* Country (Required) */}
