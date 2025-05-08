@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowRight, CreditCard, FileText, Info, CheckCircle } from "lucide-react";
 import BasicDetailsStep from "./BasicDetailsStep";
 import AdditionalDetailsStep from "./AdditionalDetailsStep";
+import TransactionSummary from "./TransactionSummary";
 
 interface OrderFormStepsProps {
   currentStep: number;
@@ -123,7 +124,14 @@ export default function OrderFormSteps({
                       ? theme === "light" ? "text-blue-600" : "text-otc-primary"
                       : theme === "light" ? "text-gray-500" : "text-gray-400"
                   )}>
-                    {i === 0 ? t('basicDetails') : t('additionalDetails')}
+                    {i === 0 
+                      ? t('basicDetails') 
+                      : i === 1 
+                        ? t('additionalDetails') 
+                        : i === 2 
+                          ? t('paymentDetails') 
+                          : t('additionalDetails')
+                    }
                   </span>
                 </div>
               ))}
@@ -139,7 +147,18 @@ export default function OrderFormSteps({
 
           {/* Step 2 - Additional Details */}
           {currentStep === 2 && (
-            <AdditionalDetailsStep formProps={formProps} />
+            <>
+              <AdditionalDetailsStep formProps={formProps} />
+              {calculationResult && showCalculation && (
+                <TransactionSummary
+                  theme={theme}
+                  t={t}
+                  calculationResult={calculationResult}
+                  getCurrencySymbol={formProps.getCurrencySymbol}
+                  setCurrentStep={setCurrentStep}
+                />
+              )}
+            </>
           )}
         </CardContent>
         
