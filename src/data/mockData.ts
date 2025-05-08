@@ -2,6 +2,32 @@ import { User, Order, TradePair, Deal, Message, TradePairGroup } from "../types"
 
 // Trade Pairs
 export const tradePairs: TradePair[] = [
+  // RUB Cash Group
+  {
+    id: "pair6",
+    name: "RUB_CASH_USDT",
+    baseCurrency: "RUB Cash",
+    quoteCurrency: "USDT",
+    group: "RUB_CASH" as TradePairGroup,
+    displayName: "RUB Cash – USDT"
+  },
+  {
+    id: "pair7",
+    name: "USD_CASH_USDT",
+    baseCurrency: "USD Cash",
+    quoteCurrency: "USDT",
+    group: "RUB_CASH" as TradePairGroup,
+    displayName: "USD Cash – USDT"
+  },
+  {
+    id: "pair8",
+    name: "EUR_CASH_USDT",
+    baseCurrency: "EUR Cash",
+    quoteCurrency: "USDT",
+    group: "RUB_CASH" as TradePairGroup,
+    displayName: "EUR Cash – USDT"
+  },
+
   // RUB Neresident Group
   { 
     id: "pair1", 
@@ -42,32 +68,6 @@ export const tradePairs: TradePair[] = [
     quoteCurrency: "USDT", 
     group: "RUB_NR" as TradePairGroup,
     displayName: "RUB (NR) – USDT"
-  },
-  
-  // RUB Cash Group
-  { 
-    id: "pair6", 
-    name: "RUB_CASH_USDT", 
-    baseCurrency: "RUB Cash", 
-    quoteCurrency: "USDT", 
-    group: "RUB_CASH" as TradePairGroup,
-    displayName: "RUB Cash – USDT"
-  },
-  { 
-    id: "pair7", 
-    name: "USD_CASH_USDT", 
-    baseCurrency: "USD Cash", 
-    quoteCurrency: "USDT", 
-    group: "RUB_CASH" as TradePairGroup,
-    displayName: "USD Cash – USDT"
-  },
-  { 
-    id: "pair8", 
-    name: "EUR_CASH_USDT", 
-    baseCurrency: "EUR Cash", 
-    quoteCurrency: "USDT", 
-    group: "RUB_CASH" as TradePairGroup,
-    displayName: "EUR Cash – USDT"
   },
   
   // Tokenized Ruble Group

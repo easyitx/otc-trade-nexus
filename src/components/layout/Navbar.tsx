@@ -54,26 +54,26 @@ export function Navbar() {
             )}
           </Button>
 
-          {/* Language Selector */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"
-              >
-                <Globe className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card shadow-light border-border">
-              <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-accent">
-                <span className={language === 'en' ? 'font-bold' : ''}>English</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage('ru')} className="hover:bg-accent">
-                <span className={language === 'ru' ? 'font-bold' : ''}>Русский</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/*/!* Language Selector *!/*/}
+          {/*<DropdownMenu>*/}
+          {/*  <DropdownMenuTrigger asChild>*/}
+          {/*    <Button */}
+          {/*      variant="outline" */}
+          {/*      size="icon" */}
+          {/*      className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect"*/}
+          {/*    >*/}
+          {/*      <Globe className="w-4 h-4" />*/}
+          {/*    </Button>*/}
+          {/*  </DropdownMenuTrigger>*/}
+          {/*  <DropdownMenuContent align="end" className="bg-card shadow-light border-border">*/}
+          {/*    <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-accent">*/}
+          {/*      <span className={language === 'en' ? 'font-bold' : ''}>English</span>*/}
+          {/*    </DropdownMenuItem>*/}
+          {/*    <DropdownMenuItem onClick={() => setLanguage('ru')} className="hover:bg-accent">*/}
+          {/*      <span className={language === 'ru' ? 'font-bold' : ''}>Русский</span>*/}
+          {/*    </DropdownMenuItem>*/}
+          {/*  </DropdownMenuContent>*/}
+          {/*</DropdownMenu>*/}
 
           {currentUser ? (
             <>

@@ -19,17 +19,17 @@ import { cn } from '@/lib/utils';
 
 // Defining trading pairs and their groups
 const tradingPairs = {
+  RUB_CASH: [
+    { id: 'RUB_CASH_USDT', name: 'RUB Cash – USDT', displayName: 'Наличный рубль – USDT' },
+    { id: 'USD_CASH_USDT', name: 'USD Cash – USDT', displayName: 'Наличный доллар США – USDT' },
+    { id: 'EUR_CASH_USDT', name: 'EUR Cash – USDT', displayName: 'Наличный доллар Евро – USDT' },
+  ],
   RUB_NR: [
     { id: 'RUB_NR_USD', name: 'RUB (NR) – USD', displayName: 'Нерезидентский рубль – USD' },
     { id: 'RUB_NR_AED', name: 'RUB (NR) – AED', displayName: 'Нерезидентский рубль – AED' },
     { id: 'RUB_NR_EUR', name: 'RUB (NR) – EUR', displayName: 'Нерезидентский рубль – EUR' },
     { id: 'RUB_NR_CNY', name: 'RUB (NR) – CNY', displayName: 'Нерезидентский рубль – CNY' },
     { id: 'RUB_NR_USDT', name: 'RUB (NR) – USDT', displayName: 'Нерезидентский рубль – USDT' },
-  ],
-  RUB_CASH: [
-    { id: 'RUB_CASH_USDT', name: 'RUB Cash – USDT', displayName: 'Наличный рубль – USDT' },
-    { id: 'USD_CASH_USDT', name: 'USD Cash – USDT', displayName: 'Наличный доллар США – USDT' },
-    { id: 'EUR_CASH_USDT', name: 'EUR Cash – USDT', displayName: 'Наличный доллар Евро – USDT' },
   ],
   TOKENIZED: [
     { id: 'A7A5_RUB', name: 'A7A5 – RUB', displayName: 'A7A5 – RUB' },

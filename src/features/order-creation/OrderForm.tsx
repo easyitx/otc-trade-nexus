@@ -128,7 +128,7 @@ export default function OrderForm() {
   // Format rate string based on selected source and adjustments
   const formatRate = () => {
     if (rateType === "fixed") {
-      return customRateValue ? `FIXED: ${customRateValue}` : "FIXED: (enter value)";
+      return customRateValue ? `Фикс: ${customRateValue}` : "Нет значения";
     }
 
     const sourceMap = {
@@ -356,7 +356,7 @@ export default function OrderForm() {
     language,
     currentStep,
     setCurrentStep,
-    totalSteps, // This is now 2 instead of 3
+    totalSteps,
     getCurrencySymbol,
     autoCalculate
   };

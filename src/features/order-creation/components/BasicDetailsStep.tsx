@@ -55,16 +55,67 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
 
   // Get currency symbol
   const getCurrencySymbol = (currency: string) => {
-    switch (currency) {
-      case "USD":
-        return "$";
-      case "EUR":
-        return "€";
-      case "RUB":
-        return "₽";
-      default:
-        return "";
-    }
+    const currencySymbols: Record<string, string> = {
+      // Основные валюты
+      USD: "$",     // Доллар США
+      EUR: "€",     // Евро
+      GBP: "£",     // Фунт стерлингов
+      JPY: "¥",     // Японская иена
+      CNY: "¥",     // Китайский юань
+      RUB: "₽",     // Российский рубль
+
+      // Азиатские валюты
+      KRW: "₩",     // Южнокорейская вона
+      INR: "₹",     // Индийская рупия
+      THB: "฿",     // Тайский бат
+      IDR: "Rp",    // Индонезийская рупия
+      VND: "₫",     // Вьетнамский донг
+
+      // Ближний Восток
+      AED: "د.إ",   // Дирхам ОАЭ
+      SAR: "﷼",     // Саудовский риял
+      ILS: "₪",     // Израильский шекель
+
+      // Латинская Америка
+      BRL: "R$",    // Бразильский реал
+      MXN: "$",     // Мексиканское песо
+      ARS: "$",     // Аргентинское песо
+
+      // Африка
+      ZAR: "R",     // Южноафриканский рэнд
+      EGP: "£",     // Египетский фунт
+      NGN: "₦",     // Нигерийская найра
+
+      // Криптовалюты
+      BTC: "₿",     // Биткоин
+      ETH: "Ξ",     // Эфириум
+      LTC: "Ł",     // Лайткоин
+
+      // Другие
+      CHF: "CHF",   // Швейцарский франк
+      AUD: "A$",    // Австралийский доллар
+      CAD: "C$",    // Канадский доллар
+      SGD: "S$",    // Сингапурский доллар
+      HKD: "HK$",   // Гонконгский доллар
+      NZD: "NZ$",   // Новозеландский доллар
+      SEK: "kr",    // Шведская крона
+      NOK: "kr",    // Норвежская крона
+      DKK: "kr",    // Датская крона
+      PLN: "zł",    // Польский злотый
+      TRY: "₺",     // Турецкая лира
+      CZK: "Kč",    // Чешская крона
+      HUF: "Ft",    // Венгерский форинт
+      RON: "lei",   // Румынский лей
+      HRK: "kn",    // Хорватская куна
+      PHP: "₱",     // Филиппинское песо
+      MYR: "RM",    // Малайзийский ринггит
+    };
+
+    // Приводим валюту к верхнему регистру для унификации
+    const normalizedCurrency = currency.toUpperCase();
+
+    // Возвращаем символ или пустую строку, если валюта не найдена
+    return currencySymbols[normalizedCurrency] || "";
   };
 
   return (
@@ -80,8 +131,8 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
         >
           {t('tradingPair')} <span className="text-red-500">*</span>
         </Label>
-        <Select 
-          value={selectedPair} 
+        <Select
+          value={selectedPair}
           onValueChange={(value) => {
             setSelectedPair(value);
             if (autoCalculate && amount && parseFloat(amount) > 0) {
@@ -90,13 +141,13 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
           }}
         >
           <SelectTrigger
-            id="tradingPair"
-            className={cn(
-              "h-12 text-base",
-              theme === "light"
-                ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
-                : "bg-otc-active border-otc-active text-white"
-            )}
+              id="tradingPair"
+              className={cn(
+                  "h-12 text-sm",
+                  theme === "light"
+                      ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
+                      : "bg-otc-active border-otc-active text-white"
+              )}
           >
             <SelectValue placeholder={t('selectTradingPair')} />
           </SelectTrigger>
@@ -112,8 +163,8 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
               <div key={group}>
                 <div className={cn(
                   "sticky top-0 px-2 py-2 text-xs uppercase tracking-wider font-medium backdrop-blur-sm z-10",
-                  theme === "light" 
-                    ? "bg-gray-50 text-gray-500 border-b border-gray-200" 
+                  theme === "light"
+                    ? "bg-gray-50 text-gray-500 border-b border-gray-200"
                     : "bg-otc-active/80 text-gray-400 border-b border-otc-active"
                 )}>
                   {t(group.replace(/\s+/g, '_') as TranslationKey)}
@@ -138,330 +189,327 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
       </div>
 
       {selectedPair && (
-        <>
-          {/* Order Type */}
-          <div className="space-y-3">
-            <Label className={cn(
-              "text-base",
-              theme === "light" ? "text-gray-800" : "text-white"
-            )}>
-              {t('orderType')} <span className="text-red-500">*</span>
-            </Label>
-            
-            {selectedPairInfo && (
-              <RadioGroup
-                value={orderType}
-                onValueChange={(value) => {
-                  setOrderType(value);
+          <>
+            {/* Order Type */}
+            <div className="space-y-2">
+              <Label className={cn(
+                  "text-sm font-medium",
+                  theme === "light" ? "text-gray-700" : "text-gray-200"
+              )}>
+                {t('orderType')} <span className="text-red-500">*</span>
+              </Label>
+
+              {selectedPairInfo && (
+                  <RadioGroup
+                      value={orderType}
+                      onValueChange={(value) => {
+                        setOrderType(value);
+                        if (autoCalculate && amount && parseFloat(amount) > 0) {
+                          setTimeout(() => calculateOrder(), 100);
+                        }
+                      }}
+                      className="grid grid-cols-2 gap-2"
+                  >
+                    {/* Buy Option */}
+                    <div className={cn(
+                        "relative rounded-lg transition-all duration-300 border overflow-hidden",
+                        orderType === "BUY" ? (
+                            theme === "light"
+                                ? "ring-1 ring-blue-400 shadow-sm"
+                                : "ring-1 ring-emerald-400 shadow-md"
+                        ) : "",
+                        theme === "light"
+                            ? "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200"
+                            : "bg-gradient-to-br from-otc-card to-otc-active/30 border-otc-active/50"
+                    )}>
+                      <label
+                          htmlFor="buy-option"
+                          className="p-3 flex items-start cursor-pointer w-full h-full"
+                      >
+                        <RadioGroupItem
+                            value="BUY"
+                            id="buy-option"
+                            className={cn(
+                                "mt-0.5 h-4 w-4",
+                                theme === "light"
+                                    ? "border-gray-300 text-blue-600"
+                                    : "border-emerald-400 text-emerald-400"
+                            )}
+                        />
+                        <div className="ml-2">
+                          <div className={cn(
+                              "font-medium text-base flex items-center",
+                              theme === "light" ? "text-gray-800" : "text-white"
+                          )}>
+              <span className={cn(
+                  "mr-1.5 text-xl",
+                  theme === "light" ? "text-green-600" : "text-emerald-400"
+              )}>+</span>
+                            Получаю {selectedPairInfo.baseCurrency}
+                          </div>
+                          <div className={cn(
+                              "text-xs mt-1",
+                              theme === "light" ? "text-gray-500" : "text-gray-300"
+                          )}>
+                            Отдаю {selectedPairInfo.quoteCurrency}
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Sell Option */}
+                    <div className={cn(
+                        "relative rounded-lg transition-all duration-300 border overflow-hidden",
+                        orderType === "SELL" ? (
+                            theme === "light"
+                                ? "ring-1 ring-blue-400 shadow-sm"
+                                : "ring-1 ring-rose-400 shadow-md"
+                        ) : "",
+                        theme === "light"
+                            ? "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200"
+                            : "bg-gradient-to-br from-otc-card to-otc-active/30 border-otc-active/50"
+                    )}>
+                      <label
+                          htmlFor="sell-option"
+                          className="p-3 flex items-start cursor-pointer w-full h-full"
+                      >
+                        <RadioGroupItem
+                            value="SELL"
+                            id="sell-option"
+                            className={cn(
+                                "mt-0.5 h-4 w-4",
+                                theme === "light"
+                                    ? "border-gray-300 text-blue-600"
+                                    : "border-rose-400 text-rose-400"
+                            )}
+                        />
+                        <div className="ml-2">
+                          <div className={cn(
+                              "font-medium text-base flex items-center",
+                              theme === "light" ? "text-gray-800" : "text-white"
+                          )}>
+              <span className={cn(
+                  "mr-1.5 text-xl",
+                  theme === "light" ? "text-red-600" : "text-rose-400"
+              )}>-</span>
+                            Отдаю {selectedPairInfo.quoteCurrency}
+                          </div>
+                          <div className={cn(
+                              "text-xs mt-1",
+                              theme === "light" ? "text-gray-500" : "text-gray-300"
+                          )}>
+                            Получаю {selectedPairInfo.baseCurrency}
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </RadioGroup>
+              )}
+            </div>
+
+            {/* Amount */}
+            <div className="space-y-3">
+              <Label htmlFor="amount" className={cn(
+                  "text-sm font-medium",
+                  theme === "light" ? "text-gray-700" : "text-gray-200"
+              )}>
+                Сколько отдаете <span className="text-red-500">*</span>
+              </Label>
+              <div className="flex space-x-2">
+                <div className="relative flex-grow">
+                  {/*Минимальная сумма должна быть в эквиваленте к доллару = 500 000$*/}
+                  <Input
+                      id="amount"
+                      value={amount}
+                      onChange={(e) => {
+                        setAmount(e.target.value);
+                        if (autoCalculate && selectedPair && e.target.value && parseFloat(e.target.value) > 0) {
+                          calculateOrder();
+                        }
+                      }}
+                      placeholder={t('minimumOrder')}
+                      className={cn(
+                          "pl-7 h-11 text-base",
+                          theme === "light"
+                              ? "bg-white border-gray-300 text-gray-800 hover:border-gray-400"
+                              : "bg-otc-active border-otc-active text-white"
+                      )}
+                  />
+                  <span className={cn(
+                      "absolute left-2.5 top-1/2 transform -translate-y-1/2 text-base",
+                      theme === "light" ? "text-gray-500" : "text-gray-400"
+                  )}>
+      {getCurrencySymbol(amountCurrency)}
+    </span>
+                </div>
+              </div>
+              {selectedPairInfo && (
+                  <p className={cn(
+                      "text-sm",
+                      theme === "light" ? "text-gray-600" : "text-gray-400"
+                  )}>
+                    {orderType === "BUY"
+                        ? `${t('amount')} ${t('in')} ${selectedPairInfo.quoteCurrency}`
+                        : `${t('amount')} ${t('in')} ${selectedPairInfo.baseCurrency}`}
+                  </p>
+              )}
+            </div>
+
+            {/* Rate */}
+            <RateSection
+                theme={theme}
+                t={t}
+                language={language}
+                rateType={rateType}
+                setRateType={(value) => {
+                  setRateType(value);
+                }}
+                rateSource={rateSource}
+                setRateSource={(value) => {
+                  setRateSource(value);
                   if (autoCalculate && amount && parseFloat(amount) > 0) {
                     setTimeout(() => calculateOrder(), 100);
                   }
                 }}
-                className="flex flex-col sm:flex-row gap-3"
-              >
-                <div className={cn(
-                  "relative flex-1 rounded-lg overflow-hidden transition-all duration-300",
-                  orderType === "BUY" ? (
-                    theme === "light" 
-                      ? "ring-2 ring-blue-500 shadow-md" 
-                      : "ring-2 ring-otc-primary shadow-md"
-                  ) : "",
-                  theme === "light" 
-                    ? "bg-white border border-gray-200" 
-                    : "bg-otc-active/30 border border-otc-active"
-                )}>
-                  <label 
-                    htmlFor="buy-option" 
-                    className="p-4 flex items-start cursor-pointer w-full h-full"
-                  >
-                    <RadioGroupItem 
-                      value="BUY" 
-                      id="buy-option"
-                      className={cn(
-                        "mt-1",
-                        theme === "light"
-                          ? "border-gray-300 text-blue-600"
-                          : "border-otc-active text-otc-primary"
-                      )}
-                    />
-                    <div className="ml-3">
-                      <div className={cn(
-                        "font-medium text-lg",
-                        theme === "light" ? "text-gray-900" : "text-white"
-                      )}>
-                        {t('buy')} {selectedPairInfo.baseCurrency}
-                      </div>
-                      <div className={cn(
-                        "text-sm mt-1",
-                        theme === "light" ? "text-gray-600" : "text-gray-400"
-                      )}>
-                        {t('receive')} {selectedPairInfo.quoteCurrency}
-                      </div>
-                    </div>
-                  </label>
+                customRateValue={customRateValue}
+                setCustomRateValue={(value) => {
+                  setCustomRateValue(value);
+                  if (autoCalculate && amount && parseFloat(amount) > 0) {
+                    setTimeout(() => calculateOrder(), 100);
+                  }
+                }}
+                rateAdjustment={rateAdjustment}
+                setRateAdjustment={(value) => {
+                  setRateAdjustment(value);
+                  if (autoCalculate && amount && parseFloat(amount) > 0) {
+                    setTimeout(() => calculateOrder(), 100);
+                  }
+                }}
+                serviceFee={serviceFee}
+                currentRates={currentRates}
+                formatRate={formatRate}
+                applyRateSourceToFixed={(source) => {
+                  applyRateSourceToFixed(source);
+                }}
+            />
+
+            {/* Transaction Calculation Results */}
+            {showCalculation && calculationResult && (
+                <div className="mt-6">
+                  <TransactionSummary
+                      theme={theme}
+                      t={t}
+                      calculationResult={calculationResult}
+                      getCurrencySymbol={getCurrencySymbol}
+                      setCurrentStep={setCurrentStep}
+                  />
                 </div>
-                
-                <div className={cn(
-                  "relative flex-1 rounded-lg overflow-hidden transition-all duration-300",
-                  orderType === "SELL" ? (
-                    theme === "light" 
-                      ? "ring-2 ring-blue-500 shadow-md" 
-                      : "ring-2 ring-otc-primary shadow-md"
-                  ) : "",
-                  theme === "light" 
-                    ? "bg-white border border-gray-200" 
-                    : "bg-otc-active/30 border border-otc-active"
-                )}>
-                  <label 
-                    htmlFor="sell-option" 
-                    className="p-4 flex items-start cursor-pointer w-full h-full"
-                  >
-                    <RadioGroupItem 
-                      value="SELL" 
-                      id="sell-option"
-                      className={cn(
-                        "mt-1",
-                        theme === "light"
-                          ? "border-gray-300 text-blue-600"
-                          : "border-otc-active text-otc-primary"
-                      )}
-                    />
-                    <div className="ml-3">
-                      <div className={cn(
-                        "font-medium text-lg",
-                        theme === "light" ? "text-gray-900" : "text-white"
-                      )}>
-                        {t('sell')} {selectedPairInfo.quoteCurrency}
-                      </div>
-                      <div className={cn(
-                        "text-sm mt-1",
-                        theme === "light" ? "text-gray-600" : "text-gray-400"
-                      )}>
-                        {t('receive')} {selectedPairInfo.baseCurrency}
-                      </div>
-                    </div>
-                  </label>
-                </div>
-              </RadioGroup>
             )}
-          </div>
-
-          {/* Amount */}
-          <div className="space-y-3">
-            <Label htmlFor="amount" className={cn(
-              "text-base",
-              theme === "light" ? "text-gray-800" : "text-white"
-            )}>
-              {t('amount')} <span className="text-red-500">*</span>
-            </Label>
-            <div className="flex space-x-3">
-              <div className="relative flex-grow">
-                <Input
-                  id="amount"
-                  value={amount}
-                  onChange={(e) => {
-                    setAmount(e.target.value);
-                    if (autoCalculate && selectedPair && e.target.value && parseFloat(e.target.value) > 0) {
-                      calculateOrder();
-                    }
-                  }}
-                  placeholder={t('minimumOrder')}
-                  className={cn(
-                    "pl-8 h-12 text-lg",
-                    theme === "light"
-                      ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
-                      : "bg-otc-active border-otc-active text-white"
-                  )}
-                />
-                <span className={cn(
-                  "absolute left-3 top-1/2 transform -translate-y-1/2 text-lg",
-                  theme === "light" ? "text-gray-500" : "text-gray-400"
-                )}>
-                  {getCurrencySymbol(amountCurrency)}
-                </span>
-              </div>
-              <div className="w-24">
-                <div className={cn(
-                  "h-12 px-3 flex items-center justify-center rounded-md border font-medium text-lg",
-                  theme === "light"
-                    ? "bg-white border-gray-300 text-gray-900"
-                    : "bg-otc-active border-otc-active text-white"
-                )}>
-                  {amountCurrency}
-                </div>
-              </div>
-            </div>
-            {selectedPairInfo && (
-              <p className={cn(
-                "text-sm",
-                theme === "light" ? "text-gray-600" : "text-gray-400"
-              )}>
-                {orderType === "BUY" 
-                  ? `${t('amount')} ${t('in')} ${selectedPairInfo.quoteCurrency}`
-                  : `${t('amount')} ${t('in')} ${selectedPairInfo.baseCurrency}`}
-              </p>
-            )}
-          </div>
-
-          {/* Rate */}
-          <RateSection 
-            theme={theme}
-            t={t} 
-            language={language}
-            rateType={rateType}
-            setRateType={(value) => {
-              setRateType(value);
-              // Remove auto calculation when changing rate type
-              // This fixes the issue of summary appearing immediately
-            }}
-            rateSource={rateSource}
-            setRateSource={(value) => {
-              setRateSource(value);
-              if (autoCalculate && amount && parseFloat(amount) > 0) {
-                setTimeout(() => calculateOrder(), 100);
-              }
-            }}
-            customRateValue={customRateValue}
-            setCustomRateValue={(value) => {
-              setCustomRateValue(value);
-              if (autoCalculate && amount && parseFloat(amount) > 0) {
-                setTimeout(() => calculateOrder(), 100);
-              }
-            }}
-            rateAdjustment={rateAdjustment}
-            setRateAdjustment={(value) => {
-              setRateAdjustment(value);
-              if (autoCalculate && amount && parseFloat(amount) > 0) {
-                setTimeout(() => calculateOrder(), 100);
-              }
-            }}
-            serviceFee={serviceFee}
-            currentRates={currentRates}
-            formatRate={formatRate}
-            applyRateSourceToFixed={(source) => {
-              applyRateSourceToFixed(source);
-              // Remove auto calculation when applying a rate source to fixed
-              // to prevent auto-showing the summary
-            }}
-          />
-
-          {/* Transaction Calculation Results */}
-          {showCalculation && calculationResult && (
-            <div className="mt-6">
-              <TransactionSummary
-                theme={theme}
-                t={t}
-                calculationResult={calculationResult}
-                getCurrencySymbol={getCurrencySymbol}
-                setCurrentStep={setCurrentStep}
-              />
-            </div>
-          )}
-        </>
+          </>
       )}
     </>
   );
 }
 
 // RateSection component to make the BasicDetailsStep more manageable
-function RateSection({ 
-  theme, t, language, rateType, setRateType, rateSource, setRateSource, 
-  customRateValue, setCustomRateValue, rateAdjustment, setRateAdjustment, 
-  serviceFee, currentRates, formatRate, applyRateSourceToFixed 
-}: any) {
+function RateSection({
+                       theme, t, language, rateType, setRateType, rateSource, setRateSource,
+                       customRateValue, setCustomRateValue, rateAdjustment, setRateAdjustment,
+                       serviceFee, currentRates, formatRate, applyRateSourceToFixed
+                     }: any) {
   return (
-    <div className="space-y-6 pt-2">
-      <div className="flex items-center justify-between">
-        <Label className={cn(
-          "text-base",
-          theme === "light" ? "text-gray-800" : "text-white"
-        )}>{t('rate')}</Label>
-        
-        <div className={cn(
-          "text-sm font-medium px-3 py-1 rounded-full",
-          theme === "light" 
-            ? "bg-blue-100 text-blue-700" 
-            : "bg-otc-primary/20 text-otc-primary"
-        )}>
-          {formatRate()}
-        </div>
-      </div>
-      
-      {/* Rate Type Selection */}
-      <div className={cn(
-        "p-4 rounded-lg border",
-        theme === "light" 
-          ? "bg-gray-50 border-gray-200" 
-          : "bg-otc-active/30 border-otc-active"
-      )}>
-        <div className="space-y-4">
+      <div className="space-y-6 pt-2">
+        <div className="flex items-center justify-between">
           <Label className={cn(
-            "block font-medium",
-            theme === "light" ? "text-gray-700" : "text-gray-300"
+              "text-base",
+              theme === "light" ? "text-gray-800" : "text-white"
+          )}>{t('rate')}</Label>
+
+          <div className={cn(
+              "text-sm font-medium px-3 py-1 rounded-full",
+              theme === "light"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-otc-primary/20 text-otc-primary"
           )}>
-            {t('rateType')}
-          </Label>
-          <RadioGroup
-            value={rateType}
-            onValueChange={(value) => setRateType(value as "dynamic" | "fixed")}
-            className="flex gap-4"
-          >
-            <div className={cn(
-              "flex items-center gap-2 p-3 rounded-lg border transition-all",
-              rateType === "dynamic" ? (
-                theme === "light" 
-                  ? "bg-blue-50 border-blue-200" 
-                  : "bg-otc-primary/10 border-otc-primary/30"
-              ) : (
-                theme === "light" 
-                  ? "bg-white border-gray-200" 
-                  : "bg-otc-active border-otc-active"
-              )
+            {formatRate()}
+          </div>
+        </div>
+
+        {/* Rate Type Selection */}
+        <div className={cn(
+            "p-4 rounded-lg border",
+            theme === "light"
+                ? "bg-gray-50 border-gray-200"
+                : "bg-otc-active/30 border-otc-active"
+        )}>
+          <div className="space-y-4">
+            <Label className={cn(
+                "block font-medium",
+                theme === "light" ? "text-gray-700" : "text-gray-300"
             )}>
-              <RadioGroupItem
-                value="dynamic"
-                id="dynamic-rate"
-                className={cn(
-                  theme === "light"
-                    ? "border-gray-300 text-blue-600"
-                    : "border-otc-active text-otc-primary"
-                )}
-              />
-              <Label
-                htmlFor="dynamic-rate"
-                className={cn(
-                  "cursor-pointer",
-                  theme === "light" ? "text-gray-800" : "text-white"
-                )}
-              >
-                {t('dynamicRate')}
-              </Label>
-            </div>
-            
-            <div className={cn(
-              "flex items-center gap-2 p-3 rounded-lg border transition-all",
-              rateType === "fixed" ? (
-                theme === "light" 
-                  ? "bg-blue-50 border-blue-200" 
-                  : "bg-otc-primary/10 border-otc-primary/30"
-              ) : (
-                theme === "light" 
-                  ? "bg-white border-gray-200" 
-                  : "bg-otc-active border-otc-active"
-              )
-            )}>
-              <RadioGroupItem
-                value="fixed"
-                id="fixed-rate"
-                className={cn(
-                  theme === "light"
-                    ? "border-gray-300 text-blue-600"
-                    : "border-otc-active text-otc-primary"
-                )}
-              />
-              <Label
-                htmlFor="fixed-rate"
-                className={cn(
+              {t('rateType')}
+            </Label>
+            <RadioGroup
+                value={rateType}
+                onValueChange={(value) => setRateType(value as "dynamic" | "fixed")}
+                className="flex gap-4"
+            >
+              <div className={cn(
+                  "flex items-center gap-2 p-3 rounded-lg border transition-all",
+                  rateType === "dynamic" ? (
+                      theme === "light"
+                          ? "bg-blue-50 border-blue-200"
+                          : "bg-otc-primary/10 border-otc-primary/30"
+                  ) : (
+                      theme === "light"
+                          ? "bg-white border-gray-200"
+                          : "bg-otc-active border-otc-active"
+                  )
+              )}>
+                <RadioGroupItem
+                    value="dynamic"
+                    id="dynamic-rate"
+                    className={cn(
+                        theme === "light"
+                            ? "border-gray-300 text-blue-600"
+                            : "border-otc-active text-otc-primary"
+                    )}
+                />
+                <Label
+                    htmlFor="dynamic-rate"
+                    className={cn(
+                        "cursor-pointer",
+                        theme === "light" ? "text-gray-800" : "text-white"
+                    )}
+                >
+                  {t('dynamicRate')}
+                </Label>
+              </div>
+
+              <div className={cn(
+                  "flex items-center gap-2 p-3 rounded-lg border transition-all",
+                  rateType === "fixed" ? (
+                      theme === "light"
+                          ? "bg-blue-50 border-blue-200"
+                          : "bg-otc-primary/10 border-otc-primary/30"
+                  ) : (
+                      theme === "light"
+                          ? "bg-white border-gray-200"
+                          : "bg-otc-active border-otc-active"
+                  )
+              )}>
+                <RadioGroupItem
+                    value="fixed"
+                    id="fixed-rate"
+                    className={cn(
+                        theme === "light"
+                            ? "border-gray-300 text-blue-600"
+                            : "border-otc-active text-otc-primary"
+                    )}
+                />
+                <Label
+                    htmlFor="fixed-rate"
+                    className={cn(
                   "cursor-pointer",
                   theme === "light" ? "text-gray-800" : "text-white"
                 )}

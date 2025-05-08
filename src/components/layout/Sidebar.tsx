@@ -33,20 +33,47 @@ const NavItem = ({ icon: Icon, label, href, isCollapsed }: NavItemProps) => {
   const { theme } = useTheme();
 
   return (
-    <Link
-      to={href}
-      className={cn(
-        "flex items-center py-2 px-3 rounded-lg mb-1 group transition-colors",
-        isActive 
-          ? theme === "light" ? "bg-accent text-primary" : "bg-otc-active text-white" 
-          : theme === "light" 
-            ? "text-primary-foreground hover:bg-accent/70 hover:text-primary"
-            : "text-muted-foreground hover:bg-otc-active hover:text-white"
-      )}
-    >
-      <Icon className="w-5 h-5 mr-2" />
-      {!isCollapsed && <span className="text-sm font-medium">{label}</span>}
-    </Link>
+      <Link
+          to={href}
+          className={cn(
+              "flex items-center rounded-lg mb-1 group transition-colors duration-150 overflow-hidden",
+              isActive
+                  ? theme === "light"
+                      ? "bg-accent text-primary"
+                      : "bg-otc-active text-white"
+                  : theme === "light"
+                      ? "text-primary-foreground hover:bg-accent/40"
+                      : "text-muted-foreground hover:bg-otc-active/50",
+              isCollapsed ? "p-3" : "py-2 px-3"
+          )}
+      >
+        <Icon
+            className={cn(
+                "shrink-0 transition-colors duration-150",
+                isCollapsed ? "w-5 h-5" : "w-5 h-5 mr-2",
+                isActive
+                    ? theme === "light"
+                        ? "text-primary"
+                        : "text-white"
+                    : theme === "light"
+                        ? "text-primary-foreground group-hover:text-primary"
+                        : "text-muted-foreground group-hover:text-white"
+            )}
+        />
+        <span
+            className={cn(
+                "text-sm font-medium whitespace-nowrap transition-all duration-150",
+                isCollapsed ? "opacity-0 w-0" : "opacity-100 w-auto ml-2",
+                isActive
+                    ? ""
+                    : theme === "light"
+                        ? "group-hover:text-primary"
+                        : "group-hover:text-white"
+            )}
+        >
+        {label}
+      </span>
+      </Link>
   );
 };
 
@@ -72,7 +99,10 @@ export function Sidebar() {
       )}
     >
       {/* Sidebar header */}
-      <div className="p-4 flex justify-between items-center">
+      <div className={cn(
+          "flex justify-between items-center",
+          isCollapsed ? "p-3" : "p-4"
+      )}>
         {!isCollapsed && (
             <div className="flex-1">
               <Link to="/" className="hidden md:flex items-center">
@@ -92,13 +122,13 @@ export function Sidebar() {
                 theme === "light"
                     ? "text-white/70 hover:text-white hover:bg-primary-foreground/10"
                     : "text-muted-foreground hover:text-white"
-          )}
+            )}
         >
-          {isCollapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
+          {isCollapsed ? <ChevronRightIcon className="w-5 h-5"/> : <ChevronLeftIcon className="w-5 h-5"/>}
         </Button>
       </div>
 
-      <Separator className={theme === "light" ? "bg-white/20" : "bg-otc-active"} />
+      <Separator className={theme === "light" ? "bg-white/20" : "bg-otc-active"}/>
 
       {/* Navigation */}
       <div className="flex-1 py-4 px-3 overflow-y-auto">
@@ -109,19 +139,12 @@ export function Sidebar() {
           <NavItem icon={PlusCircleIcon} label={t('createNewOrder')} href="/create-order" isCollapsed={isCollapsed} />
           <NavItem icon={UserIcon} label={t('profile')} href="/profile" isCollapsed={isCollapsed} />
           <NavItem icon={Settings2Icon} label={t('settings')} href="/settings" isCollapsed={isCollapsed} />
-          {/*<NavItem icon={SendIcon} label={t('connectTelegram')} href="/telegram" isCollapsed={isCollapsed} />*/}
-          
+
           {isManager && !isLoadingRoles && (
             <div className="mt-4 pt-4 border-t border-white/20">
               <div className="px-3 py-2">
                 {!isCollapsed && <p className="text-xs text-primary-foreground/70 uppercase font-semibold">Админ</p>}
               </div>
-              {/*<NavItem */}
-              {/*  icon={SlidersIcon} */}
-              {/*  label="Управление курсами" */}
-              {/*  href="/admin/rate-management" */}
-              {/*  isCollapsed={isCollapsed} */}
-              {/*/>*/}
             </div>
           )}
         </div>
