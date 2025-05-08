@@ -310,9 +310,8 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
             rateType={rateType}
             setRateType={(value) => {
               setRateType(value);
-              if (autoCalculate && amount && parseFloat(amount) > 0) {
-                setTimeout(() => calculateOrder(), 100);
-              }
+              // Remove auto calculation when changing rate type
+              // This fixes the issue of summary appearing immediately
             }}
             rateSource={rateSource}
             setRateSource={(value) => {
@@ -340,9 +339,8 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
             formatRate={formatRate}
             applyRateSourceToFixed={(source) => {
               applyRateSourceToFixed(source);
-              if (autoCalculate && amount && parseFloat(amount) > 0) {
-                setTimeout(() => calculateOrder(), 100);
-              }
+              // Remove auto calculation when applying a rate source to fixed
+              // to prevent auto-showing the summary
             }}
           />
 

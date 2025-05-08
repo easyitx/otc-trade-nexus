@@ -120,10 +120,8 @@ export default function OrderForm() {
   const applyRateSourceToFixed = (source: string) => {
     if (currentRates[source]) {
       setCustomRateValue(currentRates[source]);
-      // Re-calculate if auto-calculate is enabled
-      if (autoCalculate && selectedPair && amount && parseFloat(amount) > 0) {
-        setTimeout(() => calculateOrder(), 100);
-      }
+      // Don't auto-calculate here to fix the issue
+      // Let user click the calculate button deliberately
     }
   };
 
