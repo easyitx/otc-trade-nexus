@@ -346,33 +346,10 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
             }}
           />
 
-          {/* Calculate button (show only if calculation is not yet displayed) */}
-          {!showCalculation && (
-            <div className="mt-8">
-              <Button
-                type="button"
-                onClick={calculateOrder}
-                variant={theme === "light" ? "gradient" : "default"}
-                className={cn(
-                  "w-full py-6 text-lg relative overflow-hidden group transition-all",
-                  theme === "light"
-                    ? ""
-                    : "bg-otc-primary text-black hover:bg-otc-primary/90"
-                )}
-                disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {t('calculateSummary')}
-                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </span>
-              </Button>
-            </div>
-          )}
-
           {/* Transaction Calculation Results */}
           {showCalculation && calculationResult && (
             <div className="mt-6">
-              <TransactionSummary 
+              <TransactionSummary
                 theme={theme}
                 t={t}
                 calculationResult={calculationResult}

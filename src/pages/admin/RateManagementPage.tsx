@@ -136,7 +136,7 @@ export default function RateManagementPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label htmlFor="cbr">Корректировка ЦБ (CBR) (%)</Label>
+                <Label htmlFor="cbr">Надбавка ЦБ (CBR) (%)</Label>
                 <div className="relative">
                   <Input
                     id="cbr"
@@ -155,7 +155,7 @@ export default function RateManagementPage() {
               </div>
               
               <div className="space-y-3">
-                <Label htmlFor="profinance">Корректировка Profinance (PF) (%)</Label>
+                <Label htmlFor="profinance">Надбавка Profinance (PF) (%)</Label>
                 <div className="relative">
                   <Input
                     id="profinance"
@@ -174,7 +174,7 @@ export default function RateManagementPage() {
               </div>
               
               <div className="space-y-3">
-                <Label htmlFor="investing">Корректировка Investing.com (IV) (%)</Label>
+                <Label htmlFor="investing">Надбавка Investing.com (IV) (%)</Label>
                 <div className="relative">
                   <Input
                     id="investing"
@@ -193,7 +193,7 @@ export default function RateManagementPage() {
               </div>
               
               <div className="space-y-3">
-                <Label htmlFor="xe">Корректировка XE.com (%)</Label>
+                <Label htmlFor="xe">Надбавка XE.com (%)</Label>
                 <div className="relative">
                   <Input
                     id="xe"

@@ -126,7 +126,7 @@ export default function OrderDetailPage() {
           <div className={cn(
               "text-2xl font-bold",
               theme === "light" ? "text-foreground" : "text-white"
-          )}>Загрузка деталей заказа...</div>
+          )}>Загрузка деталей заявки...</div>
     );
   }
 
@@ -136,10 +136,10 @@ export default function OrderDetailPage() {
               "flex flex-col items-center justify-center h-[60vh]",
               theme === "light" ? "text-foreground" : "text-white"
           )}>
-            <h2 className="text-xl font-semibold mb-2">Заказ не найден</h2>
-            <p className="text-muted-foreground mb-4">Заказа, который вы ищете, не существует или он был удален.</p>
+            <h2 className="text-xl font-semibold mb-2">Заявка не найдена</h2>
+            <p className="text-muted-foreground mb-4">Заявка, которую вы ищете, не существует или она была удалена.</p>
             <Button asChild>
-              <Link to="/orders">Вернуться к заказам</Link>
+              <Link to="/orders">Вернуться к заявкам</Link>
             </Button>
           </div>
     );
@@ -152,13 +152,13 @@ export default function OrderDetailPage() {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: `OTC Desk - ${pair?.displayName} Заказ`,
+        title: `OTC Desk - ${pair?.displayName} Заявка`,
         text: `Проверьте этот ${order?.type === "BUY" ? "запрос на покупку" : "запрос на продажу"} для ${pair?.displayName}`,
         url: window.location.href,
       }).catch(err => {
         toast({
           title: "Скопировано в буфер обмена",
-          description: "Ссылка на заказ скопирована в буфер обмена",
+          description: "Ссылка на заявку скопирована в буфер обмена",
         });
         navigator.clipboard.writeText(window.location.href);
       });
@@ -166,7 +166,7 @@ export default function OrderDetailPage() {
       navigator.clipboard.writeText(window.location.href);
       toast({
         title: "Скопировано в буфер обмена",
-        description: "Ссылка на заказ скопирована в буфер обмена",
+        description: "Ссылка на заявку скопирована в буфер обмена",
       });
     }
   };
@@ -183,7 +183,7 @@ export default function OrderDetailPage() {
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
               <Link to="/orders">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Вернуться к заказам
+                Вернуться к заявкам
               </Link>
             </Button>
           </div>
@@ -237,7 +237,7 @@ export default function OrderDetailPage() {
                 theme === "light" ? "bg-background" : ""
             )}>
               <CardHeader>
-                <CardTitle className={theme === "light" ? "text-foreground" : "text-white"}>Детали заказа</CardTitle>
+                <CardTitle className={theme === "light" ? "text-foreground" : "text-white"}>Детали заявки</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
@@ -380,7 +380,7 @@ export default function OrderDetailPage() {
             <SheetHeader>
               <SheetTitle className={theme === "light" ? "text-foreground" : "text-white"}>Связаться с менеджером</SheetTitle>
               <SheetDescription>
-                Отправить сообщение менеджеру для обсуждения этого заказа.
+                Отправить сообщение менеджеру для обсуждения этой заявки.
               </SheetDescription>
             </SheetHeader>
 
@@ -392,7 +392,7 @@ export default function OrderDetailPage() {
                 <p className={cn(
                     "font-medium",
                     theme === "light" ? "text-blue-900" : "text-white"
-                )}>Детали заказа</p>
+                )}>Детали заявки</p>
                 <div className={cn(
                     "text-sm",
                     theme === "light" ? "text-blue-800" : "text-muted-foreground"
@@ -413,7 +413,7 @@ export default function OrderDetailPage() {
                   </Label>
                   <Textarea
                       id="message"
-                      placeholder="Представьтесь и объясните свой интерес к этому заказу..."
+                      placeholder="Представьтесь и объясните свой интерес к этой заявке..."
                       className={cn(
                           "min-h-[120px]",
                           theme === "light" ? "bg-background border-input" : "bg-otc-active border-otc-active text-white"
@@ -446,7 +446,7 @@ export default function OrderDetailPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Оставьте пустым, если хотите обсудить полную сумму заказа: ${Number(order.amount).toLocaleString()}
+                    Оставьте пустым, если хотите обсудить полную сумму заявки: ${Number(order.amount).toLocaleString()}
                   </p>
                 </div>
 

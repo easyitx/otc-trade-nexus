@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
-import { getDefaultExpiryDate, getCurrencySymbol, formatPercentage } from "./utils/dateUtils";
+import { getDefaultExpiryDate, getCurrencySymbol } from "./utils/dateUtils";
 import { tradePairs } from "@/data/mockData";
 
 export default function OrderForm() {
@@ -23,7 +23,7 @@ export default function OrderForm() {
   
   // Form steps
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 2;
+  const totalSteps = 3;
 
   // Form state
   const [selectedPair, setSelectedPair] = useState<string>("");
@@ -59,7 +59,7 @@ export default function OrderForm() {
     finalRate: string;
     serviceFeeAmount: string;
     adjustmentAmount: string;
-    adjustmentPercentage: string; // Added field for adjustment percentage
+    adjustmentPercentage: string;
     totalAmount: string;
     fromCurrency: string;
     toCurrency: string;

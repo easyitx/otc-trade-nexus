@@ -1,232 +1,200 @@
-
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Calculator, EuroIcon, DollarSign, BadgePercent } from "lucide-react";
 
-export default function TransactionSummary({ 
-  theme, t, calculationResult, getCurrencySymbol, setCurrentStep 
-}: { 
-  theme: string; 
-  t: (key: string) => string; 
+export default function TransactionSummary({
+                                             theme, t, calculationResult, getCurrencySymbol, setCurrentStep
+                                           }: {
+  theme: string;
+  t: (key: string) => string;
   calculationResult: any;
   getCurrencySymbol: (currency: string) => string;
   setCurrentStep: (step: number) => void;
 }) {
   return (
-    <div className={cn(
-      "mt-10 rounded-lg p-4 border animate-fade-in",
-      theme === "light"
-        ? "bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-md"
-        : "bg-gradient-to-br from-otc-active/40 to-otc-card border-otc-active shadow-md"
-    )}>
-      <h3 className={cn(
-        "text-2xl font-semibold mb-6 flex items-center",
-        theme === "light" ? "text-gray-900" : "text-white"
+      <div className={cn(
+          "mt-6 rounded-xl p-6 border animate-fade-in",
+          theme === "light"
+              ? "bg-white border-gray-200 shadow-lg"
+              : "bg-gray-800 border-gray-600 shadow-lg"
       )}>
-        <Calculator className="w-5 h-5 mr-2" />
-        {t('orderSummary')}
-      </h3>
-      
-      <div className="space-y-6">
-        <div className={cn(
-          "rounded-lg overflow-hidden border shadow-sm",
-          theme === "light" 
-            ? "bg-white border-gray-200" 
-            : "bg-otc-card border border-otc-active"
+        <h3 className={cn(
+            "text-2xl font-bold mb-6 flex items-center",
+            theme === "light" ? "text-gray-800" : "text-white"
         )}>
-          {/* Transaction Summary Header */}
+          <Calculator className="w-6 h-6 mr-3" />
+          {t('orderSummary')}
+        </h3>
+
+        <div className="space-y-6">
+          {/* Основная информация о транзакции */}
           <div className={cn(
-            "px-4 py-3",
-            theme === "light" 
-              ? "bg-gray-50 border-b border-gray-200" 
-              : "bg-otc-active border-b border-otc-active"
+              "rounded-lg p-5",
+              theme === "light"
+                  ? "bg-blue-50/60 border border-blue-100"
+                  : "bg-blue-900/20 border border-blue-800/50"
           )}>
-            <h4 className={cn(
-              "font-medium",
-              theme === "light" ? "text-gray-700" : "text-gray-300"
+            <div className="flex justify-between items-center mb-4">
+            <span className={cn(
+                "text-sm font-medium",
+                theme === "light" ? "text-gray-600" : "text-gray-300"
             )}>
               {calculationResult.fromCurrency === "RUB" ?
-                calculationResult.toCurrency === "USD" || calculationResult.toCurrency === "USDT" ?
-                  `${t('sell')} ${calculationResult.fromCurrency} ${t('for')} ${calculationResult.toCurrency}` :
-                  `${t('buy')} ${calculationResult.toCurrency} ${t('with')} ${calculationResult.fromCurrency}`
-                :
-                calculationResult.toCurrency === "RUB" ?
-                  `${t('buy')} ${calculationResult.toCurrency} ${t('with')} ${calculationResult.fromCurrency}` :
-                  `${t('sell')} ${calculationResult.fromCurrency} ${t('for')} ${calculationResult.toCurrency}`
+                  calculationResult.toCurrency === "USD" || calculationResult.toCurrency === "USDT" ?
+                      `${t('sell')} ${calculationResult.fromCurrency}` :
+                      `${t('buy')} ${calculationResult.toCurrency}`
+                  :
+                  calculationResult.toCurrency === "RUB" ?
+                      `${t('buy')} ${calculationResult.toCurrency}` :
+                      `${t('sell')} ${calculationResult.fromCurrency}`
               }
-            </h4>
-          </div>
-          
-          {/* Transaction Flow */}
-          <div className="px-4 py-5 space-y-6">
-            <div className="flex flex-col space-y-6">
-              <div className="flex justify-between items-center">
-                <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                  {t('youPay')}:
+            </span>
+              <span className={cn(
+                  "text-xs px-2 py-1 rounded",
+                  theme === "light"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-blue-800/50 text-blue-200"
+              )}>
+              {calculationResult.fromCurrency} → {calculationResult.toCurrency}
+            </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <div className={cn(
+                    "text-sm mb-1",
+                    theme === "light" ? "text-gray-500" : "text-gray-400"
+                )}>
+                  {t('youPay')}
                 </div>
                 <div className={cn(
-                  "font-medium text-lg",
-                  theme === "light" ? "text-gray-900" : "text-white"
+                    "text-xl font-bold",
+                    theme === "light" ? "text-gray-900" : "text-white"
                 )}>
                   {getCurrencySymbol(calculationResult.fromCurrency)}{calculationResult.youPay} {calculationResult.fromCurrency}
                 </div>
               </div>
-              
-              <div className="flex justify-center relative">
-                <div className={cn(
-                  "absolute left-0 right-0 top-1/2 border-t border-dashed",
-                  theme === "light" ? "border-gray-300" : "border-gray-600"
-                )}></div>
-                <div className={cn(
-                  "h-10 w-10 rounded-full flex items-center justify-center z-10",
-                  theme === "light" ? "bg-blue-50 text-blue-600" : "bg-otc-primary/20 text-otc-primary"
-                )}>
-                  <ArrowRight className="h-5 w-5" />
-                </div>
+
+              <div className={cn(
+                  "mx-4 p-2 rounded-full",
+                  theme === "light"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-blue-800/50 text-blue-300"
+              )}>
+                <ArrowRight className="h-5 w-5" />
               </div>
-              
-              <div className="flex justify-between items-center">
-                <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                  {t('youReceive')}:
+
+              <div>
+                <div className={cn(
+                    "text-sm mb-1",
+                    theme === "light" ? "text-gray-500" : "text-gray-400"
+                )}>
+                  {t('youReceive')}
                 </div>
                 <div className={cn(
-                  "font-medium text-xl",
-                  theme === "light" ? "text-green-600" : "text-green-400"
+                    "text-xl font-bold",
+                    theme === "light" ? "text-green-600" : "text-green-400"
                 )}>
                   {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.youReceive} {calculationResult.toCurrency}
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Calculation Details */}
-        <div className={cn(
-          "rounded-lg border p-4",
-          theme === "light" 
-            ? "bg-gray-50 border-gray-200" 
-            : "bg-otc-active/30 border-otc-active"
-        )}>
-          <h4 className={cn(
-            "text-sm font-medium mb-4 flex items-center",
-            theme === "light" ? "text-gray-700" : "text-gray-300"
+
+          {/* Детали расчета */}
+          <div className={cn(
+              "rounded-lg p-5 space-y-4",
+              theme === "light"
+                  ? "bg-gray-50 border border-gray-200"
+                  : "bg-gray-700/50 border border-gray-600"
           )}>
-            <BadgePercent className="w-4 h-4 mr-1.5" />
-            {t('calculationDetails')}
-          </h4>
-          
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('baseExchangeRate')}:
-              </div>
-              <div className={cn(
-                "text-right font-mono",
-                theme === "light" ? "text-gray-800" : "text-white"
-              )}>
-                1 {calculationResult.fromCurrency} = {calculationResult.baseRate} {calculationResult.toCurrency}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('adjustment')} ({calculationResult.adjustmentPercentage}%):
-              </div>
-              <div className={cn(
-                "text-right font-mono",
-                parseFloat(calculationResult.adjustmentAmount) > 0 
-                  ? "text-green-600" 
-                  : parseFloat(calculationResult.adjustmentAmount) < 0 
-                    ? "text-red-500" 
-                    : theme === "light" ? "text-gray-800" : "text-white"
-              )}>
-                {getCurrencySymbol(calculationResult.toCurrency)}{Math.abs(parseFloat(calculationResult.adjustmentAmount)).toLocaleString()} {calculationResult.toCurrency}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <div className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('serviceFee')} (1%):
-              </div>
-              <div className={cn(
-                "text-right font-mono",
-                theme === "light" ? "text-gray-800" : "text-white"
-              )}>
-                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.serviceFeeAmount} {calculationResult.toCurrency}
-              </div>
-            </div>
-            
-            <div className={cn(
-              "grid grid-cols-2 gap-2 pt-3 mt-3",
-              theme === "light"
-                ? "border-t border-gray-200"
-                : "border-t border-otc-active"
-            )}>
-              <div className={cn(
-                "font-semibold",
+            <h4 className={cn(
+                "font-semibold flex items-center text-sm",
                 theme === "light" ? "text-gray-700" : "text-gray-300"
-              )}>
-                <span className="text-lg">{t('total')}:</span>
-              </div>
-              <div className={cn(
-                "text-right font-mono font-semibold text-lg",
-                theme === "light" ? "text-gray-800" : "text-white"
-              )}>
-                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.totalAmount} {calculationResult.toCurrency}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Final Exchange Rate (made more prominent) */}
-        <div className={cn(
-          "rounded-lg border p-4",
-          theme === "light" 
-            ? "bg-blue-50 border-blue-200" 
-            : "bg-otc-primary/20 border-otc-primary/40"
-        )}>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              {calculationResult.fromCurrency === "EUR" ? (
-                <EuroIcon className="w-5 h-5 mr-2 text-blue-600" />
-              ) : (
-                <DollarSign className="w-5 h-5 mr-2 text-blue-600" />
-              )}
-              <span className={cn(
-                "font-medium",
-                theme === "light" ? "text-blue-700" : "text-otc-primary"
-              )}>
-                {t('finalExchangeRate')}:
-              </span>
-            </div>
-            <div className={cn(
-              "text-right font-mono font-bold text-lg",
-              theme === "light" ? "text-blue-600" : "text-otc-primary"
             )}>
-              1 {calculationResult.fromCurrency} = {calculationResult.finalRate} {calculationResult.toCurrency}
+              <BadgePercent className="w-4 h-4 mr-2" />
+              {t('calculationDetails')}
+            </h4>
+
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+              <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
+                {t('baseExchangeRate')}:
+              </span>
+                <span className={theme === "light" ? "text-gray-800" : "text-white"}>
+                1 {calculationResult.fromCurrency} = {calculationResult.baseRate} {calculationResult.toCurrency}
+              </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+              <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
+                {t('adjustment')} ({calculationResult.adjustmentPercentage}%):
+              </span>
+                <span className={
+                  parseFloat(calculationResult.adjustmentAmount) > 0
+                      ? "text-green-500"
+                      : parseFloat(calculationResult.adjustmentAmount) < 0
+                          ? "text-red-500"
+                          : theme === "light" ? "text-gray-800" : "text-white"
+                }>
+                {getCurrencySymbol(calculationResult.toCurrency)}{Math.abs(parseFloat(calculationResult.adjustmentAmount)).toLocaleString()} {calculationResult.toCurrency}
+              </span>
+              </div>
+
+              <div className="flex justify-between text-sm">
+              <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
+                {t('serviceFee')} (1%):
+              </span>
+                <span className={theme === "light" ? "text-gray-800" : "text-white"}>
+                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.serviceFeeAmount} {calculationResult.toCurrency}
+              </span>
+              </div>
+
+              <div className={cn(
+                  "flex justify-between pt-3 mt-3 border-t",
+                  theme === "light" ? "border-gray-300" : "border-gray-600"
+              )}>
+              <span className={cn(
+                  "font-semibold",
+                  theme === "light" ? "text-gray-700" : "text-gray-300"
+              )}>
+                {t('total')}:
+              </span>
+                <span className={cn(
+                    "font-bold",
+                    theme === "light" ? "text-gray-900" : "text-white"
+                )}>
+                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.totalAmount} {calculationResult.toCurrency}
+              </span>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div className="mt-6">
-          <Button
-            type="button"
-            onClick={() => setCurrentStep(2)}
-            variant={theme === "light" ? "gradient" : "default"}
-            className={cn(
-              "w-full py-6 text-lg group",
+
+          {/* Итоговый курс и кнопка подтверждения */}
+          <div className={cn(
+              "rounded-lg p-5",
               theme === "light"
-                ? ""
-                : "bg-otc-primary text-black hover:bg-otc-primary/90"
-            )}
-          >
-            <span className="flex items-center gap-2">
-              {t('continue')}
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </span>
-          </Button>
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600"
+                  : "bg-gradient-to-r from-blue-600 to-blue-700"
+          )}>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center">
+                {calculationResult.fromCurrency === "EUR" ? (
+                    <EuroIcon className="w-6 h-6 mr-3 text-white" />
+                ) : (
+                    <DollarSign className="w-6 h-6 mr-3 text-white" />
+                )}
+                <div>
+                  <div className="text-xs text-white/80 uppercase tracking-wider">
+                    {t('finalExchangeRate')}
+                  </div>
+                  <div className="text-xl font-bold text-white">
+                    1 {calculationResult.fromCurrency} = {calculationResult.finalRate} {calculationResult.toCurrency}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
   );
 }
