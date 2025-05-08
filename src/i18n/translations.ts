@@ -16,7 +16,7 @@ export type TranslationKey =
     | "orderLifetime" | "day" | "days" | "expiresOn" | "paymentPurpose"
     | "purposeExample" | "geography" | "country" | "city" | "selectCountry"
     | "selectCity" | "additionalNotes" | "notesPlaceholder" | "in" | "buy" | "sell"
-    | "with" | "for" | "adjustment" | "expiryDate"
+    | "with" | "for" | "adjustment" | "expiryDate" | "receive"
     // Additional translation keys
     | "dashboard" | "profile" | "settings" | "login" | "register" | "logout"
     | "loggedOut" | "loggedOutSuccess"
@@ -145,7 +145,8 @@ export const translations = {
     calculationDetails: "Calculation Details",
     paymentDetails: "Payment Details",
     basicDetails: "Basic Details",
-    additionalDetails: "Additional Details"
+    additionalDetails: "Additional Details",
+    receive: "receive",
   },
   ru: {
     welcome: "Добро пожаловать",
@@ -215,7 +216,7 @@ export const translations = {
     dynamicRate: "Динамический курс",
     fixedRate: "Фиксированный курс",
     rateSource: "Источник курса",
-    selectSource: "Выбрать источник",
+    selectSource: "Выберите источник",
     rateAdjustment: "Надбавка курса",
     enterFixedRate: "Ввести фиксированный курс",
     enterRateValue: "Ввести значение курса",
@@ -346,7 +347,8 @@ export const translations = {
     calculationDetails: "Детали расчета",
     paymentDetails: "Детали платежа",
     basicDetails: "Основные детали",
-    additionalDetails: "Дополнительные детали"
+    additionalDetails: "Дополнительные детали",
+    receive: "получить",
   }
 };
 
