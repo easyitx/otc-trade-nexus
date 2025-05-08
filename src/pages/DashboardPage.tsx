@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useAuth } from "../contexts/AuthContext";
 import { ArrowRight, CircleDollarSign, TrendingUp, Clock, Users, ArrowUpRight } from "lucide-react";
 import { tradePairs } from "../data/mockData";
-import { Order, OrderType } from "../types";
+import { Order, OrderType, Geography } from "../types";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
