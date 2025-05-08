@@ -84,11 +84,31 @@ export default function CreateOrderPage() {
       const pair = tradePairs.find(p => p.id === selectedPair);
       if (pair) {
         setSelectedPairInfo(pair);
+        // Set initial amount currency based on the selected pair and order type
+        updateAmountCurrency(pair, orderType);
       }
     } else {
       setSelectedPairInfo(null);
     }
   }, [selectedPair]);
+
+  // Update amount currency when order type changes
+  useEffect(() => {
+    if (selectedPairInfo) {
+      updateAmountCurrency(selectedPairInfo, orderType);
+    }
+  }, [orderType]);
+
+  // Function to update amount currency based on selected pair and order type
+  const updateAmountCurrency = (pairInfo: any, type: string) => {
+    if (type === "BUY") {
+      // When buying base currency, amount is in quote currency
+      setAmountCurrency(pairInfo.quoteCurrency);
+    } else {
+      // When selling base currency, amount is in base currency
+      setAmountCurrency(pairInfo.baseCurrency);
+    }
+  };
 
   // Simulate fetching current rates (in a real app, this would come from an API)
   useEffect(() => {
@@ -270,6 +290,20 @@ export default function CreateOrderPage() {
       </>
     );
   }
+
+  // Helper to get currency symbol
+  const getCurrencySymbol = (currency: string) => {
+    switch (currency) {
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "RUB":
+        return "₽";
+      default:
+        return "";
+    }
+  };
 
   return (
     <>
@@ -471,34 +505,30 @@ export default function CreateOrderPage() {
                           "absolute left-3 top-1/2 transform -translate-y-1/2",
                           theme === "light" ? "text-gray-500" : "text-gray-400"
                         )}>
-                          {amountCurrency === "USD" ? "$" : 
-                           amountCurrency === "EUR" ? "€" : 
-                           amountCurrency === "RUB" ? "₽" : ""}
+                          {getCurrencySymbol(amountCurrency)}
                         </span>
                       </div>
                       <div className="w-24">
-                        <Select value={amountCurrency} onValueChange={setAmountCurrency}>
-                          <SelectTrigger
-                            className={cn(
-                              theme === "light"
-                                ? "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
-                                : "bg-otc-active border-otc-active text-white"
-                            )}
-                          >
-                            <SelectValue placeholder="USD" />
-                          </SelectTrigger>
-                          <SelectContent className={cn(
-                            theme === "light"
-                              ? "bg-white border-gray-200"
-                              : "bg-otc-card border-otc-active"
-                          )}>
-                            <SelectItem value="USD">USD</SelectItem>
-                            <SelectItem value="EUR">EUR</SelectItem>
-                            <SelectItem value="RUB">RUB</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className={cn(
+                          "h-10 px-3 flex items-center justify-center rounded-md border",
+                          theme === "light"
+                            ? "bg-white border-gray-300 text-gray-900"
+                            : "bg-otc-active border-otc-active text-white"
+                        )}>
+                          {amountCurrency}
+                        </div>
                       </div>
                     </div>
+                    {selectedPairInfo && (
+                      <p className={cn(
+                        "text-sm mt-1",
+                        theme === "light" ? "text-gray-600" : "text-gray-400"
+                      )}>
+                        {orderType === "BUY" 
+                          ? `${t('amount')} ${t('in')} ${selectedPairInfo.quoteCurrency}`
+                          : `${t('amount')} ${t('in')} ${selectedPairInfo.baseCurrency}`}
+                      </p>
+                    )}
                   </div>
 
                   {/* Rate - Step 4 */}
