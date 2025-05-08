@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { countries } from "@/data/countries";
-import { cities } from "@/data/cities";
+import { citiesByCountry } from "@/data/cities";
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -55,10 +55,8 @@ export default function AdditionalDetailsStep({ formProps }: AdditionalDetailsSt
     setExpiryDate(newDate);
   };
 
-  // Get filtered cities based on selected country
-  const filteredCities = country 
-    ? cities.filter(c => c.country === country) 
-    : [];
+  // Get filtered cities based on selected country code
+  const filteredCities = country ? citiesByCountry[country] || [] : [];
 
   return (
     <>
@@ -165,9 +163,9 @@ export default function AdditionalDetailsStep({ formProps }: AdditionalDetailsSt
                   : "bg-otc-card border-otc-active"
               )}
             >
-              {countries.sort((a, b) => a.localeCompare(b)).map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
+              {countries.sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
+                <SelectItem key={c.code} value={c.code}>
+                  {c.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -200,9 +198,9 @@ export default function AdditionalDetailsStep({ formProps }: AdditionalDetailsSt
                       : "bg-otc-card border-otc-active" 
                   )}
                 >
-                  {filteredCities.sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
-                    <SelectItem key={c.name} value={c.name}>
-                      {c.name}
+                  {filteredCities.sort((a, b) => a.localeCompare(b)).map((cityName) => (
+                    <SelectItem key={cityName} value={cityName}>
+                      {cityName}
                     </SelectItem>
                   ))}
                 </SelectContent>

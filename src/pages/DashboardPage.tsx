@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MainLayout } from "../components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -7,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useAuth } from "../contexts/AuthContext";
 import { ArrowRight, CircleDollarSign, TrendingUp, Clock, Users, ArrowUpRight } from "lucide-react";
 import { tradePairs } from "../data/mockData";
-import { Order, OrderType } from "../types";
+import { Order, OrderType, Geography } from "../types";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -173,22 +172,31 @@ export default function DashboardPage() {
         return [];
       }
 
-      return data.map(order => ({
-        ...order,
-        createdAt: new Date(order.created_at),
-        updatedAt: new Date(order.updated_at),
-        expiresAt: new Date(order.expires_at),
-        userId: order.user_id,
-        tradePairId: "USD_USDT_PAIR", // Add default tradePairId
-        // Explicitly cast the type to OrderType
-        type: order.type === "BUY" || order.type === "SELL" 
-          ? order.type as OrderType 
-          : "BUY", // Default to BUY if not matching
-        // Ensure status is cast to the proper union type
-        status: ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED"].includes(order.status || "")
-          ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED"
-          : "ACTIVE" // Default to ACTIVE if not matching
-      }));
+      // Process the orders data to match our frontend types
+      return data.map(order => {
+        // Convert geography from JSON to Geography type
+        const geography: Geography = order.geography as unknown as Geography || { country: undefined, city: undefined };
+
+        return {
+          id: order.id,
+          type: order.type === "BUY" || order.type === "SELL" ? order.type as OrderType : "BUY",
+          amount: Number(order.amount),
+          amountCurrency: order.amount_currency || "USD",
+          rate: order.rate,
+          rateDetails: order.rate_details ? order.rate_details : undefined,
+          createdAt: new Date(order.created_at),
+          updatedAt: new Date(order.updated_at),
+          expiresAt: new Date(order.expires_at),
+          purpose: order.purpose || undefined,
+          notes: order.notes || undefined,
+          userId: order.user_id,
+          tradePairId: "USD_USDT_PAIR", // Default tradePairId
+          status: ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED"].includes(order.status || "") 
+            ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED" 
+            : "ACTIVE",
+          geography: geography
+        };
+      });
     }
   });
 

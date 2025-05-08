@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
-import type { Order as FrontendOrder } from '@/types';
+import type { Order as FrontendOrder, Geography } from '@/types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Json } from '@/integrations/supabase/types';
 
 // Adapter function to convert from Supabase format to frontend format
 const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
@@ -18,6 +19,9 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
   const orderStatus = ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED"].includes(order.status || "")
     ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED"
     : "ACTIVE"; // Default to ACTIVE if not matching
+
+  // Convert geography from JSON to Geography type
+  const geography: Geography = order.geography as unknown as Geography || { country: undefined, city: undefined };
 
   return {
     id: order.id,
@@ -33,7 +37,7 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     notes: order.notes || undefined,
     userId: order.user_id,
     status: orderStatus,
-    geography: order.geography || { country: undefined, city: undefined },
+    geography: geography,
     // Use a default tradePairId until we implement proper pair selection
     tradePairId: "USD_USDT_PAIR" 
   };
@@ -51,7 +55,7 @@ const adaptOrderToSupabase = (order: Omit<FrontendOrder, 'id' | 'userId' | 'crea
     purpose: order.purpose || null,
     notes: order.notes || null,
     status: order.status,
-    geography: order.geography || null
+    geography: order.geography as unknown as Json || null
   };
 };
 
