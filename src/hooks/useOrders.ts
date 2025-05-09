@@ -70,11 +70,24 @@ export interface OrdersQueryParams {
   };
 }
 
-// Helper function to convert amounts to USD equivalent for consistent comparison
+// Улучшенная функция конвертации в USD для унифицированного сравнения
 export const convertToUSD = (amount: number, currency: string, rate: string): number => {
+  // Для USD и USDT просто возвращаем значение без конвертации
   if (currency === "USD" || currency === "USDT") return amount;
-  // For other currencies, convert to USD based on rate
-  return amount / Number(rate);
+  
+  // Для других валют конвертируем в USD на основе курса
+  // Предполагаем, что rate - это соотношение валюты к USD
+  const numericRate = Number(rate);
+  
+  // Проверка на корректность курса и деление на ноль
+  if (isNaN(numericRate) || numericRate === 0) {
+    console.warn(`Некорректный курс для конвертации: ${rate}`);
+    return amount; // Возвращаем исходное значение, если курс некорректный
+  }
+  
+  const usdAmount = amount / numericRate;
+  console.log(`Конвертация: ${amount} ${currency} = ${usdAmount} USD (курс: ${rate})`);
+  return usdAmount;
 };
 
 export function useOrders() {

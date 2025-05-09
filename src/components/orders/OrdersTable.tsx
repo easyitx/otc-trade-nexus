@@ -8,6 +8,7 @@ import { Order } from "../../types";
 import { tradePairs } from "../../data/mockData";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { convertToUSD } from "@/hooks/useOrders";
 import {
   Table,
   TableBody,
@@ -31,22 +32,24 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   const sellOrders = orders.filter(order => order.type === "SELL")
     .sort((a, b) => Number(b.amount) - Number(a.amount));
     
-  // Calculate total volume for percentages
-  const totalBuyVolume = buyOrders.reduce((sum, order) => {
-    // Convert to USD equivalent for consistent comparison
+  // Calculate total volume for percentages in USD equivalent for consistent comparison
+  const totalBuyVolumeUSD = buyOrders.reduce((sum, order) => {
     const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
       ? Number(order.amount) 
       : Number(order.amount) / Number(order.rate);
     return sum + orderVolumeUSD;
   }, 0);
   
-  const totalSellVolume = sellOrders.reduce((sum, order) => {
-    // Convert to USD equivalent for consistent comparison
+  const totalSellVolumeUSD = sellOrders.reduce((sum, order) => {
     const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
       ? Number(order.amount) 
       : Number(order.amount) / Number(order.rate);
     return sum + orderVolumeUSD;
   }, 0);
+
+  // Для отладки выведем общие объемы
+  console.log('Общий объем покупок (USD):', totalBuyVolumeUSD);
+  console.log('Общий объем продаж (USD):', totalSellVolumeUSD);
 
   if (orders.length === 0) {
     return (
@@ -91,17 +94,25 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     }
   };
   
-  // Calculate the percentage of the total volume an order represents
+  // Улучшенная функция расчета процентного отображения объема заявки
   const calculateVolumePercentage = (order: Order, orderType: "BUY" | "SELL") => {
-    const totalVolume = orderType === "BUY" ? totalBuyVolume : totalSellVolume;
+    // Определяем общий объем для соответствующего типа заявки
+    const totalVolume = orderType === "BUY" ? totalBuyVolumeUSD : totalSellVolumeUSD;
     if (totalVolume === 0) return 0;
     
-    // Convert to USD equivalent for consistent comparison
+    // Конвертируем текущую заявку в USD для корректного сравнения
     const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
       ? Number(order.amount) 
       : Number(order.amount) / Number(order.rate);
-      
-    return (orderVolumeUSD / totalVolume) * 100;
+    
+    // Рассчитываем процент, но ограничиваем максимум до 100%
+    const percentage = (orderVolumeUSD / totalVolume) * 100;
+    
+    // Лог для отладки
+    console.log(`Заявка ${order.id} (${orderType}): объем ${orderVolumeUSD} USD, ${percentage.toFixed(2)}% от общего объема ${totalVolume} USD`);
+    
+    // Ограничиваем максимум до 100% и минимум до 5% для наглядности маленьких заявок
+    return Math.min(100, Math.max(5, percentage));
   };
 
   const OrderRow = ({ order, type }: { order: Order, type: "BUY" | "SELL" }) => {
@@ -142,7 +153,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
 
     return (
       <div className="relative group">
-        {/* Background fill based on percentage of total volume */}
+        {/* Фоновая заливка на основе процента от общего объема с улучшенной визуализацией */}
         <div 
           className={cn(
             "absolute inset-0 opacity-20 z-0",
