@@ -75,9 +75,12 @@ export const convertToUSD = (amount: number, currency: string, rate: string): nu
   // Для USD и USDT просто возвращаем значение без конвертации
   if (currency === "USD" || currency === "USDT") return amount;
   
+  // Удаляем нецифровые символы из строки курса, кроме точки
+  const cleanRate = String(rate).replace(/[^0-9.]/g, '');
+  
   // Для других валют конвертируем в USD на основе курса
   // Предполагаем, что rate - это соотношение валюты к USD
-  const numericRate = Number(rate);
+  const numericRate = Number(cleanRate);
   
   // Проверка на корректность курса и деление на ноль
   if (isNaN(numericRate) || numericRate === 0) {
@@ -86,7 +89,7 @@ export const convertToUSD = (amount: number, currency: string, rate: string): nu
   }
   
   const usdAmount = amount / numericRate;
-  console.log(`Конвертация: ${amount} ${currency} = ${usdAmount} USD (курс: ${rate})`);
+  console.log(`Конвертация: ${amount} ${currency} = ${usdAmount} USD (курс: ${numericRate})`);
   return usdAmount;
 };
 
@@ -268,6 +271,6 @@ export function useOrders() {
     createOrder,
     updateOrderStatus,
     useOrdersQuery,
-    convertToUSD // Экспортируем функцию для использования в других компонентах
+    convertToUSD
   };
 }

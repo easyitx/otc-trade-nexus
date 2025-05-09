@@ -2,18 +2,16 @@
 import { useState, useEffect } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Filter, Plus, Search, ArrowDownUp, List, LayoutGrid } from "lucide-react";
-import { tradePairs } from "../data/mockData";
+import { Filter, ArrowDownUp, List, LayoutGrid } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
 import { useOrders, OrdersQueryParams } from "@/hooks/useOrders";
-import { Order } from "@/types";
 import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -22,13 +20,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useDebounce } from "@/hooks/useDebounce";
 import { Progress } from "@/components/ui/progress";
 
 export default function OrdersPage() {
   const { theme } = useTheme();
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedPairGroup, setSelectedPairGroup] = useState<string>("all");
   const [volumeRange, setVolumeRange] = useState([0, 100]);
@@ -41,6 +36,7 @@ export default function OrdersPage() {
   const [pageSize] = useState(10);
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
   const [selectedPair, setSelectedPair] = useState<string>("all");
+  const [isOrdersLoading, setIsOrdersLoading] = useState(false);
 
   // Trading pairs for quick filtering
   const tradingPairs = [
@@ -63,7 +59,6 @@ export default function OrdersPage() {
     sortOrder: sortOrder,
     filter: {
       type: selectedType === 'all' ? undefined : selectedType as 'BUY' | 'SELL' | undefined,
-      search: debouncedSearchTerm || undefined,
       minAmount: actualMinVolume,
       maxAmount: actualMaxVolume,
       tradePair: selectedPair === 'all' ? undefined : selectedPair
@@ -74,10 +69,15 @@ export default function OrdersPage() {
   const { useOrdersQuery } = useOrders();
   const { 
     data: ordersData,
-    isLoading: isLoadingOrders,
+    isLoading: queryLoading,
     isError,
     refetch
   } = useOrdersQuery(queryParams);
+
+  // Отслеживаем изменение состояния загрузки заявок для отображения скелетонов
+  useEffect(() => {
+    setIsOrdersLoading(queryLoading);
+  }, [queryLoading]);
 
   // Refetch when sort parameters change
   useEffect(() => {
@@ -106,14 +106,12 @@ export default function OrdersPage() {
   // Reset to first page when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedType, selectedPairGroup, debouncedSearchTerm, volumeRange, selectedPair]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+  }, [selectedType, selectedPairGroup, volumeRange, selectedPair]);
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // Прокрутим страницу вверх при изменении страницы
+    window.scrollTo(0, 0);
   };
 
   const handleSortChange = (value: string) => {
@@ -157,15 +155,28 @@ export default function OrdersPage() {
     }).format(actualValue);
   };
 
-  // Calculate total volume in USD for display
-  const calculateTotalVolumeUSD = (orders: Order[]) => {
-    return orders.reduce((sum, order) => {
-      // Convert to USD equivalent 
-      const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
-        ? Number(order.amount) 
-        : Number(order.amount) / Number(order.rate);
-      return sum + orderVolumeUSD;
-    }, 0);
+  // Calculate total volume in USD for both buy and sell orders
+  const buyOrdersVolume = ordersData?.orders.filter(o => o.type === "BUY").reduce((sum, order) => {
+    return sum + convertToUSD(Number(order.amount), order.amountCurrency || 'USD', order.rate);
+  }, 0) || 0;
+  
+  const sellOrdersVolume = ordersData?.orders.filter(o => o.type === "SELL").reduce((sum, order) => {
+    return sum + convertToUSD(Number(order.amount), order.amountCurrency || 'USD', order.rate);
+  }, 0) || 0;
+  
+  const totalVolumeUSD = buyOrdersVolume + sellOrdersVolume;
+
+  // Функция для конвертации в USD
+  const convertToUSD = (amount: number, currency: string, rate: string): number => {
+    if (currency === "USD" || currency === "USDT") return amount;
+    
+    const numericRate = Number(rate.replace(/[^0-9.]/g, ''));
+    
+    if (isNaN(numericRate) || numericRate === 0) {
+      return amount;
+    }
+    
+    return amount / numericRate;
   };
 
   // Generate pagination items
@@ -220,13 +231,35 @@ export default function OrdersPage() {
     return items;
   };
 
-  if (isLoadingOrders) {
-    return (
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-otc-primary"></div>
-        </div>
-    );
-  }
+  // Скелетон для заявок при загрузке
+  const OrdersSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 p-0">
+      <div className="space-y-2 p-4">
+        {Array(3).fill(0).map((_, i) => (
+          <div key={i} className="border rounded-md p-4 relative">
+            <div className="flex justify-between">
+              <Skeleton className="h-6 w-24 mb-2" />
+              <Skeleton className="h-6 w-16" />
+            </div>
+            <Skeleton className="h-8 w-36 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2 p-4">
+        {Array(3).fill(0).map((_, i) => (
+          <div key={i} className="border rounded-md p-4 relative">
+            <div className="flex justify-between">
+              <Skeleton className="h-6 w-24 mb-2" />
+              <Skeleton className="h-6 w-16" />
+            </div>
+            <Skeleton className="h-8 w-36 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   if (isError) {
     return (
@@ -245,72 +278,52 @@ export default function OrdersPage() {
   // Calculate the number of buy and sell orders
   const buyOrdersCount = ordersData?.orders.filter(o => o.type === "BUY").length || 0;
   const sellOrdersCount = ordersData?.orders.filter(o => o.type === "SELL").length || 0;
-  
-  // Calculate total volume in USD for both buy and sell orders
-  const buyOrdersVolume = calculateTotalVolumeUSD(ordersData?.orders.filter(o => o.type === "BUY") || []);
-  const sellOrdersVolume = calculateTotalVolumeUSD(ordersData?.orders.filter(o => o.type === "SELL") || []);
-  const totalVolumeUSD = buyOrdersVolume + sellOrdersVolume;
 
   return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className={cn(
-            "text-2xl font-bold", 
-            theme === "light" ? "text-foreground" : "text-white"
-          )}>ОТС Заявки</h1>
-          <Button className="bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
-            <Link to="/create-order">
-              <Plus className="mr-2 h-4 w-4" />
-              Новая заявка
-            </Link>
-          </Button>
-        </div>
-        
-        {/* Compact Filters */}
-        <Card className={cn(
-          "p-3",
-          theme === "light" 
-            ? "bg-card border-border" 
-            : "bg-otc-card border-otc-active"
-        )}>
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-3 items-center">
-              {/* Search input */}
-              <div className="relative flex-1 min-w-[200px] max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Поиск заявок..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  className={cn(
-                    "pl-10 h-10",
-                    theme === "light" 
-                      ? "bg-accent/50 border-accent" 
-                      : "bg-otc-active border-otc-active text-white"
-                  )}
-                />
-              </div>
-              
-              {/* Type filter */}
-              <ToggleGroup 
-                type="single" 
-                value={selectedType} 
-                onValueChange={(value) => value && setSelectedType(value)}
-                className="border rounded-md"
-              >
-                <ToggleGroupItem value="all" aria-label="Toggle all types">
-                  Все типы
-                </ToggleGroupItem>
-                <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500">
-                  Покупка
-                </ToggleGroupItem>
-                <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500">
-                  Продажа
-                </ToggleGroupItem>
-              </ToggleGroup>
-              
-              {/* View mode toggle */}
-              <div className="flex gap-1 ml-auto">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className={cn(
+          "text-2xl font-bold", 
+          theme === "light" ? "text-foreground" : "text-white"
+        )}>ОТС Заявки</h1>
+        <Button className="bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
+          <Link to="/create-order">
+            <span className="mr-2">+</span>
+            Новая заявка
+          </Link>
+        </Button>
+      </div>
+      
+      {/* Компактная панель фильтров */}
+      <Card className={cn(
+        "p-3",
+        theme === "light" 
+          ? "bg-card border-border" 
+          : "bg-otc-card border-otc-active"
+      )}>
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-3 items-center justify-between">
+            {/* Панель фильтров по типу заявки */}
+            <ToggleGroup 
+              type="single" 
+              value={selectedType} 
+              onValueChange={(value) => value && setSelectedType(value)}
+              className="border rounded-md"
+            >
+              <ToggleGroupItem value="all" aria-label="Toggle all types">
+                Все типы
+              </ToggleGroupItem>
+              <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500">
+                Покупка
+              </ToggleGroupItem>
+              <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500">
+                Продажа
+              </ToggleGroupItem>
+            </ToggleGroup>
+            
+            <div className="flex items-center gap-2 ml-auto">
+              {/* Режим отображения */}
+              <div className="flex gap-1">
                 <Button 
                   variant={viewMode === "cards" ? "default" : "outline"} 
                   size="icon"
@@ -343,41 +356,42 @@ export default function OrdersPage() {
                 </Button>
               </div>
               
-              {/* Sort dropdown */}
-              <div className="w-44">
-                <Select value={sortBy === 'amount' && sortOrder === 'desc' ? 'highest_volume' : 
-                         sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
-                         sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
-                         sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
-                         sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
-                         sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
-                      onValueChange={handleSortChange}>
-                  <SelectTrigger className={cn(
-                    theme === "light" 
-                      ? "bg-accent/50 border-accent" 
-                      : "bg-otc-active border-otc-active text-white"
-                  )}>
-                    <ArrowDownUp className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Сортировка" />
-                  </SelectTrigger>
-                  <SelectContent className={cn(
-                    theme === "light" 
-                      ? "bg-card border-border" 
-                      : "bg-otc-card border-otc-active"
-                  )}>
-                    <SelectItem value="newest">Новые заявки</SelectItem>
-                    <SelectItem value="oldest">Старые заявки</SelectItem>
-                    <SelectItem value="highest_rate">Лучший курс (макс)</SelectItem>
-                    <SelectItem value="lowest_rate">Лучший курс (мин)</SelectItem>
-                    <SelectItem value="highest_volume">Объем (макс)</SelectItem>
-                    <SelectItem value="lowest_volume">Объем (мин)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Сортировка */}
+              <Select 
+                value={sortBy === 'amount' && sortOrder === 'desc' ? 'highest_volume' : 
+                       sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
+                       sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
+                       sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
+                       sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
+                       sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
+                onValueChange={handleSortChange}
+              >
+                <SelectTrigger className={cn(
+                  "w-[180px]",
+                  theme === "light" 
+                    ? "bg-accent/50 border-accent" 
+                    : "bg-otc-active border-otc-active text-white"
+                )}>
+                  <ArrowDownUp className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Сортировка" />
+                </SelectTrigger>
+                <SelectContent className={cn(
+                  theme === "light" 
+                    ? "bg-card border-border" 
+                    : "bg-otc-card border-otc-active"
+                )}>
+                  <SelectItem value="highest_volume">Объем (макс)</SelectItem>
+                  <SelectItem value="lowest_volume">Объем (мин)</SelectItem>
+                  <SelectItem value="highest_rate">Курс (макс)</SelectItem>
+                  <SelectItem value="lowest_rate">Курс (мин)</SelectItem>
+                  <SelectItem value="newest">Новые заявки</SelectItem>
+                  <SelectItem value="oldest">Старые заявки</SelectItem>
+                </SelectContent>
+              </Select>
               
+              {/* Кнопка дополнительных фильтров */}
               <Button 
                 variant="outline" 
-                size="sm"
                 onClick={() => setIsAdvancedFiltersOpen(!isAdvancedFiltersOpen)}
                 className={cn(
                   "flex items-center gap-1",
@@ -390,178 +404,193 @@ export default function OrdersPage() {
                 Фильтры
               </Button>
             </div>
-            
-            {/* Trading pairs filter buttons */}
-            <div className="flex flex-wrap gap-2">
-              <ToggleGroup 
-                type="single" 
-                value={selectedPair}
-                onValueChange={(value) => value && setSelectedPair(value)}
-                className="flex flex-wrap gap-1"
+          </div>
+          
+          {/* Кнопки фильтрации по торговым парам */}
+          <div className="flex flex-wrap gap-2">
+            <ToggleGroup 
+              type="single" 
+              value={selectedPair}
+              onValueChange={(value) => value && setSelectedPair(value)}
+              className="flex flex-wrap gap-1"
+            >
+              <ToggleGroupItem 
+                value="all" 
+                className={cn(
+                  "text-sm px-3 py-1 rounded-full",
+                  selectedPair === "all" ? "bg-otc-primary text-black" : 
+                  theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
+                )}
               >
+                Все пары
+              </ToggleGroupItem>
+              {tradingPairs.map(pair => (
                 <ToggleGroupItem 
-                  value="all" 
+                  key={pair.id} 
+                  value={pair.id}
                   className={cn(
                     "text-sm px-3 py-1 rounded-full",
-                    selectedPair === "all" ? "bg-otc-primary text-black" : 
+                    selectedPair === pair.id ? "bg-otc-primary text-black" : 
                     theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
                   )}
                 >
-                  Все пары
+                  {pair.display}
                 </ToggleGroupItem>
-                {tradingPairs.map(pair => (
-                  <ToggleGroupItem 
-                    key={pair.id} 
-                    value={pair.id}
-                    className={cn(
-                      "text-sm px-3 py-1 rounded-full",
-                      selectedPair === pair.id ? "bg-otc-primary text-black" : 
-                      theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
-                    )}
-                  >
-                    {pair.display}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-            
-            {/* Advanced filters (collapsible) */}
-            {isAdvancedFiltersOpen && (
-              <div className="pt-3 border-t border-border">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="flex-1 w-full">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Объем: {formatVolumeLabel(volumeRange[0])} - {formatVolumeLabel(volumeRange[1])} RUB</span>
-                    </div>
-                    <Slider
-                      defaultValue={[0, 100]}
-                      value={volumeRange}
-                      onValueChange={(value) => {
-                        setVolumeRange(value);
-                      }}
-                      max={100}
-                      step={1}
-                      className="w-full"
-                    />
+              ))}
+            </ToggleGroup>
+          </div>
+          
+          {/* Дополнительные фильтры (сворачиваемые) */}
+          {isAdvancedFiltersOpen && (
+            <div className="pt-3 border-t border-border">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="flex-1 w-full">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs text-muted-foreground">Объем: {formatVolumeLabel(volumeRange[0])} - {formatVolumeLabel(volumeRange[1])}</span>
                   </div>
-                  
-                  <div className="w-full md:w-56">
-                    <Select value={selectedPairGroup} onValueChange={value => {
-                      setSelectedPairGroup(value);
-                    }}>
-                      <SelectTrigger className={cn(
-                        theme === "light" 
-                          ? "bg-accent/50 border-accent" 
-                          : "bg-otc-active border-otc-active text-white"
-                      )}>
-                        <SelectValue placeholder="Группа пар" />
-                      </SelectTrigger>
-                      <SelectContent className={cn(
-                        theme === "light" 
-                          ? "bg-card border-border" 
-                          : "bg-otc-card border-otc-active"
-                      )}>
-                        <SelectItem value="all">Все группы</SelectItem>
-                        <SelectItem value="RUB_NR">RUB (НР)</SelectItem>
-                        <SelectItem value="RUB_CASH">RUB (Нал)</SelectItem>
-                        <SelectItem value="TOKENIZED">Токенизированные</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Slider
+                    value={volumeRange}
+                    onValueChange={(value) => {
+                      setVolumeRange(value);
+                    }}
+                    max={100}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="w-full md:w-56">
+                  <Select value={selectedPairGroup} onValueChange={value => {
+                    setSelectedPairGroup(value);
+                  }}>
+                    <SelectTrigger className={cn(
+                      theme === "light" 
+                        ? "bg-accent/50 border-accent" 
+                        : "bg-otc-active border-otc-active text-white"
+                    )}>
+                      <SelectValue placeholder="Группа пар" />
+                    </SelectTrigger>
+                    <SelectContent className={cn(
+                      theme === "light" 
+                        ? "bg-card border-border" 
+                        : "bg-otc-card border-otc-active"
+                    )}>
+                      <SelectItem value="all">Все группы</SelectItem>
+                      <SelectItem value="RUB_NR">RUB (НР)</SelectItem>
+                      <SelectItem value="RUB_CASH">RUB (Нал)</SelectItem>
+                      <SelectItem value="TOKENIZED">Токенизированные</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            )}
-          </div>
-        </Card>
-        
-        {/* Orders table with stats */}
-        <div className={cn(
-          "border rounded-lg overflow-hidden",
-          theme === "light" 
-            ? "bg-card border-border" 
-            : "bg-otc-card border-otc-active"
-        )}>
-          <div className={cn(
-            "p-3 border-b flex flex-wrap gap-4 justify-between",
-            theme === "light" ? "border-border" : "border-otc-active"
-          )}>
-            <div className="flex flex-wrap gap-6">
-              <div>
-                <p className="text-xs text-muted-foreground">Всего заявок</p>
-                <p className={cn(
-                  "text-xl font-bold",
-                  theme === "light" ? "text-foreground" : "text-white"
-                )}>{ordersData?.totalCount || 0}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Покупка</p>
-                <p className="text-xl font-bold text-green-500">
-                  {buyOrdersCount}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Продажа</p>
-                <p className="text-xl font-bold text-red-500">
-                  {sellOrdersCount}
-                </p>
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Общий объем на странице</p>
-              <p className={cn(
-                "text-xl font-bold",
-                theme === "light" ? "text-foreground" : "text-white"
-              )}>
-                {new Intl.NumberFormat("ru-RU", {
-                  style: "decimal",
-                  maximumFractionDigits: 0,
-                }).format(totalVolumeUSD)} USD
-              </p>
-            </div>
-          </div>
-          
-          {/* Volume comparison chart */}
-          <div className="px-3 py-2 border-b flex items-center space-x-2">
-            <div className="h-4 bg-green-500 rounded-sm" style={{ width: `${(buyOrdersVolume / totalVolumeUSD) * 100}%` }}></div>
-            <div className="h-4 bg-red-500 rounded-sm" style={{ width: `${(sellOrdersVolume / totalVolumeUSD) * 100}%` }}></div>
-          </div>
-          
-          <OrdersTable orders={ordersData?.orders || []} showDetailedView={viewMode === "table"} />
-          
-          {/* Pagination */}
-          {ordersData && ordersData.totalPages > 1 && (
-            <div className={cn(
-              "p-4 border-t",
-              theme === "light" ? "border-border" : "border-otc-active"
-            )}>
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                      className={cn(
-                        "cursor-pointer",
-                        currentPage === 1 && "opacity-50 cursor-not-allowed"
-                      )} 
-                    />
-                  </PaginationItem>
-                  
-                  {renderPaginationItems()}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => currentPage < (ordersData?.totalPages || 1) && handlePageChange(currentPage + 1)}
-                      className={cn(
-                        "cursor-pointer",
-                        currentPage === (ordersData?.totalPages || 1) && "opacity-50 cursor-not-allowed"
-                      )}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
             </div>
           )}
         </div>
+      </Card>
+      
+      {/* Таблица заявок со статистикой */}
+      <div className={cn(
+        "border rounded-lg overflow-hidden",
+        theme === "light" 
+          ? "bg-card border-border" 
+          : "bg-otc-card border-otc-active"
+      )}>
+        <div className={cn(
+          "p-3 border-b flex flex-wrap gap-4 justify-between",
+          theme === "light" ? "border-border" : "border-otc-active"
+        )}>
+          <div className="flex flex-wrap gap-6">
+            <div>
+              <p className="text-xs text-muted-foreground">Всего заявок</p>
+              <p className={cn(
+                "text-xl font-bold",
+                theme === "light" ? "text-foreground" : "text-white"
+              )}>{ordersData?.totalCount || 0}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Покупка</p>
+              <p className="text-xl font-bold text-green-500">
+                {buyOrdersCount}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Продажа</p>
+              <p className="text-xl font-bold text-red-500">
+                {sellOrdersCount}
+              </p>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Общий объем на странице</p>
+            <p className={cn(
+              "text-xl font-bold",
+              theme === "light" ? "text-foreground" : "text-white"
+            )}>
+              {new Intl.NumberFormat("ru-RU", {
+                style: "decimal",
+                maximumFractionDigits: 0,
+              }).format(totalVolumeUSD)} USD
+            </p>
+          </div>
+        </div>
+        
+        {/* График сравнения объемов */}
+        {totalVolumeUSD > 0 && (
+          <div className="px-3 py-2 border-b">
+            <div className="flex h-4 w-full rounded-sm overflow-hidden">
+              <div 
+                className="h-full bg-green-500" 
+                style={{ width: `${(buyOrdersVolume / totalVolumeUSD) * 100}%` }}
+              ></div>
+              <div 
+                className="h-full bg-red-500" 
+                style={{ width: `${(sellOrdersVolume / totalVolumeUSD) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+        
+        {/* Отображение заявок или скелетона при загрузке */}
+        {isOrdersLoading ? (
+          <OrdersSkeleton />
+        ) : (
+          <OrdersTable orders={ordersData?.orders || []} showDetailedView={viewMode === "table"} />
+        )}
+        
+        {/* Пагинация */}
+        {ordersData && ordersData.totalPages > 1 && (
+          <div className={cn(
+            "p-4 border-t",
+            theme === "light" ? "border-border" : "border-otc-active"
+          )}>
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    className={cn(
+                      "cursor-pointer",
+                      currentPage === 1 && "opacity-50 cursor-not-allowed"
+                    )} 
+                  />
+                </PaginationItem>
+                
+                {renderPaginationItems()}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => currentPage < (ordersData?.totalPages || 1) && handlePageChange(currentPage + 1)}
+                    className={cn(
+                      "cursor-pointer",
+                      currentPage === (ordersData?.totalPages || 1) && "opacity-50 cursor-not-allowed"
+                    )}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
+    </div>
   );
 }

@@ -34,16 +34,12 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     
   // Calculate total volume for percentages in USD equivalent for consistent comparison
   const totalBuyVolumeUSD = buyOrders.reduce((sum, order) => {
-    const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
-      ? Number(order.amount) 
-      : Number(order.amount) / Number(order.rate);
+    const orderVolumeUSD = convertToUSD(Number(order.amount), order.amountCurrency || "USD", order.rate);
     return sum + orderVolumeUSD;
   }, 0);
   
   const totalSellVolumeUSD = sellOrders.reduce((sum, order) => {
-    const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
-      ? Number(order.amount) 
-      : Number(order.amount) / Number(order.rate);
+    const orderVolumeUSD = convertToUSD(Number(order.amount), order.amountCurrency || "USD", order.rate);
     return sum + orderVolumeUSD;
   }, 0);
 
@@ -101,9 +97,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     if (totalVolume === 0) return 0;
     
     // Конвертируем текущую заявку в USD для корректного сравнения
-    const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
-      ? Number(order.amount) 
-      : Number(order.amount) / Number(order.rate);
+    const orderVolumeUSD = convertToUSD(Number(order.amount), order.amountCurrency || "USD", order.rate);
     
     // Рассчитываем процент, но ограничиваем максимум до 100%
     const percentage = (orderVolumeUSD / totalVolume) * 100;
@@ -115,10 +109,39 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     return Math.min(100, Math.max(5, percentage));
   };
 
+  // Функция для определения торговой пары
+  const getTradePairComponents = (order: Order) => {
+    const baseCurrency = order.amountCurrency || "RUB";
+    const quoteCurrency = baseCurrency === "RUB" ? "USDT" : "RUB";
+    
+    return { baseCurrency, quoteCurrency };
+  };
+
+  // Функция для получения текстового описания направления обмена
+  const getTradeDirection = (order: Order) => {
+    const { baseCurrency, quoteCurrency } = getTradePairComponents(order);
+    
+    if (order.type === "BUY") {
+      return {
+        buying: quoteCurrency,
+        selling: baseCurrency,
+        direction: `Покупает ${quoteCurrency} за ${baseCurrency}`
+      };
+    } else {
+      return {
+        buying: baseCurrency,
+        selling: quoteCurrency,
+        direction: `Продает ${baseCurrency} за ${quoteCurrency}`
+      };
+    }
+  };
+
   const OrderRow = ({ order, type }: { order: Order, type: "BUY" | "SELL" }) => {
     const isGreen = type === "BUY";
     const volumePercentage = calculateVolumePercentage(order, type);
-    const tradePairDisplay = order.amountCurrency === "RUB" ? "RUB/USDT" : "USDT/RUB";
+    const { baseCurrency, quoteCurrency } = getTradePairComponents(order);
+    const tradePairDisplay = `${baseCurrency}/${quoteCurrency}`;
+    const tradeDirection = getTradeDirection(order);
     const formattedRate = getFormattedRateDisplay(order);
     const rateType = getRateDescription(order);
     
@@ -186,7 +209,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
                 {formatAmount(Number(order.amount))} {order.amountCurrency}
               </div>
               <div className="text-xs text-muted-foreground">
-                {tradePairDisplay} • истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
+                <span className="font-medium">{tradeDirection.direction}</span> • истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
               </div>
             </div>
           </div>
@@ -233,7 +256,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   );
 
   const CardsView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 p-0">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
       {/* Buy Orders */}
       <div className={cn(
         "backdrop-blur-xl border rounded-lg overflow-hidden",
@@ -257,6 +280,11 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           {buyOrders.map((order) => (
             <OrderRow key={order.id} order={order} type="BUY" />
           ))}
+          {buyOrders.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground">
+              Нет активных заявок на покупку
+            </div>
+          )}
         </div>
       </div>
 
@@ -283,6 +311,11 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           {sellOrders.map((order) => (
             <OrderRow key={order.id} order={order} type="SELL" />
           ))}
+          {sellOrders.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground">
+              Нет активных заявок на продажу
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -290,4 +323,3 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
 
   return showDetailedView ? <DetailedView /> : <CardsView />;
 };
-
