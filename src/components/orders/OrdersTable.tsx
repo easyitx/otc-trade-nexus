@@ -46,11 +46,26 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     }).format(amount);
   };
 
+  const getRateDescription = (order: Order) => {
+    if (!order.rateDetails) return "Фиксированный";
+    
+    if (order.rateDetails.type === "dynamic") {
+      const source = order.rateDetails.source || "ЦБ";
+      const adjustment = order.rateDetails.adjustment !== undefined 
+        ? `+${order.rateDetails.adjustment}%` 
+        : "";
+      return `Динамичный ${source}${adjustment}`;
+    }
+    
+    return "Фиксированный";
+  };
+
   const OrderRow = ({ order, type }: { order: Order, type: "BUY" | "SELL" }) => {
     const pair = tradePairs[0];
     const isGreen = type === "BUY";
     const volume = (Number(order.amount) / Number(order.rate)).toFixed(3);
-    const rateType = order.rateDetails?.type === "dynamic" ? "Динамический" : "Фиксированный";
+    const rateType = getRateDescription(order);
+    const tradePairDisplay = order.amountCurrency === "RUB" ? "RUB/USDT" : "USDT/RUB";
     
     if (showDetailedView) {
       return (
@@ -64,6 +79,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
             {order.rate}
           </TableCell>
           <TableCell>{rateType}</TableCell>
+          <TableCell>{tradePairDisplay}</TableCell>
           <TableCell>{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}</TableCell>
           <TableCell>
             <Button 
@@ -88,51 +104,43 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           "group-hover:from-accent/20 group-hover:via-accent/20 group-hover:to-transparent transition-all duration-300"
         )} />
         <div className={cn(
-          "relative flex items-center justify-between p-4 border-b",
+          "relative flex items-center justify-between p-3 border-b",
           theme === "light" ? "border-border" : "border-white/10"
         )}>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {type === "BUY" ? (
               <ArrowUpRight className="h-4 w-4 text-green-500" />
             ) : (
               <ArrowDownRight className="h-4 w-4 text-red-500" />
             )}
             <div>
-              <div className={`text-lg font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-                {order.rate}
+              <div className="flex items-center gap-1">
+                <span className={`text-lg font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
+                  {order.rate}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {rateType}
+                </span>
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm font-medium">
                 {formatAmount(Number(order.amount))} {order.amountCurrency}
               </div>
               <div className="text-xs text-muted-foreground">
-                {formatAmount(Number(volume))} USDT
+                {tradePairDisplay} • {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">
-                {pair?.displayName || "RUB/USDT"}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}
-              </div>
-              <div className={cn("text-xs", theme === "light" ? "text-foreground/70" : "text-white/70")}>
-                {rateType}
-              </div>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              asChild
-            >
-              <Link to={`/orders/${order.id}`}>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            asChild
+          >
+            <Link to={`/orders/${order.id}`}>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     );
@@ -147,11 +155,12 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
             theme === "light" ? "bg-accent/50" : "bg-white/5 border-white/10"
           )}>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Тип</TableHead>
-            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Количество</TableHead>
-            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Объём (USDT)</TableHead>
+            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Объем</TableHead>
+            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>USDT</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Курс</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Тип курса</TableHead>
-            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Срок действия</TableHead>
+            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Пара</TableHead>
+            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Срок</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white w-[50px]")}></TableHead>
           </TableRow>
         </TableHeader>
@@ -165,25 +174,25 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   );
 
   const CardsView = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-3">
       {/* Buy Orders */}
       <div className={cn(
-        "backdrop-blur-xl border rounded-2xl overflow-hidden",
+        "backdrop-blur-xl border rounded-lg overflow-hidden",
         theme === "light" 
           ? "bg-white border-border shadow-card" 
           : "bg-white/5 border-white/10"
       )}>
         <div className={cn(
-          "p-4 border-b",
+          "p-3 border-b",
           theme === "light" ? "bg-green-500/10 border-border" : "bg-green-500/10 border-white/10"
         )}>
-          <h3 className="text-lg font-semibold text-green-500">Buy Orders</h3>
-          <p className="text-sm text-muted-foreground">
-            Total Volume: {formatAmount(buyOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
+          <h3 className="text-base font-semibold text-green-500">Buy Orders</h3>
+          <p className="text-xs text-muted-foreground">
+            Total: {formatAmount(buyOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
           </p>
         </div>
         <div className={cn(
-          "divide-y", 
+          "divide-y max-h-[350px] overflow-y-auto", 
           theme === "light" ? "divide-border" : "divide-white/10"
         )}>
           {buyOrders.map((order) => (
@@ -194,22 +203,22 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
 
       {/* Sell Orders */}
       <div className={cn(
-        "backdrop-blur-xl border rounded-2xl overflow-hidden",
+        "backdrop-blur-xl border rounded-lg overflow-hidden",
         theme === "light" 
           ? "bg-white border-border shadow-card" 
           : "bg-white/5 border-white/10"
       )}>
         <div className={cn(
-          "p-4 border-b",
+          "p-3 border-b",
           theme === "light" ? "bg-red-500/10 border-border" : "bg-red-500/10 border-white/10"
         )}>
-          <h3 className="text-lg font-semibold text-red-500">Sell Orders</h3>
-          <p className="text-sm text-muted-foreground">
-            Total Volume: {formatAmount(sellOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
+          <h3 className="text-base font-semibold text-red-500">Sell Orders</h3>
+          <p className="text-xs text-muted-foreground">
+            Total: {formatAmount(sellOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
           </p>
         </div>
         <div className={cn(
-          "divide-y", 
+          "divide-y max-h-[350px] overflow-y-auto", 
           theme === "light" ? "divide-border" : "divide-white/10"
         )}>
           {sellOrders.map((order) => (
