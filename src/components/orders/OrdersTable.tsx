@@ -1,22 +1,17 @@
 
-import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
-import { ru } from "date-fns/locale";
-import { ArrowRight, ArrowUpRight, ArrowDownRight, Archive } from "lucide-react";
-import { Button } from "../ui/button";
-import { Order } from "../../types";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Order } from "@/types";
 import { cn } from "@/lib/utils";
 import { convertToUSD } from "@/hooks/useOrders";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { Badge } from "../ui/badge";
+import { OrderCard } from "./OrderCard";
+import { OrderTableRow } from "./OrderTableRow";
 
 interface OrdersTableProps {
   orders: Order[];
@@ -43,10 +38,6 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     return sum + orderVolumeUSD;
   }, 0);
 
-  // Для отладки выведем общие объемы
-  console.log('Общий объем покупок (USD):', totalBuyVolumeUSD);
-  console.log('Общий объем продаж (USD):', totalSellVolumeUSD);
-
   if (orders.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -55,251 +46,33 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     );
   }
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat("ru-RU", {
-      style: "decimal",
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const getRateDescription = (order: Order) => {
-    if (!order.rateDetails) return "Фиксированный";
-    
-    if (order.rateDetails.type === "dynamic") {
-      const source = order.rateDetails.source || "ЦБ";
-      const adjustment = order.rateDetails.adjustment !== undefined 
-        ? `+${order.rateDetails.adjustment}%` 
-        : "";
-      return `Динамичный ${source}${adjustment}`;
-    }
-    
-    return "Фиксированный";
-  };
-  
-  const getFormattedRateDisplay = (order: Order) => {
-    if (order.type === "BUY") {
-      return order.rateDetails?.type === "dynamic" 
-        ? `ЦБ+${order.rateDetails.adjustment}%` 
-        : `${order.rate}`;
-    } else {
-      // For sell orders
-      return order.rateDetails?.type === "dynamic" 
-        ? `ЦБ+${order.rateDetails.adjustment}%` 
-        : `${order.rate}`;
-    }
-  };
-  
-  // Улучшенная функция расчета процентного отображения объема заявки
+  // Calculate volume percentage for visual representation
   const calculateVolumePercentage = (order: Order, orderType: "BUY" | "SELL") => {
     try {
-      // Определяем общий объем для соответствующего типа заявки
+      // Determine total volume for corresponding order type
       const totalVolume = orderType === "BUY" ? totalBuyVolumeUSD : totalSellVolumeUSD;
-      if (totalVolume <= 0) return 5; // Минимальное значение для отображения
+      if (totalVolume <= 0) return 5; // Minimum value for display
       
-      // Конвертируем текущую заявку в USD для корректного сравнения
+      // Convert current order to USD for consistent comparison
       const orderVolumeUSD = convertToUSD(Number(order.amount), order.amountCurrency || "USD", order.rate);
       
-      // Рассчитываем процент, но ограничиваем максимум до 100%
+      // Calculate percentage but limit maximum to 100%
       const percentage = (orderVolumeUSD / totalVolume) * 100;
       
-      // Лог для отладки
-      console.log(`Заявка ${order.id} (${orderType}): объем ${orderVolumeUSD.toFixed(2)} USD, ${percentage.toFixed(2)}% от общего объема ${totalVolume.toFixed(2)} USD`);
-      
-      // Ограничиваем максимум до 100% и минимум до 5% для наглядности маленьких заявок
+      // Limit maximum to 100% and minimum to 5% for visibility of small orders
       return Math.min(100, Math.max(5, percentage));
     } catch (error) {
-      console.error("Ошибка при расчете процента объема:", error);
-      return 5; // Возвращаем минимальное значение в случае ошибки
+      console.error("Error calculating volume percentage:", error);
+      return 5; // Return minimum value in case of error
     }
   };
 
-  // Функция для определения торговой пары
-  const getTradePairComponents = (order: Order) => {
-    const baseCurrency = order.amountCurrency || "RUB";
-    const quoteCurrency = baseCurrency === "RUB" ? "USDT" : "RUB";
-    
-    return { baseCurrency, quoteCurrency };
+  // Check if order is expired or archived
+  const isExpiredOrArchived = (order: Order): boolean => {
+    return order.status === "ARCHIVED" || new Date(order.expiresAt) < new Date();
   };
 
-  // Функция для получения текстового описания направления обмена
-  const getTradeDirection = (order: Order) => {
-    const { baseCurrency, quoteCurrency } = getTradePairComponents(order);
-    
-    if (order.type === "BUY") {
-      return {
-        buying: quoteCurrency,
-        selling: baseCurrency,
-        direction: `Покупает ${quoteCurrency} за ${baseCurrency}`,
-        fullDirection: `Хочет купить ${quoteCurrency} и отдать ${baseCurrency}`
-      };
-    } else {
-      return {
-        buying: baseCurrency,
-        selling: quoteCurrency,
-        direction: `Продает ${baseCurrency} за ${quoteCurrency}`,
-        fullDirection: `Хочет продать ${baseCurrency} и получить ${quoteCurrency}`
-      };
-    }
-  };
-
-  // Функция для проверки статуса и срока действия заявки
-  const isOrderExpired = (expiresAt: Date): boolean => {
-    return expiresAt < new Date();
-  };
-
-  // Функция для отображения статуса заявки
-  const getOrderStatusBadge = (order: Order) => {
-    if (order.status === "ARCHIVED") {
-      return (
-        <Badge variant="outline" className="bg-gray-100 text-gray-500 flex items-center gap-1 ml-2">
-          <Archive className="h-3 w-3" /> 
-          Архивная
-        </Badge>
-      );
-    }
-    
-    if (order.status === "CANCELLED") {
-      return (
-        <Badge variant="outline" className="bg-red-100 text-red-500 ml-2">
-          Отменена
-        </Badge>
-      );
-    }
-    
-    if (isOrderExpired(new Date(order.expiresAt))) {
-      return (
-        <Badge variant="outline" className="bg-yellow-100 text-yellow-700 ml-2">
-          Истекла
-        </Badge>
-      );
-    }
-    
-    return null;
-  };
-
-  const OrderRow = ({ order, type }: { order: Order, type: "BUY" | "SELL" }) => {
-    const isGreen = type === "BUY";
-    const volumePercentage = calculateVolumePercentage(order, type);
-    const { baseCurrency, quoteCurrency } = getTradePairComponents(order);
-    const tradePairDisplay = `${baseCurrency}/${quoteCurrency}`;
-    const tradeDirection = getTradeDirection(order);
-    const formattedRate = getFormattedRateDisplay(order);
-    const rateType = getRateDescription(order);
-    const isExpiredOrArchived = order.status === "ARCHIVED" || isOrderExpired(new Date(order.expiresAt));
-    
-    if (showDetailedView) {
-      return (
-        <TableRow className={cn(
-          "hover:bg-accent/20 relative", // Added relative positioning
-          isExpiredOrArchived && "opacity-60"
-        )}>
-          {/* Background fill for table row based on volume percentage */}
-          <div 
-            className={cn(
-              "absolute inset-0 opacity-20 z-0",
-              isGreen ? "bg-green-500" : "bg-red-500"
-            )}
-            style={{
-              width: `${volumePercentage}%`,
-              maxWidth: '100%'
-            }}
-          />
-          <TableCell className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'} relative z-10`}>
-            {type === "BUY" ? "Покупка" : "Продажа"}
-            {getOrderStatusBadge(order)}
-          </TableCell>
-          <TableCell className="relative z-10">{formatAmount(Number(order.amount))} {order.amountCurrency}</TableCell>
-          <TableCell className={`${isGreen ? 'text-green-500' : 'text-red-500'} relative z-10`}>
-            {formattedRate}
-          </TableCell>
-          <TableCell className="relative z-10">{rateType}</TableCell>
-          <TableCell className="relative z-10">{tradePairDisplay}</TableCell>
-          <TableCell className="relative z-10">{tradeDirection.fullDirection}</TableCell>
-          <TableCell className="relative z-10">{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}</TableCell>
-          <TableCell className="relative z-10">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className={cn("hover:bg-accent/30")}
-              asChild
-            >
-              <Link to={`/orders/${order.id}`}>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return (
-      <div className={cn(
-        "relative group", 
-        isExpiredOrArchived && "opacity-60"
-      )}>
-        {/* Фоновая заливка на основе процента от общего объема с улучшенной визуализацией */}
-        <div 
-          className={cn(
-            "absolute inset-0 opacity-20 z-0 left-0",
-            isGreen ? "bg-green-500" : "bg-red-500"
-          )}
-          style={{
-            width: `${volumePercentage}%`,
-            maxWidth: '100%'
-          }}
-        />
-        <div className={cn(
-          "relative flex items-center justify-between p-3 border-b z-10",
-          theme === "light" ? "border-border" : "border-white/10",
-        )}>
-          <div className="flex items-center space-x-2">
-            {type === "BUY" ? (
-              <ArrowUpRight className="h-5 w-5 text-green-500 flex-shrink-0" />
-            ) : (
-              <ArrowDownRight className="h-5 w-5 text-red-500 flex-shrink-0" />
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <span className={`text-lg font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-                  {formattedRate}
-                </span>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {rateType}
-                </span>
-                {getOrderStatusBadge(order)}
-              </div>
-              <div className="text-base font-semibold flex items-center gap-1">
-                <span>{formatAmount(Number(order.amount))} {order.amountCurrency}</span>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                <span className="font-medium">{tradeDirection.fullDirection}</span> • 
-                {order.status === "ARCHIVED" ? (
-                  <span className="ml-1">архивная</span>
-                ) : (
-                  <span className="ml-1">
-                    истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            asChild
-          >
-            <Link to={`/orders/${order.id}`}>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
+  // Table view for detailed display
   const DetailedView = () => (
     <div className="w-full overflow-auto">
       <Table className="w-full border-collapse">
@@ -320,13 +93,19 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
         </TableHeader>
         <TableBody>
           {orders.map((order) => (
-            <OrderRow key={order.id} order={order} type={order.type} />
+            <OrderTableRow 
+              key={order.id} 
+              order={order} 
+              volumePercentage={calculateVolumePercentage(order, order.type)}
+              isExpiredOrArchived={isExpiredOrArchived(order)}
+            />
           ))}
         </TableBody>
       </Table>
     </div>
   );
 
+  // Card view for compact display
   const CardsView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
       {/* Buy Orders */}
@@ -342,7 +121,11 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
         )}>
           <h3 className="text-sm font-semibold text-green-500">Заявки на покупку</h3>
           <p className="text-xs text-muted-foreground">
-            Всего: {formatAmount(buyOrders.reduce((sum, order) => sum + Number(order.amount), 0))} {buyOrders.length > 0 ? buyOrders[0].amountCurrency || 'RUB' : 'RUB'}
+            Всего: {new Intl.NumberFormat("ru-RU", {
+              style: "decimal",
+              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+            }).format(buyOrders.reduce((sum, order) => sum + Number(order.amount), 0))} {buyOrders.length > 0 ? buyOrders[0].amountCurrency || 'RUB' : 'RUB'}
           </p>
         </div>
         <div className={cn(
@@ -350,7 +133,12 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           theme === "light" ? "divide-border" : "divide-white/10"
         )}>
           {buyOrders.map((order) => (
-            <OrderRow key={order.id} order={order} type="BUY" />
+            <OrderCard 
+              key={order.id} 
+              order={order} 
+              volumePercentage={calculateVolumePercentage(order, "BUY")}
+              isExpiredOrArchived={isExpiredOrArchived(order)}
+            />
           ))}
           {buyOrders.length === 0 && (
             <div className="text-center py-6 text-muted-foreground">
@@ -373,7 +161,11 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
         )}>
           <h3 className="text-sm font-semibold text-red-500">Заявки на продажу</h3>
           <p className="text-xs text-muted-foreground">
-            Всего: {formatAmount(sellOrders.reduce((sum, order) => sum + Number(order.amount), 0))} {sellOrders.length > 0 ? sellOrders[0].amountCurrency || 'RUB' : 'RUB'}
+            Всего: {new Intl.NumberFormat("ru-RU", {
+              style: "decimal",
+              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+            }).format(sellOrders.reduce((sum, order) => sum + Number(order.amount), 0))} {sellOrders.length > 0 ? sellOrders[0].amountCurrency || 'RUB' : 'RUB'}
           </p>
         </div>
         <div className={cn(
@@ -381,7 +173,12 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           theme === "light" ? "divide-border" : "divide-white/10"
         )}>
           {sellOrders.map((order) => (
-            <OrderRow key={order.id} order={order} type="SELL" />
+            <OrderCard 
+              key={order.id} 
+              order={order} 
+              volumePercentage={calculateVolumePercentage(order, "SELL")}
+              isExpiredOrArchived={isExpiredOrArchived(order)}
+            />
           ))}
           {sellOrders.length === 0 && (
             <div className="text-center py-6 text-muted-foreground">
@@ -393,5 +190,6 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     </div>
   );
 
+  // Return the appropriate view based on the showDetailedView prop
   return showDetailedView ? <DetailedView /> : <CardsView />;
 };

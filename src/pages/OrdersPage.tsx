@@ -1,34 +1,17 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { ArrowDownUp, List, LayoutGrid, Archive, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
+import { OrderFilters } from "../components/orders/OrderFilters";
+import { OrderStatistics } from "../components/orders/OrderStatistics";
+import { OrderPagination } from "../components/orders/OrderPagination";
 import { useOrders, OrdersQueryParams } from "@/hooks/useOrders";
-import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
 import { tradePairs } from "@/data/mockData";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 export default function OrdersPage() {
   const { theme } = useTheme();
@@ -42,7 +25,6 @@ export default function OrdersPage() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
-  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
   const [selectedPair, setSelectedPair] = useState<string>("all");
   const [isOrdersLoading, setIsOrdersLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
@@ -57,8 +39,8 @@ export default function OrdersPage() {
   const actualMinVolume = minVolume + (maxVolume - minVolume) * volumeRange[0] / 100;
   const actualMaxVolume = minVolume + (maxVolume - minVolume) * volumeRange[1] / 100;
 
-  // Prepare query parameters for fetching orders
-  const queryParams: OrdersQueryParams = {
+  // Prepare query parameters with useMemo to prevent unnecessary re-renders
+  const queryParams: OrdersQueryParams = useMemo(() => ({
     page: currentPage,
     pageSize: pageSize,
     sortBy: sortBy,
@@ -68,11 +50,11 @@ export default function OrdersPage() {
       minAmount: actualMinVolume,
       maxAmount: actualMaxVolume,
       tradePair: selectedPair === 'all' ? undefined : selectedPair,
-      showArchived: showArchived
+      showArchived: showArchived // Fixed showing archived orders
     }
-  };
+  }), [currentPage, pageSize, sortBy, sortOrder, selectedType, actualMinVolume, actualMaxVolume, selectedPair, showArchived]);
 
-  // Get orders with the query parameters
+  // Get orders with query parameters
   const { useOrdersQuery, convertToUSD } = useOrders();
   const { 
     data: ordersData,
@@ -81,7 +63,7 @@ export default function OrdersPage() {
     refetch
   } = useOrdersQuery(queryParams);
 
-  // Отслеживаем изменение состояния загрузки заявок для отображения скелетонов
+  // Track loading state for skeleton display
   useEffect(() => {
     setIsOrdersLoading(queryLoading);
   }, [queryLoading]);
@@ -91,12 +73,12 @@ export default function OrdersPage() {
     refetch();
   }, [sortBy, sortOrder, refetch]);
 
-  // Update min and max volume for the volume range slider based on data
+  // Update min and max volume for range slider based on data
   useEffect(() => {
     if (ordersData?.orders && ordersData.orders.length > 0) {
       const volumes = ordersData.orders.map(order => Number(order.amount));
       
-      // Only update if we have a significant change to avoid the slider jumping around
+      // Only update if significant change to avoid slider jumping
       const calculatedMin = Math.min(...volumes);
       const calculatedMax = Math.max(...volumes);
       
@@ -108,21 +90,22 @@ export default function OrdersPage() {
         setMaxVolume(calculatedMax);
       }
     }
-  }, [ordersData?.orders]);
+  }, [ordersData?.orders, minVolume, maxVolume]);
 
   // Reset to first page when filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedType, selectedPairGroup, volumeRange, selectedPair, showArchived]);
   
+  // Handle page changes and scroll to top
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Прокрутим страницу вверх при изменении страницы
     window.scrollTo(0, 0);
   };
 
+  // Handle sort changes
   const handleSortChange = (value: string) => {
-    // Map the UI-friendly sort options to actual sort parameters
+    // Map UI-friendly sort options to actual sort parameters
     switch(value) {
       case 'newest':
         setSortBy('created_at');
@@ -154,15 +137,7 @@ export default function OrdersPage() {
     }
   };
 
-  const formatVolumeLabel = (value: number) => {
-    const actualValue = minVolume + (maxVolume - minVolume) * value / 100;
-    return new Intl.NumberFormat("ru-RU", {
-      style: "decimal",
-      maximumFractionDigits: 0,
-    }).format(actualValue);
-  };
-
-  // Calculate total volume in USD for both buy and sell orders
+  // Calculate volumes in USD for buy and sell orders
   const buyOrdersVolume = ordersData?.orders.filter(o => o.type === "BUY").reduce((sum, order) => {
     return sum + convertToUSD(Number(order.amount), order.amountCurrency || 'USD', order.rate);
   }, 0) || 0;
@@ -173,59 +148,12 @@ export default function OrdersPage() {
   
   const totalVolumeUSD = buyOrdersVolume + sellOrdersVolume;
 
-  // Generate pagination items
-  const renderPaginationItems = () => {
-    if (!ordersData?.totalPages) return null;
-    
-    const items = [];
-    const totalPages = ordersData.totalPages;
-    
-    // Always show first page, current page, and last page
-    // Plus one page before and after current if they exist
-    const pagesToShow = new Set([
-      1,
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      totalPages
-    ].filter(p => p >= 1 && p <= totalPages));
-    
-    const pagesArray = Array.from(pagesToShow).sort((a, b) => a - b);
-    
-    // Add pagination items with ellipsis where needed
-    let prevPage = 0;
-    for (const page of pagesArray) {
-      if (page - prevPage > 1) {
-        // Add ellipsis
-        items.push(
-          <PaginationItem key={`ellipsis-${prevPage}`}>
-            <span className="flex h-9 w-9 items-center justify-center">...</span>
-          </PaginationItem>
-        );
-      }
-      
-      items.push(
-        <PaginationItem key={page}>
-          <PaginationLink
-            isActive={page === currentPage}
-            onClick={() => handlePageChange(page)}
-            className={cn(
-              "cursor-pointer",
-              page === currentPage && "bg-otc-primary text-black hover:bg-otc-primary/90"
-            )}
-          >
-            {page}
-          </PaginationLink>
-        </PaginationItem>
-      );
-      
-      prevPage = page;
-    }
-    
-    return items;
-  };
+  // Calculate order counts
+  const buyOrdersCount = ordersData?.orders.filter(o => o.type === "BUY").length || 0;
+  const sellOrdersCount = ordersData?.orders.filter(o => o.type === "SELL").length || 0;
+  const archivedOrdersCount = ordersData?.orders.filter(o => o.status === "ARCHIVED").length || 0;
 
-  // Скелетон для заявок при загрузке
+  // Skeleton for loading state
   const OrdersSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-0 p-0">
       <div className="space-y-2 p-4">
@@ -255,6 +183,7 @@ export default function OrdersPage() {
     </div>
   );
 
+  // Error display
   if (isError) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -269,21 +198,15 @@ export default function OrdersPage() {
     );
   }
 
-  // Calculate the number of buy and sell orders
-  const buyOrdersCount = ordersData?.orders.filter(o => o.type === "BUY").length || 0;
-  const sellOrdersCount = ordersData?.orders.filter(o => o.type === "SELL").length || 0;
-  
-  // Calculate the number of archived orders if showing them
-  const archivedOrdersCount = ordersData?.orders.filter(o => o.status === "ARCHIVED").length || 0;
-
   return (
     <div className="space-y-4">
+      {/* Header with page title and create order button */}
       <div className="flex items-center justify-between">
         <h1 className={cn(
           "text-2xl font-bold", 
           theme === "light" ? "text-foreground" : "text-white"
         )}>ОТС Заявки</h1>
-        <Button className="bg-otc-primary text-black hover:bg-otc-primary/90" asChild>
+        <Button className="bg-purple-500 hover:bg-purple-600 text-white" asChild>
           <Link to="/create-order">
             <span className="mr-2">+</span>
             Новая заявка
@@ -291,324 +214,66 @@ export default function OrdersPage() {
         </Button>
       </div>
       
-      {/* Улучшенная адаптивная панель фильтров */}
-      <Card className={cn(
-        "p-3",
-        theme === "light" 
-          ? "bg-card border-border" 
-          : "bg-otc-card border-otc-active"
-      )}>
-        {/* Используем аккордеон для лучшей мобильной адаптивности */}
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="filters" className="border-none">
-            <div className="flex flex-col space-y-3">
-              {/* Компактная панель с основными фильтрами и сортировкой */}
-              <div className="flex flex-wrap gap-3 items-center justify-between">
-                {/* Панель фильтров по типу заявки - адаптивная */}
-                <div className="flex flex-wrap items-center gap-2 md:gap-4">
-                  <div className="w-full md:w-auto">
-                    <ToggleGroup 
-                      type="single" 
-                      value={selectedType} 
-                      onValueChange={(value) => value && setSelectedType(value)}
-                      className="border rounded-md w-full md:w-auto"
-                    >
-                      <ToggleGroupItem value="all" aria-label="Toggle all types" className="flex-1 md:flex-auto">
-                        Все типы
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500 flex-1 md:flex-auto">
-                        Покупка
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500 flex-1 md:flex-auto">
-                        Продажа
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 ml-auto md:ml-0">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="archived-mode"
-                        checked={showArchived}
-                        onCheckedChange={setShowArchived}
-                      />
-                      <label
-                        htmlFor="archived-mode"
-                        className="text-sm flex items-center gap-1 cursor-pointer whitespace-nowrap"
-                      >
-                        <Archive className="h-4 w-4" />
-                        {showArchived ? "Архивные" : "Только активные"}
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Управление видом и сортировкой - справа на десктопе, внизу на мобильных */}
-                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-                  {/* Режим отображения */}
-                  <div className="flex gap-1">
-                    <Button 
-                      variant={viewMode === "cards" ? "default" : "outline"} 
-                      size="icon"
-                      className={cn(
-                        viewMode === "cards"
-                          ? "bg-otc-primary hover:bg-otc-primary/90"
-                          : theme === "light" 
-                            ? "border-border hover:bg-accent" 
-                            : "border-otc-active hover:bg-otc-active",
-                        theme === "light" && viewMode !== "cards" ? "text-foreground" : "text-black",
-                      )}
-                      onClick={() => setViewMode("cards")}
-                    >
-                      <LayoutGrid className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant={viewMode === "table" ? "default" : "outline"} 
-                      size="icon"
-                      className={cn(
-                        viewMode === "table"
-                          ? "bg-otc-primary hover:bg-otc-primary/90"
-                          : theme === "light" 
-                            ? "border-border hover:bg-accent" 
-                            : "border-otc-active hover:bg-otc-active",
-                        theme === "light" && viewMode !== "table" ? "text-foreground" : "text-black",
-                      )}
-                      onClick={() => setViewMode("table")}
-                    >
-                      <List className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {/* Сортировка */}
-                  <Select 
-                    value={sortBy === 'amount' && sortOrder === 'desc' ? 'highest_volume' : 
-                          sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
-                          sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
-                          sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
-                          sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
-                          sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
-                    onValueChange={handleSortChange}
-                  >
-                    <SelectTrigger className={cn(
-                      "w-[180px]",
-                      theme === "light" 
-                        ? "bg-accent/50 border-accent" 
-                        : "bg-otc-active border-otc-active text-white"
-                    )}>
-                      <ArrowDownUp className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Сортировка" />
-                    </SelectTrigger>
-                    <SelectContent className={cn(
-                      theme === "light" 
-                        ? "bg-card border-border" 
-                        : "bg-otc-card border-otc-active"
-                    )}>
-                      <SelectItem value="highest_volume">Объем (макс)</SelectItem>
-                      <SelectItem value="lowest_volume">Объем (мин)</SelectItem>
-                      <SelectItem value="highest_rate">Курс (макс)</SelectItem>
-                      <SelectItem value="lowest_rate">Курс (мин)</SelectItem>
-                      <SelectItem value="newest">Новые заявки</SelectItem>
-                      <SelectItem value="oldest">Старые заявки</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              {/* Аккордеон для торговых пар, чтобы они не ломали макет на мобильных */}
-              <AccordionTrigger className="py-2 hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span className="text-sm font-medium">Торговые пары и фильтры</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                {/* Кнопки фильтрации по торговым парам - улучшены для адаптивности */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2">
-                  <ToggleGroupItem 
-                    value="all" 
-                    className={cn(
-                      "text-sm px-3 py-1 rounded-full text-center",
-                      selectedPair === "all" ? "bg-otc-primary text-black" : 
-                      theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
-                    )}
-                    onClick={() => setSelectedPair("all")}
-                  >
-                    Все пары
-                  </ToggleGroupItem>
-                  {tradingPairOptions.map(pair => (
-                    <ToggleGroupItem 
-                      key={pair.id} 
-                      value={pair.id}
-                      className={cn(
-                        "text-sm px-3 py-1 rounded-full text-center",
-                        selectedPair === pair.id ? "bg-otc-primary text-black" : 
-                        theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
-                      )}
-                      onClick={() => setSelectedPair(pair.id)}
-                    >
-                      {pair.display}
-                    </ToggleGroupItem>
-                  ))}
-                </div>
-                
-                {/* Дополнительные фильтры */}
-                <div className="mt-4 space-y-4">
-                  <div className="flex flex-col md:flex-row items-start gap-6">
-                    <div className="flex-1 w-full">
-                      <div className="flex justify-between mb-1">
-                        <span className="text-xs text-muted-foreground">Объем: {formatVolumeLabel(volumeRange[0])} - {formatVolumeLabel(volumeRange[1])}</span>
-                      </div>
-                      <Slider
-                        value={volumeRange}
-                        onValueChange={(value) => {
-                          setVolumeRange(value);
-                        }}
-                        max={100}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-                    
-                    <div className="w-full md:w-56">
-                      <Select value={selectedPairGroup} onValueChange={value => {
-                        setSelectedPairGroup(value);
-                      }}>
-                        <SelectTrigger className={cn(
-                          theme === "light" 
-                            ? "bg-accent/50 border-accent" 
-                            : "bg-otc-active border-otc-active text-white"
-                        )}>
-                          <SelectValue placeholder="Группа пар" />
-                        </SelectTrigger>
-                        <SelectContent className={cn(
-                          theme === "light" 
-                            ? "bg-card border-border" 
-                            : "bg-otc-card border-otc-active"
-                        )}>
-                          <SelectItem value="all">Все группы</SelectItem>
-                          <SelectItem value="RUB_NR">RUB (НР)</SelectItem>
-                          <SelectItem value="RUB_CASH">RUB (Нал)</SelectItem>
-                          <SelectItem value="TOKENIZED">Токенизированные</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </AccordionContent>
-            </div>
-          </AccordionItem>
-        </Accordion>
+      {/* Filters component */}
+      <Card>
+        <OrderFilters
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          selectedPair={selectedPair}
+          setSelectedPair={setSelectedPair}
+          selectedPairGroup={selectedPairGroup}
+          setSelectedPairGroup={setSelectedPairGroup}
+          volumeRange={volumeRange}
+          setVolumeRange={setVolumeRange}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          handleSortChange={handleSortChange}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          showArchived={showArchived}
+          setShowArchived={setShowArchived}
+          minVolume={minVolume}
+          maxVolume={maxVolume}
+          tradingPairOptions={tradingPairOptions}
+        />
       </Card>
       
-      {/* Таблица заявок со статистикой */}
+      {/* Orders table with stats */}
       <div className={cn(
         "border rounded-lg overflow-hidden",
         theme === "light" 
           ? "bg-card border-border" 
           : "bg-otc-card border-otc-active"
       )}>
-        <div className={cn(
-          "p-3 border-b flex flex-wrap gap-4 justify-between",
-          theme === "light" ? "border-border" : "border-otc-active"
-        )}>
-          <div className="flex flex-wrap gap-6">
-            <div>
-              <p className="text-xs text-muted-foreground">Всего заявок</p>
-              <p className={cn(
-                "text-xl font-bold",
-                theme === "light" ? "text-foreground" : "text-white"
-              )}>{ordersData?.totalCount || 0}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Покупка</p>
-              <p className="text-xl font-bold text-green-500">
-                {buyOrdersCount}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Продажа</p>
-              <p className="text-xl font-bold text-red-500">
-                {sellOrdersCount}
-              </p>
-            </div>
-            {showArchived && (
-              <div>
-                <p className="text-xs text-muted-foreground">Архивные</p>
-                <p className="text-xl font-bold text-gray-500">
-                  {archivedOrdersCount}
-                </p>
-              </div>
-            )}
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Общий объем на странице</p>
-            <p className={cn(
-              "text-xl font-bold",
-              theme === "light" ? "text-foreground" : "text-white"
-            )}>
-              {new Intl.NumberFormat("ru-RU", {
-                style: "decimal",
-                maximumFractionDigits: 0,
-              }).format(totalVolumeUSD)} USD
-            </p>
-          </div>
-        </div>
+        {/* Statistics component */}
+        <OrderStatistics
+          totalCount={ordersData?.totalCount || 0}
+          buyOrdersCount={buyOrdersCount}
+          sellOrdersCount={sellOrdersCount}
+          archivedOrdersCount={archivedOrdersCount}
+          showArchived={showArchived}
+          totalVolumeUSD={totalVolumeUSD}
+          buyOrdersVolume={buyOrdersVolume}
+          sellOrdersVolume={sellOrdersVolume}
+        />
         
-        {/* График сравнения объемов */}
-        {totalVolumeUSD > 0 && (
-          <div className="px-3 py-2 border-b">
-            <div className="flex h-4 w-full rounded-sm overflow-hidden">
-              <div 
-                className="h-full bg-green-500" 
-                style={{ width: `${(buyOrdersVolume / totalVolumeUSD) * 100}%` }}
-              ></div>
-              <div 
-                className="h-full bg-red-500" 
-                style={{ width: `${(sellOrdersVolume / totalVolumeUSD) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
-        
-        {/* Отображение заявок или скелетона при загрузке */}
+        {/* Display orders or loading skeleton */}
         {isOrdersLoading ? (
           <OrdersSkeleton />
         ) : (
-          <OrdersTable orders={ordersData?.orders || []} showDetailedView={viewMode === "table"} />
+          <OrdersTable 
+            orders={ordersData?.orders || []} 
+            showDetailedView={viewMode === "table"} 
+          />
         )}
         
-        {/* Пагинация */}
+        {/* Pagination component */}
         {ordersData && ordersData.totalPages > 1 && (
-          <div className={cn(
-            "p-4 border-t",
-            theme === "light" ? "border-border" : "border-otc-active"
-          )}>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                    className={cn(
-                      "cursor-pointer",
-                      currentPage === 1 && "opacity-50 cursor-not-allowed"
-                    )} 
-                  />
-                </PaginationItem>
-                
-                {renderPaginationItems()}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => currentPage < (ordersData?.totalPages || 1) && handlePageChange(currentPage + 1)}
-                    className={cn(
-                      "cursor-pointer",
-                      currentPage === (ordersData?.totalPages || 1) && "opacity-50 cursor-not-allowed"
-                    )}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+          <OrderPagination
+            currentPage={currentPage}
+            totalPages={ordersData.totalPages}
+            onPageChange={handlePageChange}
+          />
         )}
       </div>
     </div>

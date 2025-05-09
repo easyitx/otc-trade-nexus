@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
@@ -34,7 +35,7 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     status: orderStatus,
     geography: order.geography as Geography | undefined,
     // Use a default tradePairId until we implement proper pair selection
-    tradePairId: "USD_USDT_PAIR" 
+    tradePairId: `${order.amount_currency || "USD"}_USDT_PAIR` 
   };
 };
 
@@ -70,35 +71,51 @@ export interface OrdersQueryParams {
   };
 }
 
-// Улучшенная функция конвертации в USD для унифицированного сравнения
+// Helper function for currency conversion with memoization optimization
+const conversionCache = new Map<string, number>();
+
 export const convertToUSD = (amount: number, currency: string, rate: string): number => {
   try {
-    // Для USD и USDT просто возвращаем значение без конвертации
+    // For USD and USDT return value without conversion
     if (currency === "USD" || currency === "USDT") return amount;
     
-    // Удаляем нецифровые символы из строки курса, кроме точки
+    // Create cache key
+    const cacheKey = `${amount}-${currency}-${rate}`;
+    
+    // Check if conversion is cached
+    if (conversionCache.has(cacheKey)) {
+      return conversionCache.get(cacheKey)!;
+    }
+    
+    // Remove non-numeric characters from rate string, except decimal point
     const cleanRate = String(rate).replace(/[^0-9.]/g, '');
     
-    // Для других валют конвертируем в USD на основе курса
-    // Предполагаем, что rate - это соотношение валюты к USD
+    // Convert to USD based on rate
     const numericRate = parseFloat(cleanRate);
     
-    // Проверка на корректность курса и деление на ноль
+    // Check for valid rate and division by zero
     if (isNaN(numericRate) || numericRate === 0) {
-      console.warn(`Некорректный курс для конвертации: ${rate}`);
-      return amount; // Возвращаем исходное значение, если курс некорректный
+      console.warn(`Invalid rate for conversion: ${rate}`);
+      return amount;
     }
     
     const usdAmount = amount / numericRate;
-    console.debug(`Конвертация: ${amount} ${currency} = ${usdAmount.toFixed(2)} USD (курс: ${numericRate})`);
+    
+    // Cache the result
+    if (conversionCache.size > 100) {
+      // Clear cache if it gets too large to prevent memory issues
+      conversionCache.clear();
+    }
+    conversionCache.set(cacheKey, usdAmount);
+    
     return usdAmount;
   } catch (error) {
-    console.error("Ошибка при конвертации валюты:", error);
-    return amount; // В случае ошибки возвращаем исходное значение
+    console.error("Currency conversion error:", error);
+    return amount;
   }
 };
 
-// Function to check if an order is expired and should be archived
+// Function to check if an order is expired
 const isOrderExpired = (expiresAt: string): boolean => {
   const expirationDate = new Date(expiresAt);
   const now = new Date();
@@ -160,7 +177,7 @@ export function useOrders() {
   };
 
   const fetchOrders = async ({ page = 1, pageSize = 10, sortBy = 'amount', sortOrder = 'desc', filter = {} }: OrdersQueryParams) => {
-    console.log("Загрузка заявок с параметрами:", { page, pageSize, sortBy, sortOrder, filter });
+    console.log("Loading orders with params:", { page, pageSize, sortBy, sortOrder, filter });
     
     // Start building our query
     let query = supabase
@@ -184,31 +201,30 @@ export function useOrders() {
       query = query.or(`purpose.ilike.%${filter.search}%,notes.ilike.%${filter.search}%`);
     }
     
-    // Filter by trading pair if specified
+    // Enhanced trading pair filter
     if (filter.tradePair && filter.tradePair !== 'all') {
-      // This is a mock implementation since we don't have actual trade_pair_id column yet
-      // In a real implementation, you would use something like:
-      // query = query.eq('trade_pair_id', filter.tradePair);
-      
-      // For now, filter by amount_currency as a placeholder
+      // Extract currency info from pair name
       if (filter.tradePair.includes('RUB')) {
         query = query.eq('amount_currency', 'RUB');
       } else if (filter.tradePair.includes('USD')) {
         query = query.eq('amount_currency', 'USD');
+      } else if (filter.tradePair.includes('USDT')) {
+        // Additional handling for pairs containing USDT
+        // This is a placeholder until proper trade_pair_id is implemented
+        query = query.or('amount_currency.eq.USDT,amount_currency.eq.USD');
       }
     }
 
-    // Handle showing/hiding archived orders
-    if (filter.showArchived) {
-      // When showing archived, include all statuses
+    // Fixed archived filter logic
+    if (filter.showArchived === true) {
+      // When showing archived, include archived status
       // No additional filter needed
     } else {
       // When not showing archived, exclude orders with ARCHIVED status
       query = query.neq('status', 'ARCHIVED');
     }
     
-    // Apply sorting
-    // Map frontend field names to database column names
+    // Apply sorting - Map frontend field names to database column names
     let sortColumn = sortBy;
     if (sortBy === 'volume') sortColumn = 'amount';
     if (sortBy === 'createdAt') sortColumn = 'created_at';
@@ -221,17 +237,17 @@ export function useOrders() {
     const to = from + pageSize - 1;
     query = query.range(from, to);
     
-    console.log("Выполнение запроса с диапазоном:", from, to);
+    console.log("Executing query with range:", from, to);
     
     // Execute the query
     const { data, error, count } = await query;
     
     if (error) {
-      console.error("Ошибка при загрузке заявок:", error);
+      console.error("Error loading orders:", error);
       throw error;
     }
     
-    console.log(`Получено ${data?.length || 0} заявок. Всего: ${count}`);
+    console.log(`Retrieved ${data?.length || 0} orders. Total: ${count}`);
 
     // Check for expired orders and update them to ARCHIVED status if needed
     const expiredOrderIds: string[] = [];
@@ -249,8 +265,6 @@ export function useOrders() {
         .from('orders')
         .update({ status: 'ARCHIVED' })
         .in('id', expiredOrderIds);
-      
-      // We don't need to refetch since we already updated the status in our local data
     }
     
     // Convert data to frontend format
@@ -268,7 +282,9 @@ export function useOrders() {
   const useOrdersQuery = (params: OrdersQueryParams = {}) => {
     return useQuery({
       queryKey: ['orders', params],
-      queryFn: () => fetchOrders(params)
+      queryFn: () => fetchOrders(params),
+      staleTime: 30000, // Add staleTime to reduce flashing
+      keepPreviousData: true // Keep previous data while fetching new data
     });
   };
 
