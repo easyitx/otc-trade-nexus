@@ -284,7 +284,7 @@ export function useOrders() {
       queryKey: ['orders', params],
       queryFn: () => fetchOrders(params),
       staleTime: 30000, // Add staleTime to reduce flashing
-      keepPreviousData: true // Keep previous data while fetching new data
+      placeholderData: 'keepPrevious' // Updated from keepPreviousData to placeholderData
     });
   };
 
