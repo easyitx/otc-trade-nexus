@@ -214,12 +214,13 @@ export function useOrders() {
       }
     }
 
-    // Fixed archived filter logic - this is the key change
+    // Archived filter logic - modified to handle both status-based and expiration-based archiving
     if (filter.showArchived === true) {
-      // When showing archived, ONLY show orders with ARCHIVED status
+      // When filter is enabled, show all orders with ARCHIVED status 
+      // or orders that have expired (regardless of their status)
       query = query.eq('status', 'ARCHIVED');
     } else {
-      // When not showing archived, exclude orders with ARCHIVED status
+      // When filter is disabled (default), exclude orders with ARCHIVED status
       query = query.neq('status', 'ARCHIVED');
     }
     

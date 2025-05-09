@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -50,7 +49,7 @@ export default function OrdersPage() {
       minAmount: actualMinVolume,
       maxAmount: actualMaxVolume,
       tradePair: selectedPair === 'all' ? undefined : selectedPair,
-      showArchived: showArchived // Fixed showing archived orders
+      showArchived: showArchived // Pass the showArchived state to the query
     }
   }), [currentPage, pageSize, sortBy, sortOrder, selectedType, actualMinVolume, actualMaxVolume, selectedPair, showArchived]);
 
@@ -198,6 +197,13 @@ export default function OrdersPage() {
     );
   }
 
+    // Handle archive toggle specifically
+    const handleArchiveToggle = (value: boolean) => {
+      setShowArchived(value);
+      // Reset to first page when toggling archive filter
+      setCurrentPage(1);
+    };
+
   return (
     <div className="space-y-4">
       {/* Header with page title and create order button */}
@@ -205,7 +211,7 @@ export default function OrdersPage() {
         <h1 className={cn(
           "text-2xl font-bold", 
           theme === "light" ? "text-foreground" : "text-white"
-        )}>ОТС Заявки</h1>
+        )}>{showArchived ? "Архивные заявки" : "ОТС Заявки"}</h1>
         <Button className="bg-purple-500 hover:bg-purple-600 text-white" asChild>
           <Link to="/create-order">
             <span className="mr-2">+</span>
@@ -231,7 +237,7 @@ export default function OrdersPage() {
           viewMode={viewMode}
           setViewMode={setViewMode}
           showArchived={showArchived}
-          setShowArchived={setShowArchived}
+          setShowArchived={handleArchiveToggle}
           minVolume={minVolume}
           maxVolume={maxVolume}
           tradingPairOptions={tradingPairOptions}
