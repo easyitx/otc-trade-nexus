@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowRight, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
 import { Order } from "../../types";
 import { tradePairs } from "../../data/mockData";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -51,6 +50,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     const pair = tradePairs[0];
     const isGreen = type === "BUY";
     const volume = (Number(order.amount) / Number(order.rate)).toFixed(3);
+    const rateType = order.rateDetails?.type === "dynamic" ? "Динамический" : "Фиксированный";
     
     if (showDetailedView) {
       return (
@@ -58,12 +58,12 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           <TableCell className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
             {type}
           </TableCell>
-          <TableCell>{formatAmount(Number(order.amount))} RUB</TableCell>
-          <TableCell>{formatAmount(Number(volume))} T</TableCell>
+          <TableCell>{formatAmount(Number(order.amount))} {order.amountCurrency}</TableCell>
+          <TableCell>{formatAmount(Number(volume))} USDT</TableCell>
           <TableCell className={`${isGreen ? 'text-green-500' : 'text-red-500'}`}>
             {order.rate}
           </TableCell>
-          <TableCell>Фиксированный</TableCell>
+          <TableCell>{rateType}</TableCell>
           <TableCell>{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}</TableCell>
           <TableCell>
             <Button 
@@ -102,10 +102,10 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
                 {order.rate}
               </div>
               <div className="text-sm text-muted-foreground">
-                {formatAmount(Number(order.amount))} RUB
+                {formatAmount(Number(order.amount))} {order.amountCurrency}
               </div>
               <div className="text-xs text-muted-foreground">
-                {formatAmount(Number(volume))} T
+                {formatAmount(Number(volume))} USDT
               </div>
             </div>
           </div>
@@ -119,7 +119,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
                 {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}
               </div>
               <div className={cn("text-xs", theme === "light" ? "text-foreground/70" : "text-white/70")}>
-                Фиксированный
+                {rateType}
               </div>
             </div>
             <Button 
@@ -147,8 +147,8 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
             theme === "light" ? "bg-accent/50" : "bg-white/5 border-white/10"
           )}>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Тип</TableHead>
-            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Количество (RUB)</TableHead>
-            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Объём (T)</TableHead>
+            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Количество</TableHead>
+            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Объём (USDT)</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Курс</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Тип курса</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Срок действия</TableHead>

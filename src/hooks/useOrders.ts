@@ -124,6 +124,8 @@ export function useOrders() {
   };
 
   const fetchOrders = async ({ page = 1, pageSize = 10, sortBy = 'amount', sortOrder = 'desc', filter = {} }: OrdersQueryParams) => {
+    console.log("Fetching orders with params:", { page, pageSize, sortBy, sortOrder, filter });
+    
     // Start building our query
     let query = supabase
       .from('orders')
@@ -147,7 +149,12 @@ export function useOrders() {
     }
     
     // Apply sorting
-    const sortColumn = sortBy === 'volume' ? 'amount' : sortBy;
+    // Map frontend field names to database column names
+    let sortColumn = sortBy;
+    if (sortBy === 'volume') sortColumn = 'amount';
+    if (sortBy === 'createdAt') sortColumn = 'created_at';
+    if (sortBy === 'rate') sortColumn = 'rate';
+    
     query = query.order(sortColumn, { ascending: sortOrder === 'asc' });
     
     // Apply pagination
@@ -155,10 +162,17 @@ export function useOrders() {
     const to = from + pageSize - 1;
     query = query.range(from, to);
     
+    console.log("Executing query with range:", from, to);
+    
     // Execute the query
     const { data, error, count } = await query;
     
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching orders:", error);
+      throw error;
+    }
+    
+    console.log(`Retrieved ${data?.length || 0} orders. Total count: ${count}`);
     
     // Convert data to frontend format
     const orders = data.map(order => adaptOrderFromSupabase(order as SupabaseOrder));

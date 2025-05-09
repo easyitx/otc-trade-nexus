@@ -11,7 +11,6 @@ import { OrdersTable } from "../components/orders/OrdersTable";
 import { useOrders, OrdersQueryParams } from "@/hooks/useOrders";
 import { Order } from "@/types";
 import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import {
@@ -22,83 +21,56 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function OrdersPage() {
   const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedPairGroup, setSelectedPairGroup] = useState<string>("all");
+  const [volumeRange, setVolumeRange] = useState([0, 100]);
   const [minVolume, setMinVolume] = useState(0);
   const [maxVolume, setMaxVolume] = useState(100000000);
-  const [volumeRange, setVolumeRange] = useState([0, 100]);
-  const [sortBy, setSortBy] = useState<string>("highest_volume"); // Default sort by volume
+  const [sortBy, setSortBy] = useState<string>("amount");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize] = useState(10);
+
+  // Calculate actual min/max amounts for filtering
+  const actualMinVolume = minVolume + (maxVolume - minVolume) * volumeRange[0] / 100;
+  const actualMaxVolume = minVolume + (maxVolume - minVolume) * volumeRange[1] / 100;
 
   // Prepare query parameters for fetching orders
   const queryParams: OrdersQueryParams = {
     page: currentPage,
     pageSize: pageSize,
-    sortBy: 'amount', // Default to amount/volume
-    sortOrder: 'desc', // Default to descending (highest to lowest)
+    sortBy: sortBy,
+    sortOrder: sortOrder,
     filter: {
       type: selectedType === 'all' ? undefined : selectedType as 'BUY' | 'SELL' | undefined,
-      search: searchTerm || undefined,
-      // We'll calculate these based on the volume range slider
-      minAmount: undefined,
-      maxAmount: undefined
+      search: debouncedSearchTerm || undefined,
+      minAmount: actualMinVolume,
+      maxAmount: actualMaxVolume
     }
   };
-
-  // Map the sortBy dropdown value to query parameters
-  useEffect(() => {
-    let sort = 'amount';
-    let order: 'asc' | 'desc' = 'desc';
-    
-    switch(sortBy) {
-      case 'newest':
-        sort = 'created_at';
-        order = 'desc';
-        break;
-      case 'oldest':
-        sort = 'created_at';
-        order = 'asc';
-        break;
-      case 'highest_rate':
-        sort = 'rate';
-        order = 'desc';
-        break;
-      case 'lowest_rate':
-        sort = 'rate';
-        order = 'asc';
-        break;
-      case 'highest_volume':
-        sort = 'amount';
-        order = 'desc';
-        break;
-      case 'lowest_volume':
-        sort = 'amount';
-        order = 'asc';
-        break;
-      default:
-        sort = 'amount';
-        order = 'desc';
-    }
-    
-    queryParams.sortBy = sort;
-    queryParams.sortOrder = order;
-  }, [sortBy]);
 
   // Get orders with the query parameters
   const { useOrdersQuery } = useOrders();
   const { 
     data: ordersData,
     isLoading: isLoadingOrders,
-    isError
+    isError,
+    refetch
   } = useOrdersQuery(queryParams);
 
-  // Calculate min and max volume for the volume range slider
+  // Refetch when sort parameters change
+  useEffect(() => {
+    refetch();
+  }, [sortBy, sortOrder, refetch]);
+
+  // Update min and max volume for the volume range slider based on data
   useEffect(() => {
     if (ordersData?.orders && ordersData.orders.length > 0) {
       const volumes = ordersData.orders.map(order => Number(order.amount));
@@ -117,25 +89,50 @@ export default function OrdersPage() {
     }
   }, [ordersData?.orders]);
 
-  // Update filter values when volume range changes
+  // Reset to first page when filter changes
   useEffect(() => {
-    const actualMinVolume = minVolume + (maxVolume - minVolume) * volumeRange[0] / 100;
-    const actualMaxVolume = minVolume + (maxVolume - minVolume) * volumeRange[1] / 100;
-    
-    queryParams.filter = {
-      ...queryParams.filter,
-      minAmount: actualMinVolume,
-      maxAmount: actualMaxVolume
-    };
-  }, [volumeRange, minVolume, maxVolume]);
+    setCurrentPage(1);
+  }, [selectedType, selectedPairGroup, debouncedSearchTerm, volumeRange]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
   };
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleSortChange = (value: string) => {
+    // Map the UI-friendly sort options to actual sort parameters
+    switch(value) {
+      case 'newest':
+        setSortBy('created_at');
+        setSortOrder('desc');
+        break;
+      case 'oldest':
+        setSortBy('created_at');
+        setSortOrder('asc');
+        break;
+      case 'highest_rate':
+        setSortBy('rate');
+        setSortOrder('desc');
+        break;
+      case 'lowest_rate':
+        setSortBy('rate');
+        setSortOrder('asc');
+        break;
+      case 'highest_volume':
+        setSortBy('amount');
+        setSortOrder('desc');
+        break;
+      case 'lowest_volume':
+        setSortBy('amount');
+        setSortOrder('asc');
+        break;
+      default:
+        setSortBy('amount');
+        setSortOrder('desc');
+    }
   };
 
   const formatVolumeLabel = (value: number) => {
@@ -263,7 +260,6 @@ export default function OrdersPage() {
                 <div className="w-40">
                   <Select value={selectedType} onValueChange={value => {
                     setSelectedType(value);
-                    setCurrentPage(1); // Reset to first page on filter change
                   }}>
                     <SelectTrigger className={cn(
                       theme === "light" 
@@ -287,7 +283,6 @@ export default function OrdersPage() {
                 <div className="w-40">
                   <Select value={selectedPairGroup} onValueChange={value => {
                     setSelectedPairGroup(value);
-                    setCurrentPage(1); // Reset to first page on filter change
                   }}>
                     <SelectTrigger className={cn(
                       theme === "light" 
@@ -354,7 +349,6 @@ export default function OrdersPage() {
                   value={volumeRange}
                   onValueChange={(value) => {
                     setVolumeRange(value);
-                    setCurrentPage(1); // Reset to first page on filter change
                   }}
                   max={100}
                   step={1}
@@ -362,10 +356,13 @@ export default function OrdersPage() {
                 />
               </div>
               <div className="w-40 md:w-56">
-                <Select value={sortBy} onValueChange={value => {
-                  setSortBy(value);
-                  setCurrentPage(1); // Reset to first page on sort change
-                }}>
+                <Select value={sortBy === 'amount' && sortOrder === 'desc' ? 'highest_volume' : 
+                           sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
+                           sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
+                           sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
+                           sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
+                           sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
+                       onValueChange={handleSortChange}>
                   <SelectTrigger className={cn(
                     theme === "light" 
                       ? "bg-accent/50 border-accent" 
