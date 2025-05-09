@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
 import type { Order as FrontendOrder, RateDetails, Geography } from '@/types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPrevious } from '@tanstack/react-query';
 
 // Adapter function to convert from Supabase format to frontend format
 const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
@@ -284,7 +283,7 @@ export function useOrders() {
       queryKey: ['orders', params],
       queryFn: () => fetchOrders(params),
       staleTime: 30000, // Add staleTime to reduce flashing
-      placeholderData: 'keepPrevious' // Updated from keepPreviousData to placeholderData
+      placeholderData: keepPrevious // Use keepPrevious function instead of string
     });
   };
 
