@@ -55,6 +55,20 @@ const adaptOrderToSupabase = (order: Omit<FrontendOrder, 'id' | 'userId' | 'crea
   };
 };
 
+export interface OrdersQueryParams {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  filter?: {
+    type?: 'BUY' | 'SELL' | 'all';
+    pairGroup?: string;
+    minAmount?: number;
+    maxAmount?: number;
+    search?: string;
+  };
+}
+
 export function useOrders() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -91,6 +105,9 @@ export function useOrders() {
         description: "Your order has been successfully created"
       });
 
+      // Invalidate the orders query to refetch
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+
       // Convert the returned data to our frontend format
       const adaptedData = data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
       return { data: adaptedData, error: null };
@@ -106,20 +123,61 @@ export function useOrders() {
     }
   };
 
-  const { data: orders, isLoading: isLoadingOrders } = useQuery({
-    queryKey: ['orders'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Convert all orders to our frontend format
-      return data.map((order) => adaptOrderFromSupabase(order as SupabaseOrder));
+  const fetchOrders = async ({ page = 1, pageSize = 10, sortBy = 'amount', sortOrder = 'desc', filter = {} }: OrdersQueryParams) => {
+    // Start building our query
+    let query = supabase
+      .from('orders')
+      .select('*', { count: 'exact' });
+    
+    // Apply filtering
+    if (filter.type && filter.type !== 'all') {
+      query = query.eq('type', filter.type);
     }
-  });
+    
+    if (filter.minAmount !== undefined) {
+      query = query.gte('amount', filter.minAmount);
+    }
+    
+    if (filter.maxAmount !== undefined) {
+      query = query.lte('amount', filter.maxAmount);
+    }
+    
+    if (filter.search) {
+      query = query.or(`purpose.ilike.%${filter.search}%,notes.ilike.%${filter.search}%`);
+    }
+    
+    // Apply sorting
+    const sortColumn = sortBy === 'volume' ? 'amount' : sortBy;
+    query = query.order(sortColumn, { ascending: sortOrder === 'asc' });
+    
+    // Apply pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    query = query.range(from, to);
+    
+    // Execute the query
+    const { data, error, count } = await query;
+    
+    if (error) throw error;
+    
+    // Convert data to frontend format
+    const orders = data.map(order => adaptOrderFromSupabase(order as SupabaseOrder));
+    
+    return {
+      orders,
+      totalCount: count || 0,
+      page,
+      pageSize,
+      totalPages: count ? Math.ceil(count / pageSize) : 0
+    };
+  };
+
+  const useOrdersQuery = (params: OrdersQueryParams = {}) => {
+    return useQuery({
+      queryKey: ['orders', params],
+      queryFn: () => fetchOrders(params)
+    });
+  };
 
   const updateOrderStatus = async (orderId: string, status: FrontendOrder['status']) => {
     setLoading(true);
@@ -138,6 +196,9 @@ export function useOrders() {
         description: `Order status has been updated to ${status}`
       });
 
+      // Invalidate the orders query to refetch
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+
       // Convert the returned data to our frontend format
       const adaptedData = data ? adaptOrderFromSupabase(data as SupabaseOrder) : null;
       return { data: adaptedData, error: null };
@@ -155,9 +216,8 @@ export function useOrders() {
 
   return {
     loading,
-    orders,
-    isLoadingOrders,
     createOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    useOrdersQuery
   };
 }

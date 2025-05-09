@@ -8,119 +8,134 @@ import { Filter, Plus, Search, ArrowDownUp, List, LayoutGrid } from "lucide-reac
 import { tradePairs } from "../data/mockData";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
-import { useOrders } from "@/hooks/useOrders";
+import { useOrders, OrdersQueryParams } from "@/hooks/useOrders";
 import { Order } from "@/types";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function OrdersPage() {
-  const { orders, isLoadingOrders } = useOrders();
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedPairGroup, setSelectedPairGroup] = useState<string>("all");
   const [minVolume, setMinVolume] = useState(0);
   const [maxVolume, setMaxVolume] = useState(100000000);
   const [volumeRange, setVolumeRange] = useState([0, 100]);
-  const [sortBy, setSortBy] = useState<string>("newest");
+  const [sortBy, setSortBy] = useState<string>("highest_volume"); // Default sort by volume
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
-  const { theme } = useTheme();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
-  // Calculate actual volume range based on orders
+  // Prepare query parameters for fetching orders
+  const queryParams: OrdersQueryParams = {
+    page: currentPage,
+    pageSize: pageSize,
+    sortBy: 'amount', // Default to amount/volume
+    sortOrder: 'desc', // Default to descending (highest to lowest)
+    filter: {
+      type: selectedType === 'all' ? undefined : selectedType as 'BUY' | 'SELL' | undefined,
+      search: searchTerm || undefined,
+      // We'll calculate these based on the volume range slider
+      minAmount: undefined,
+      maxAmount: undefined
+    }
+  };
+
+  // Map the sortBy dropdown value to query parameters
   useEffect(() => {
-    if (orders && orders.length > 0) {
-      const volumes = orders.map(order => Number(order.amount));
-      const min = Math.min(...volumes);
-      const max = Math.max(...volumes);
+    let sort = 'amount';
+    let order: 'asc' | 'desc' = 'desc';
+    
+    switch(sortBy) {
+      case 'newest':
+        sort = 'created_at';
+        order = 'desc';
+        break;
+      case 'oldest':
+        sort = 'created_at';
+        order = 'asc';
+        break;
+      case 'highest_rate':
+        sort = 'rate';
+        order = 'desc';
+        break;
+      case 'lowest_rate':
+        sort = 'rate';
+        order = 'asc';
+        break;
+      case 'highest_volume':
+        sort = 'amount';
+        order = 'desc';
+        break;
+      case 'lowest_volume':
+        sort = 'amount';
+        order = 'asc';
+        break;
+      default:
+        sort = 'amount';
+        order = 'desc';
+    }
+    
+    queryParams.sortBy = sort;
+    queryParams.sortOrder = order;
+  }, [sortBy]);
+
+  // Get orders with the query parameters
+  const { useOrdersQuery } = useOrders();
+  const { 
+    data: ordersData,
+    isLoading: isLoadingOrders,
+    isError
+  } = useOrdersQuery(queryParams);
+
+  // Calculate min and max volume for the volume range slider
+  useEffect(() => {
+    if (ordersData?.orders && ordersData.orders.length > 0) {
+      const volumes = ordersData.orders.map(order => Number(order.amount));
       
-      setMinVolume(min);
-      setMaxVolume(max);
-      setVolumeRange([0, 100]);
+      // Only update if we have a significant change to avoid the slider jumping around
+      const calculatedMin = Math.min(...volumes);
+      const calculatedMax = Math.max(...volumes);
+      
+      if (Math.abs(calculatedMin - minVolume) > minVolume * 0.1) {
+        setMinVolume(calculatedMin);
+      }
+      
+      if (Math.abs(calculatedMax - maxVolume) > maxVolume * 0.1) {
+        setMaxVolume(calculatedMax);
+      }
     }
-  }, [orders]);
+  }, [ordersData?.orders]);
 
+  // Update filter values when volume range changes
   useEffect(() => {
-    if (!orders) return;
-    
-    let result = [...orders];
-    
-    // Filter by search term
-    if (searchTerm) {
-      result = result.filter(order => {
-        const pair = tradePairs.find(p => p.id === order.tradePairId);
-        const pairName = pair?.displayName || "";
-        const searchLower = searchTerm.toLowerCase();
-        
-        return (
-          pairName.toLowerCase().includes(searchLower) || 
-          order.purpose?.toLowerCase().includes(searchLower) ||
-          order.notes?.toLowerCase().includes(searchLower) ||
-          order.rate.toLowerCase().includes(searchLower)
-        );
-      });
-    }
-    
-    // Filter by order type
-    if (selectedType !== "all") {
-      result = result.filter(order => order.type === selectedType);
-    }
-    
-    // Filter by pair group
-    if (selectedPairGroup !== "all") {
-      result = result.filter(order => {
-        const pair = tradePairs.find(p => p.id === order.tradePairId);
-        return pair?.group === selectedPairGroup;
-      });
-    }
-
-    // Filter by volume
     const actualMinVolume = minVolume + (maxVolume - minVolume) * volumeRange[0] / 100;
     const actualMaxVolume = minVolume + (maxVolume - minVolume) * volumeRange[1] / 100;
     
-    result = result.filter(order => {
-      const amount = Number(order.amount);
-      return amount >= actualMinVolume && amount <= actualMaxVolume;
-    });
-    
-    // Sort orders
-    switch (sortBy) {
-      case "newest":
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case "oldest":
-        result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        break;
-      case "highest_rate":
-        result.sort((a, b) => Number(b.rate) - Number(a.rate));
-        break;
-      case "lowest_rate":
-        result.sort((a, b) => Number(a.rate) - Number(b.rate));
-        break;
-      case "highest_volume":
-        result.sort((a, b) => Number(b.amount) - Number(a.amount));
-        break;
-      case "lowest_volume":
-        result.sort((a, b) => Number(a.amount) - Number(b.amount));
-        break;
-      default:
-        break;
-    }
-    
-    setFilteredOrders(result);
-  }, [searchTerm, selectedType, selectedPairGroup, volumeRange, sortBy, orders, minVolume, maxVolume]);
+    queryParams.filter = {
+      ...queryParams.filter,
+      minAmount: actualMinVolume,
+      maxAmount: actualMaxVolume
+    };
+  }, [volumeRange, minVolume, maxVolume]);
 
-  if (isLoadingOrders) {
-    return (
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-otc-primary"></div>
-        </div>
-    );
-  }
-  
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page on new search
+  };
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const formatVolumeLabel = (value: number) => {
@@ -130,6 +145,80 @@ export default function OrdersPage() {
       maximumFractionDigits: 0,
     }).format(actualValue);
   };
+
+  // Generate pagination items
+  const renderPaginationItems = () => {
+    if (!ordersData?.totalPages) return null;
+    
+    const items = [];
+    const totalPages = ordersData.totalPages;
+    
+    // Always show first page, current page, and last page
+    // Plus one page before and after current if they exist
+    const pagesToShow = new Set([
+      1,
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      totalPages
+    ].filter(p => p >= 1 && p <= totalPages));
+    
+    const pagesArray = Array.from(pagesToShow).sort((a, b) => a - b);
+    
+    // Add pagination items with ellipsis where needed
+    let prevPage = 0;
+    for (const page of pagesArray) {
+      if (page - prevPage > 1) {
+        // Add ellipsis
+        items.push(
+          <PaginationItem key={`ellipsis-${prevPage}`}>
+            <span className="flex h-9 w-9 items-center justify-center">...</span>
+          </PaginationItem>
+        );
+      }
+      
+      items.push(
+        <PaginationItem key={page}>
+          <PaginationLink
+            isActive={page === currentPage}
+            onClick={() => handlePageChange(page)}
+            className={cn(
+              "cursor-pointer",
+              page === currentPage && "bg-otc-primary text-black hover:bg-otc-primary/90"
+            )}
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>
+      );
+      
+      prevPage = page;
+    }
+    
+    return items;
+  };
+
+  if (isLoadingOrders) {
+    return (
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-otc-primary"></div>
+        </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Card className="p-6 max-w-md">
+          <h3 className="text-lg font-medium mb-2">Error loading orders</h3>
+          <p className="text-muted-foreground">There was an error loading the orders. Please try again later.</p>
+          <Button className="mt-4" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
       <div className="space-y-6">
@@ -172,7 +261,10 @@ export default function OrdersPage() {
               
               <div className="flex gap-4">
                 <div className="w-40">
-                  <Select value={selectedType} onValueChange={value => setSelectedType(value)}>
+                  <Select value={selectedType} onValueChange={value => {
+                    setSelectedType(value);
+                    setCurrentPage(1); // Reset to first page on filter change
+                  }}>
                     <SelectTrigger className={cn(
                       theme === "light" 
                         ? "bg-accent/50 border-accent" 
@@ -193,7 +285,10 @@ export default function OrdersPage() {
                 </div>
                 
                 <div className="w-40">
-                  <Select value={selectedPairGroup} onValueChange={value => setSelectedPairGroup(value)}>
+                  <Select value={selectedPairGroup} onValueChange={value => {
+                    setSelectedPairGroup(value);
+                    setCurrentPage(1); // Reset to first page on filter change
+                  }}>
                     <SelectTrigger className={cn(
                       theme === "light" 
                         ? "bg-accent/50 border-accent" 
@@ -257,14 +352,20 @@ export default function OrdersPage() {
                 <Slider
                   defaultValue={[0, 100]}
                   value={volumeRange}
-                  onValueChange={setVolumeRange}
+                  onValueChange={(value) => {
+                    setVolumeRange(value);
+                    setCurrentPage(1); // Reset to first page on filter change
+                  }}
                   max={100}
                   step={1}
                   className="w-full"
                 />
               </div>
               <div className="w-40 md:w-56">
-                <Select value={sortBy} onValueChange={value => setSortBy(value)}>
+                <Select value={sortBy} onValueChange={value => {
+                  setSortBy(value);
+                  setCurrentPage(1); // Reset to first page on sort change
+                }}>
                   <SelectTrigger className={cn(
                     theme === "light" 
                       ? "bg-accent/50 border-accent" 
@@ -308,23 +409,23 @@ export default function OrdersPage() {
                 <p className={cn(
                   "text-xl font-bold",
                   theme === "light" ? "text-foreground" : "text-white"
-                )}>{filteredOrders.length}</p>
+                )}>{ordersData?.totalCount || 0}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Покупка</p>
                 <p className="text-xl font-bold text-green-500">
-                  {filteredOrders.filter(o => o.type === "BUY").length}
+                  {ordersData?.orders.filter(o => o.type === "BUY").length || 0}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Продажа</p>
                 <p className="text-xl font-bold text-red-500">
-                  {filteredOrders.filter(o => o.type === "SELL").length}
+                  {ordersData?.orders.filter(o => o.type === "SELL").length || 0}
                 </p>
               </div>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Общий объем</p>
+              <p className="text-xs text-muted-foreground">Общий объем на странице</p>
               <p className={cn(
                 "text-xl font-bold",
                 theme === "light" ? "text-foreground" : "text-white"
@@ -332,12 +433,46 @@ export default function OrdersPage() {
                 {new Intl.NumberFormat("ru-RU", {
                   style: "decimal",
                   maximumFractionDigits: 0,
-                }).format(filteredOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
+                }).format((ordersData?.orders || []).reduce((sum, order) => sum + Number(order.amount), 0))} RUB
               </p>
             </div>
           </div>
           
-          <OrdersTable orders={filteredOrders} showDetailedView={viewMode === "table"} />
+          <OrdersTable orders={ordersData?.orders || []} showDetailedView={viewMode === "table"} />
+          
+          {/* Pagination */}
+          {ordersData && ordersData.totalPages > 1 && (
+            <div className={cn(
+              "p-4 border-t",
+              theme === "light" ? "border-border" : "border-otc-active"
+            )}>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                      className={cn(
+                        "cursor-pointer",
+                        currentPage === 1 && "opacity-50 cursor-not-allowed"
+                      )} 
+                    />
+                  </PaginationItem>
+                  
+                  {renderPaginationItems()}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < (ordersData?.totalPages || 1) && handlePageChange(currentPage + 1)}
+                      className={cn(
+                        "cursor-pointer",
+                        currentPage === (ordersData?.totalPages || 1) && "opacity-50 cursor-not-allowed"
+                      )}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </div>
       </div>
   );
