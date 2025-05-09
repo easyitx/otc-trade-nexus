@@ -214,10 +214,10 @@ export function useOrders() {
       }
     }
 
-    // Fixed archived filter logic
+    // Fixed archived filter logic - this is the key change
     if (filter.showArchived === true) {
-      // When showing archived, include archived status
-      // No additional filter needed
+      // When showing archived, ONLY show orders with ARCHIVED status
+      query = query.eq('status', 'ARCHIVED');
     } else {
       // When not showing archived, exclude orders with ARCHIVED status
       query = query.neq('status', 'ARCHIVED');
