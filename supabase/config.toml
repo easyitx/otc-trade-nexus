@@ -3,3 +3,9 @@ project_id = "kvnpcqisowlqvdumkczc"
 
 [functions.exchange-rates]
 verify_jwt = false
+
+[functions.archive-expired-orders]
+verify_jwt = false
+
+[functions.setup-cron-job]
+verify_jwt = false
