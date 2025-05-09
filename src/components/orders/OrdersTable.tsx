@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { ru } from "date-fns/locale";
 import { ArrowRight, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { Order } from "../../types";
@@ -26,14 +27,31 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   
   // Split orders into buy and sell
   const buyOrders = orders.filter(order => order.type === "BUY")
-    .sort((a, b) => Number(b.rate) - Number(a.rate));
+    .sort((a, b) => Number(b.amount) - Number(a.amount));
   const sellOrders = orders.filter(order => order.type === "SELL")
-    .sort((a, b) => Number(a.rate) - Number(b.rate));
+    .sort((a, b) => Number(b.amount) - Number(a.amount));
+    
+  // Calculate total volume for percentages
+  const totalBuyVolume = buyOrders.reduce((sum, order) => {
+    // Convert to USD equivalent for consistent comparison
+    const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
+      ? Number(order.amount) 
+      : Number(order.amount) / Number(order.rate);
+    return sum + orderVolumeUSD;
+  }, 0);
+  
+  const totalSellVolume = sellOrders.reduce((sum, order) => {
+    // Convert to USD equivalent for consistent comparison
+    const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
+      ? Number(order.amount) 
+      : Number(order.amount) / Number(order.rate);
+    return sum + orderVolumeUSD;
+  }, 0);
 
   if (orders.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No orders found matching your filters.
+        Заявки не найдены.
       </div>
     );
   }
@@ -59,28 +77,53 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     
     return "Фиксированный";
   };
+  
+  const getFormattedRateDisplay = (order: Order) => {
+    if (order.type === "BUY") {
+      return order.rateDetails?.type === "dynamic" 
+        ? `ЦБ+${order.rateDetails.adjustment}%` 
+        : `${order.rate}`;
+    } else {
+      // For sell orders
+      return order.rateDetails?.type === "dynamic" 
+        ? `ЦБ+${order.rateDetails.adjustment}%` 
+        : `${order.rate}`;
+    }
+  };
+  
+  // Calculate the percentage of the total volume an order represents
+  const calculateVolumePercentage = (order: Order, orderType: "BUY" | "SELL") => {
+    const totalVolume = orderType === "BUY" ? totalBuyVolume : totalSellVolume;
+    if (totalVolume === 0) return 0;
+    
+    // Convert to USD equivalent for consistent comparison
+    const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
+      ? Number(order.amount) 
+      : Number(order.amount) / Number(order.rate);
+      
+    return (orderVolumeUSD / totalVolume) * 100;
+  };
 
   const OrderRow = ({ order, type }: { order: Order, type: "BUY" | "SELL" }) => {
-    const pair = tradePairs[0];
     const isGreen = type === "BUY";
-    const volume = (Number(order.amount) / Number(order.rate)).toFixed(3);
-    const rateType = getRateDescription(order);
+    const volumePercentage = calculateVolumePercentage(order, type);
     const tradePairDisplay = order.amountCurrency === "RUB" ? "RUB/USDT" : "USDT/RUB";
+    const formattedRate = getFormattedRateDisplay(order);
+    const rateType = getRateDescription(order);
     
     if (showDetailedView) {
       return (
         <TableRow className={cn("hover:bg-accent/20")}>
           <TableCell className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-            {type}
+            {type === "BUY" ? "Покупка" : "Продажа"}
           </TableCell>
           <TableCell>{formatAmount(Number(order.amount))} {order.amountCurrency}</TableCell>
-          <TableCell>{formatAmount(Number(volume))} USDT</TableCell>
           <TableCell className={`${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-            {order.rate}
+            {formattedRate}
           </TableCell>
           <TableCell>{rateType}</TableCell>
           <TableCell>{tradePairDisplay}</TableCell>
-          <TableCell>{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}</TableCell>
+          <TableCell>{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}</TableCell>
           <TableCell>
             <Button 
               variant="ghost" 
@@ -98,35 +141,41 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     }
 
     return (
-      <div className="group relative">
+      <div className="relative group">
+        {/* Background fill based on percentage of total volume */}
+        <div 
+          className={cn(
+            "absolute inset-0 opacity-20 z-0",
+            isGreen ? "bg-green-500" : "bg-red-500"
+          )}
+          style={{
+            width: `${volumePercentage}%`,
+          }}
+        />
         <div className={cn(
-          "absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent",
-          "group-hover:from-accent/20 group-hover:via-accent/20 group-hover:to-transparent transition-all duration-300"
-        )} />
-        <div className={cn(
-          "relative flex items-center justify-between p-2 border-b",
-          theme === "light" ? "border-border" : "border-white/10"
+          "relative flex items-center justify-between p-3 border-b z-10",
+          theme === "light" ? "border-border" : "border-white/10",
         )}>
           <div className="flex items-center space-x-2">
             {type === "BUY" ? (
-              <ArrowUpRight className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <ArrowUpRight className="h-5 w-5 text-green-500 flex-shrink-0" />
             ) : (
-              <ArrowDownRight className="h-4 w-4 text-red-500 flex-shrink-0" />
+              <ArrowDownRight className="h-5 w-5 text-red-500 flex-shrink-0" />
             )}
             <div>
-              <div className="flex items-center gap-1">
-                <span className={`text-base font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-                  {order.rate}
+              <div className="flex items-center gap-2">
+                <span className={`text-lg font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
+                  {formattedRate}
                 </span>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {rateType}
                 </span>
               </div>
-              <div className="text-sm font-medium">
+              <div className="text-base font-semibold">
                 {formatAmount(Number(order.amount))} {order.amountCurrency}
               </div>
               <div className="text-xs text-muted-foreground">
-                {tradePairDisplay} • {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true })}
+                {tradePairDisplay} • истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
               </div>
             </div>
           </div>
@@ -156,7 +205,6 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           )}>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Тип</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Объем</TableHead>
-            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>USDT</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Курс</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Тип курса</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Пара</TableHead>
@@ -174,7 +222,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   );
 
   const CardsView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 p-0">
       {/* Buy Orders */}
       <div className={cn(
         "backdrop-blur-xl border rounded-lg overflow-hidden",
@@ -183,16 +231,16 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           : "bg-white/5 border-white/10"
       )}>
         <div className={cn(
-          "p-2 border-b",
+          "p-3 border-b",
           theme === "light" ? "bg-green-500/10 border-border" : "bg-green-500/10 border-white/10"
         )}>
-          <h3 className="text-sm font-semibold text-green-500">Buy Orders</h3>
+          <h3 className="text-sm font-semibold text-green-500">Заявки на покупку</h3>
           <p className="text-xs text-muted-foreground">
-            Total: {formatAmount(buyOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
+            Всего: {formatAmount(buyOrders.reduce((sum, order) => sum + Number(order.amount), 0))} {buyOrders.length > 0 ? buyOrders[0].amountCurrency || 'RUB' : 'RUB'}
           </p>
         </div>
         <div className={cn(
-          "divide-y max-h-[350px] overflow-y-auto", 
+          "divide-y max-h-[500px] overflow-y-auto", 
           theme === "light" ? "divide-border" : "divide-white/10"
         )}>
           {buyOrders.map((order) => (
@@ -209,16 +257,16 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           : "bg-white/5 border-white/10"
       )}>
         <div className={cn(
-          "p-2 border-b",
+          "p-3 border-b",
           theme === "light" ? "bg-red-500/10 border-border" : "bg-red-500/10 border-white/10"
         )}>
-          <h3 className="text-sm font-semibold text-red-500">Sell Orders</h3>
+          <h3 className="text-sm font-semibold text-red-500">Заявки на продажу</h3>
           <p className="text-xs text-muted-foreground">
-            Total: {formatAmount(sellOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
+            Всего: {formatAmount(sellOrders.reduce((sum, order) => sum + Number(order.amount), 0))} {sellOrders.length > 0 ? sellOrders[0].amountCurrency || 'RUB' : 'RUB'}
           </p>
         </div>
         <div className={cn(
-          "divide-y max-h-[350px] overflow-y-auto", 
+          "divide-y max-h-[500px] overflow-y-auto", 
           theme === "light" ? "divide-border" : "divide-white/10"
         )}>
           {sellOrders.map((order) => (
@@ -231,3 +279,4 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
 
   return showDetailedView ? <DetailedView /> : <CardsView />;
 };
+

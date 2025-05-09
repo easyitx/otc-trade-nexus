@@ -23,6 +23,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useDebounce } from "@/hooks/useDebounce";
+import { Progress } from "@/components/ui/progress";
 
 export default function OrdersPage() {
   const { theme } = useTheme();
@@ -156,6 +157,17 @@ export default function OrdersPage() {
     }).format(actualValue);
   };
 
+  // Calculate total volume in USD for display
+  const calculateTotalVolumeUSD = (orders: Order[]) => {
+    return orders.reduce((sum, order) => {
+      // Convert to USD equivalent 
+      const orderVolumeUSD = order.amountCurrency === "USD" || order.amountCurrency === "USDT" 
+        ? Number(order.amount) 
+        : Number(order.amount) / Number(order.rate);
+      return sum + orderVolumeUSD;
+    }, 0);
+  };
+
   // Generate pagination items
   const renderPaginationItems = () => {
     if (!ordersData?.totalPages) return null;
@@ -220,18 +232,27 @@ export default function OrdersPage() {
     return (
       <div className="flex items-center justify-center h-full">
         <Card className="p-6 max-w-md">
-          <h3 className="text-lg font-medium mb-2">Error loading orders</h3>
-          <p className="text-muted-foreground">There was an error loading the orders. Please try again later.</p>
+          <h3 className="text-lg font-medium mb-2">Ошибка загрузки заявок</h3>
+          <p className="text-muted-foreground">Возникла ошибка при загрузке заявок. Пожалуйста, попробуйте позже.</p>
           <Button className="mt-4" onClick={() => window.location.reload()}>
-            Retry
+            Повторить
           </Button>
         </Card>
       </div>
     );
   }
 
+  // Calculate the number of buy and sell orders
+  const buyOrdersCount = ordersData?.orders.filter(o => o.type === "BUY").length || 0;
+  const sellOrdersCount = ordersData?.orders.filter(o => o.type === "SELL").length || 0;
+  
+  // Calculate total volume in USD for both buy and sell orders
+  const buyOrdersVolume = calculateTotalVolumeUSD(ordersData?.orders.filter(o => o.type === "BUY") || []);
+  const sellOrdersVolume = calculateTotalVolumeUSD(ordersData?.orders.filter(o => o.type === "SELL") || []);
+  const totalVolumeUSD = buyOrdersVolume + sellOrdersVolume;
+
   return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className={cn(
             "text-2xl font-bold", 
@@ -247,12 +268,12 @@ export default function OrdersPage() {
         
         {/* Compact Filters */}
         <Card className={cn(
-          "p-4",
+          "p-3",
           theme === "light" 
             ? "bg-card border-border" 
             : "bg-otc-card border-otc-active"
         )}>
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex flex-wrap gap-3 items-center">
               {/* Search input */}
               <div className="relative flex-1 min-w-[200px] max-w-md">
@@ -441,9 +462,9 @@ export default function OrdersPage() {
                           : "bg-otc-card border-otc-active"
                       )}>
                         <SelectItem value="all">Все группы</SelectItem>
-                        <SelectItem value="RUB_NR">RUB (NR)</SelectItem>
-                        <SelectItem value="RUB_CASH">RUB (Cash)</SelectItem>
-                        <SelectItem value="TOKENIZED">Tokenized</SelectItem>
+                        <SelectItem value="RUB_NR">RUB (НР)</SelectItem>
+                        <SelectItem value="RUB_CASH">RUB (Нал)</SelectItem>
+                        <SelectItem value="TOKENIZED">Токенизированные</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -461,10 +482,10 @@ export default function OrdersPage() {
             : "bg-otc-card border-otc-active"
         )}>
           <div className={cn(
-            "p-4 border-b flex flex-wrap gap-4 justify-between",
+            "p-3 border-b flex flex-wrap gap-4 justify-between",
             theme === "light" ? "border-border" : "border-otc-active"
           )}>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-6">
               <div>
                 <p className="text-xs text-muted-foreground">Всего заявок</p>
                 <p className={cn(
@@ -475,13 +496,13 @@ export default function OrdersPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Покупка</p>
                 <p className="text-xl font-bold text-green-500">
-                  {ordersData?.orders.filter(o => o.type === "BUY").length || 0}
+                  {buyOrdersCount}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Продажа</p>
                 <p className="text-xl font-bold text-red-500">
-                  {ordersData?.orders.filter(o => o.type === "SELL").length || 0}
+                  {sellOrdersCount}
                 </p>
               </div>
             </div>
@@ -494,9 +515,15 @@ export default function OrdersPage() {
                 {new Intl.NumberFormat("ru-RU", {
                   style: "decimal",
                   maximumFractionDigits: 0,
-                }).format((ordersData?.orders || []).reduce((sum, order) => sum + Number(order.amount), 0))} RUB
+                }).format(totalVolumeUSD)} USD
               </p>
             </div>
+          </div>
+          
+          {/* Volume comparison chart */}
+          <div className="px-3 py-2 border-b flex items-center space-x-2">
+            <div className="h-4 bg-green-500 rounded-sm" style={{ width: `${(buyOrdersVolume / totalVolumeUSD) * 100}%` }}></div>
+            <div className="h-4 bg-red-500 rounded-sm" style={{ width: `${(sellOrdersVolume / totalVolumeUSD) * 100}%` }}></div>
           </div>
           
           <OrdersTable orders={ordersData?.orders || []} showDetailedView={viewMode === "table"} />

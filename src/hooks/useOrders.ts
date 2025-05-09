@@ -70,6 +70,13 @@ export interface OrdersQueryParams {
   };
 }
 
+// Helper function to convert amounts to USD equivalent for consistent comparison
+export const convertToUSD = (amount: number, currency: string, rate: string): number => {
+  if (currency === "USD" || currency === "USDT") return amount;
+  // For other currencies, convert to USD based on rate
+  return amount / Number(rate);
+};
+
 export function useOrders() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -79,11 +86,11 @@ export function useOrders() {
   const createOrder = async (orderData: Omit<FrontendOrder, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'tradePairId'>) => {
     if (!currentUser) {
       toast({
-        title: "Authentication required",
-        description: "You must be logged in to create orders",
+        title: "Требуется авторизация",
+        description: "Вы должны быть авторизованы, чтобы создавать заявки",
         variant: "destructive"
       });
-      return { data: null, error: "Authentication required" };
+      return { data: null, error: "Требуется авторизация" };
     }
 
     setLoading(true);
@@ -102,8 +109,8 @@ export function useOrders() {
       if (error) throw error;
 
       toast({
-        title: "Order created",
-        description: "Your order has been successfully created"
+        title: "Заявка создана",
+        description: "Ваша заявка успешно создана"
       });
 
       // Invalidate the orders query to refetch
@@ -114,7 +121,7 @@ export function useOrders() {
       return { data: adaptedData, error: null };
     } catch (error: any) {
       toast({
-        title: "Failed to create order",
+        title: "Не удалось создать заявку",
         description: error.message,
         variant: "destructive"
       });
@@ -125,7 +132,7 @@ export function useOrders() {
   };
 
   const fetchOrders = async ({ page = 1, pageSize = 10, sortBy = 'amount', sortOrder = 'desc', filter = {} }: OrdersQueryParams) => {
-    console.log("Fetching orders with params:", { page, pageSize, sortBy, sortOrder, filter });
+    console.log("Загрузка заявок с параметрами:", { page, pageSize, sortBy, sortOrder, filter });
     
     // Start building our query
     let query = supabase
@@ -177,17 +184,17 @@ export function useOrders() {
     const to = from + pageSize - 1;
     query = query.range(from, to);
     
-    console.log("Executing query with range:", from, to);
+    console.log("Выполнение запроса с диапазоном:", from, to);
     
     // Execute the query
     const { data, error, count } = await query;
     
     if (error) {
-      console.error("Error fetching orders:", error);
+      console.error("Ошибка при загрузке заявок:", error);
       throw error;
     }
     
-    console.log(`Retrieved ${data?.length || 0} orders. Total count: ${count}`);
+    console.log(`Получено ${data?.length || 0} заявок. Всего: ${count}`);
     
     // Convert data to frontend format
     const orders = data.map(order => adaptOrderFromSupabase(order as SupabaseOrder));
@@ -221,8 +228,8 @@ export function useOrders() {
       if (error) throw error;
 
       toast({
-        title: "Order updated",
-        description: `Order status has been updated to ${status}`
+        title: "Заявка обновлена",
+        description: `Статус заявки изменен на ${status}`
       });
 
       // Invalidate the orders query to refetch
@@ -233,7 +240,7 @@ export function useOrders() {
       return { data: adaptedData, error: null };
     } catch (error: any) {
       toast({
-        title: "Failed to update order",
+        title: "Не удалось обновить заявку",
         description: error.message,
         variant: "destructive"
       });
@@ -247,6 +254,7 @@ export function useOrders() {
     loading,
     createOrder,
     updateOrderStatus,
-    useOrdersQuery
+    useOrdersQuery,
+    convertToUSD // Экспортируем функцию для использования в других компонентах
   };
 }
