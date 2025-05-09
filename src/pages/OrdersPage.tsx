@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { ArrowDownUp, List, LayoutGrid } from "lucide-react";
+import { ArrowDownUp, List, LayoutGrid, Archive } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
 import { useOrders, OrdersQueryParams } from "@/hooks/useOrders";
@@ -12,6 +12,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
   Pagination,
   PaginationContent,
@@ -36,6 +37,7 @@ export default function OrdersPage() {
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
   const [selectedPair, setSelectedPair] = useState<string>("all");
   const [isOrdersLoading, setIsOrdersLoading] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   // Trading pairs for quick filtering
   const tradingPairs = [
@@ -60,7 +62,8 @@ export default function OrdersPage() {
       type: selectedType === 'all' ? undefined : selectedType as 'BUY' | 'SELL' | undefined,
       minAmount: actualMinVolume,
       maxAmount: actualMaxVolume,
-      tradePair: selectedPair === 'all' ? undefined : selectedPair
+      tradePair: selectedPair === 'all' ? undefined : selectedPair,
+      showArchived: showArchived
     }
   };
 
@@ -105,7 +108,7 @@ export default function OrdersPage() {
   // Reset to first page when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedType, selectedPairGroup, volumeRange, selectedPair]);
+  }, [selectedType, selectedPairGroup, volumeRange, selectedPair, showArchived]);
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -264,6 +267,9 @@ export default function OrdersPage() {
   // Calculate the number of buy and sell orders
   const buyOrdersCount = ordersData?.orders.filter(o => o.type === "BUY").length || 0;
   const sellOrdersCount = ordersData?.orders.filter(o => o.type === "SELL").length || 0;
+  
+  // Calculate the number of archived orders if showing them
+  const archivedOrdersCount = ordersData?.orders.filter(o => o.status === "ARCHIVED").length || 0;
 
   return (
     <div className="space-y-4">
@@ -290,24 +296,43 @@ export default function OrdersPage() {
         <div className="space-y-3">
           <div className="flex flex-wrap gap-3 items-center justify-between">
             {/* Панель фильтров по типу заявки */}
-            <ToggleGroup 
-              type="single" 
-              value={selectedType} 
-              onValueChange={(value) => value && setSelectedType(value)}
-              className="border rounded-md"
-            >
-              <ToggleGroupItem value="all" aria-label="Toggle all types">
-                Все типы
-              </ToggleGroupItem>
-              <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500">
-                Покупка
-              </ToggleGroupItem>
-              <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500">
-                Продажа
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <div className="flex flex-wrap items-center gap-4">
+              <ToggleGroup 
+                type="single" 
+                value={selectedType} 
+                onValueChange={(value) => value && setSelectedType(value)}
+                className="border rounded-md"
+              >
+                <ToggleGroupItem value="all" aria-label="Toggle all types">
+                  Все типы
+                </ToggleGroupItem>
+                <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500">
+                  Покупка
+                </ToggleGroupItem>
+                <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500">
+                  Продажа
+                </ToggleGroupItem>
+              </ToggleGroup>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="archived-mode"
+                    checked={showArchived}
+                    onCheckedChange={setShowArchived}
+                  />
+                  <label
+                    htmlFor="archived-mode"
+                    className="text-sm flex items-center gap-1 cursor-pointer"
+                  >
+                    <Archive className="h-4 w-4" />
+                    {showArchived ? "Показывать архивные" : "Только активные"}
+                  </label>
+                </div>
+              </div>
+            </div>
             
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex items-center gap-2">
               {/* Режим отображения */}
               <div className="flex gap-1">
                 <Button 
@@ -490,6 +515,14 @@ export default function OrdersPage() {
                 {sellOrdersCount}
               </p>
             </div>
+            {showArchived && (
+              <div>
+                <p className="text-xs text-muted-foreground">Архивные</p>
+                <p className="text-xl font-bold text-gray-500">
+                  {archivedOrdersCount}
+                </p>
+              </div>
+            )}
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Общий объем на странице</p>

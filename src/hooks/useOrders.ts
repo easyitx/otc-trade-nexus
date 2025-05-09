@@ -15,8 +15,8 @@ const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
     : "BUY"; // Default to BUY if not matching
 
   // Ensure status is properly cast to expected union type
-  const orderStatus = ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED"].includes(order.status || "")
-    ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED"
+  const orderStatus = ["ACTIVE", "COMPLETED", "CANCELLED", "EXPIRED", "ARCHIVED"].includes(order.status || "")
+    ? order.status as "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED" | "ARCHIVED"
     : "ACTIVE"; // Default to ACTIVE if not matching
 
   return {
@@ -67,6 +67,7 @@ export interface OrdersQueryParams {
     maxAmount?: number;
     search?: string;
     tradePair?: string;
+    showArchived?: boolean; // Add a new filter to show/hide archived orders
   };
 }
 
@@ -96,6 +97,13 @@ export const convertToUSD = (amount: number, currency: string, rate: string): nu
     console.error("Ошибка при конвертации валюты:", error);
     return amount; // В случае ошибки возвращаем исходное значение
   }
+};
+
+// Function to check if an order is expired and should be archived
+const isOrderExpired = (expiresAt: string): boolean => {
+  const expirationDate = new Date(expiresAt);
+  const now = new Date();
+  return expirationDate < now;
 };
 
 export function useOrders() {
@@ -190,6 +198,15 @@ export function useOrders() {
         query = query.eq('amount_currency', 'USD');
       }
     }
+
+    // Handle showing/hiding archived orders
+    if (filter.showArchived) {
+      // When showing archived, include all statuses
+      // No additional filter needed
+    } else {
+      // When not showing archived, exclude orders with ARCHIVED status
+      query = query.neq('status', 'ARCHIVED');
+    }
     
     // Apply sorting
     // Map frontend field names to database column names
@@ -216,6 +233,26 @@ export function useOrders() {
     }
     
     console.log(`Получено ${data?.length || 0} заявок. Всего: ${count}`);
+
+    // Check for expired orders and update them to ARCHIVED status if needed
+    const expiredOrderIds: string[] = [];
+    data?.forEach(order => {
+      if (order.status === 'ACTIVE' && isOrderExpired(order.expires_at)) {
+        expiredOrderIds.push(order.id);
+        order.status = 'ARCHIVED';
+      }
+    });
+
+    // Update expired orders in the database
+    if (expiredOrderIds.length > 0) {
+      console.log(`Updating ${expiredOrderIds.length} expired orders to ARCHIVED status`);
+      await supabase
+        .from('orders')
+        .update({ status: 'ARCHIVED' })
+        .in('id', expiredOrderIds);
+      
+      // We don't need to refetch since we already updated the status in our local data
+    }
     
     // Convert data to frontend format
     const orders = data.map(order => adaptOrderFromSupabase(order as SupabaseOrder));

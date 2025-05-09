@@ -27,7 +27,7 @@ export type Order = {
   };
   purpose: string | null;
   notes: string | null;
-  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
+  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED' | 'ARCHIVED';
   expires_at: string;
   created_at: string;
   updated_at: string;

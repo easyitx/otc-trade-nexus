@@ -55,7 +55,7 @@ export interface Order {
   notes?: string;
   userId: string;
   tradePairId: string;
-  status: "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED";
+  status: "ACTIVE" | "COMPLETED" | "CANCELLED" | "EXPIRED" | "ARCHIVED";
   geography?: Geography;
 }
 

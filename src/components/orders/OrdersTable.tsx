@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
-import { ArrowRight, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ArrowDownRight, Archive } from "lucide-react";
 import { Button } from "../ui/button";
 import { Order } from "../../types";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { Badge } from "../ui/badge";
 
 interface OrdersTableProps {
   orders: Order[];
@@ -142,6 +143,41 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     }
   };
 
+  // Функция для проверки статуса и срока действия заявки
+  const isOrderExpired = (expiresAt: Date): boolean => {
+    return expiresAt < new Date();
+  };
+
+  // Функция для отображения статуса заявки
+  const getOrderStatusBadge = (order: Order) => {
+    if (order.status === "ARCHIVED") {
+      return (
+        <Badge variant="outline" className="bg-gray-100 text-gray-500 flex items-center gap-1 ml-2">
+          <Archive className="h-3 w-3" /> 
+          Архивная
+        </Badge>
+      );
+    }
+    
+    if (order.status === "CANCELLED") {
+      return (
+        <Badge variant="outline" className="bg-red-100 text-red-500 ml-2">
+          Отменена
+        </Badge>
+      );
+    }
+    
+    if (isOrderExpired(new Date(order.expiresAt))) {
+      return (
+        <Badge variant="outline" className="bg-yellow-100 text-yellow-700 ml-2">
+          Истекла
+        </Badge>
+      );
+    }
+    
+    return null;
+  };
+
   const OrderRow = ({ order, type }: { order: Order, type: "BUY" | "SELL" }) => {
     const isGreen = type === "BUY";
     const volumePercentage = calculateVolumePercentage(order, type);
@@ -150,12 +186,17 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     const tradeDirection = getTradeDirection(order);
     const formattedRate = getFormattedRateDisplay(order);
     const rateType = getRateDescription(order);
+    const isExpiredOrArchived = order.status === "ARCHIVED" || isOrderExpired(new Date(order.expiresAt));
     
     if (showDetailedView) {
       return (
-        <TableRow className={cn("hover:bg-accent/20")}>
+        <TableRow className={cn(
+          "hover:bg-accent/20",
+          isExpiredOrArchived && "opacity-60"
+        )}>
           <TableCell className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
             {type === "BUY" ? "Покупка" : "Продажа"}
+            {getOrderStatusBadge(order)}
           </TableCell>
           <TableCell>{formatAmount(Number(order.amount))} {order.amountCurrency}</TableCell>
           <TableCell className={`${isGreen ? 'text-green-500' : 'text-red-500'}`}>
@@ -182,7 +223,10 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     }
 
     return (
-      <div className="relative group">
+      <div className={cn(
+        "relative group", 
+        isExpiredOrArchived && "opacity-60"
+      )}>
         {/* Фоновая заливка на основе процента от общего объема с улучшенной визуализацией */}
         <div 
           className={cn(
@@ -212,12 +256,20 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {rateType}
                 </span>
+                {getOrderStatusBadge(order)}
               </div>
-              <div className="text-base font-semibold">
-                {formatAmount(Number(order.amount))} {order.amountCurrency}
+              <div className="text-base font-semibold flex items-center gap-1">
+                <span>{formatAmount(Number(order.amount))} {order.amountCurrency}</span>
               </div>
               <div className="text-xs text-muted-foreground">
-                <span className="font-medium">{tradeDirection.fullDirection}</span> • истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
+                <span className="font-medium">{tradeDirection.fullDirection}</span> • 
+                {order.status === "ARCHIVED" ? (
+                  <span className="ml-1">архивная</span>
+                ) : (
+                  <span className="ml-1">
+                    истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
+                  </span>
+                )}
               </div>
             </div>
           </div>
