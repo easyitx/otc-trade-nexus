@@ -5,7 +5,6 @@ import { ru } from "date-fns/locale";
 import { ArrowRight, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { Order } from "../../types";
-import { tradePairs } from "../../data/mockData";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import { convertToUSD } from "@/hooks/useOrders";
@@ -92,21 +91,26 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   
   // Улучшенная функция расчета процентного отображения объема заявки
   const calculateVolumePercentage = (order: Order, orderType: "BUY" | "SELL") => {
-    // Определяем общий объем для соответствующего типа заявки
-    const totalVolume = orderType === "BUY" ? totalBuyVolumeUSD : totalSellVolumeUSD;
-    if (totalVolume === 0) return 0;
-    
-    // Конвертируем текущую заявку в USD для корректного сравнения
-    const orderVolumeUSD = convertToUSD(Number(order.amount), order.amountCurrency || "USD", order.rate);
-    
-    // Рассчитываем процент, но ограничиваем максимум до 100%
-    const percentage = (orderVolumeUSD / totalVolume) * 100;
-    
-    // Лог для отладки
-    console.log(`Заявка ${order.id} (${orderType}): объем ${orderVolumeUSD} USD, ${percentage.toFixed(2)}% от общего объема ${totalVolume} USD`);
-    
-    // Ограничиваем максимум до 100% и минимум до 5% для наглядности маленьких заявок
-    return Math.min(100, Math.max(5, percentage));
+    try {
+      // Определяем общий объем для соответствующего типа заявки
+      const totalVolume = orderType === "BUY" ? totalBuyVolumeUSD : totalSellVolumeUSD;
+      if (totalVolume <= 0) return 5; // Минимальное значение для отображения
+      
+      // Конвертируем текущую заявку в USD для корректного сравнения
+      const orderVolumeUSD = convertToUSD(Number(order.amount), order.amountCurrency || "USD", order.rate);
+      
+      // Рассчитываем процент, но ограничиваем максимум до 100%
+      const percentage = (orderVolumeUSD / totalVolume) * 100;
+      
+      // Лог для отладки
+      console.log(`Заявка ${order.id} (${orderType}): объем ${orderVolumeUSD.toFixed(2)} USD, ${percentage.toFixed(2)}% от общего объема ${totalVolume.toFixed(2)} USD`);
+      
+      // Ограничиваем максимум до 100% и минимум до 5% для наглядности маленьких заявок
+      return Math.min(100, Math.max(5, percentage));
+    } catch (error) {
+      console.error("Ошибка при расчете процента объема:", error);
+      return 5; // Возвращаем минимальное значение в случае ошибки
+    }
   };
 
   // Функция для определения торговой пары
@@ -125,13 +129,15 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
       return {
         buying: quoteCurrency,
         selling: baseCurrency,
-        direction: `Покупает ${quoteCurrency} за ${baseCurrency}`
+        direction: `Покупает ${quoteCurrency} за ${baseCurrency}`,
+        fullDirection: `Хочет купить ${quoteCurrency} и отдать ${baseCurrency}`
       };
     } else {
       return {
         buying: baseCurrency,
         selling: quoteCurrency,
-        direction: `Продает ${baseCurrency} за ${quoteCurrency}`
+        direction: `Продает ${baseCurrency} за ${quoteCurrency}`,
+        fullDirection: `Хочет продать ${baseCurrency} и получить ${quoteCurrency}`
       };
     }
   };
@@ -157,6 +163,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           </TableCell>
           <TableCell>{rateType}</TableCell>
           <TableCell>{tradePairDisplay}</TableCell>
+          <TableCell>{tradeDirection.fullDirection}</TableCell>
           <TableCell>{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}</TableCell>
           <TableCell>
             <Button 
@@ -179,11 +186,12 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
         {/* Фоновая заливка на основе процента от общего объема с улучшенной визуализацией */}
         <div 
           className={cn(
-            "absolute inset-0 opacity-20 z-0",
+            "absolute inset-0 opacity-20 z-0 left-0",
             isGreen ? "bg-green-500" : "bg-red-500"
           )}
           style={{
             width: `${volumePercentage}%`,
+            maxWidth: '100%'
           }}
         />
         <div className={cn(
@@ -209,7 +217,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
                 {formatAmount(Number(order.amount))} {order.amountCurrency}
               </div>
               <div className="text-xs text-muted-foreground">
-                <span className="font-medium">{tradeDirection.direction}</span> • истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
+                <span className="font-medium">{tradeDirection.fullDirection}</span> • истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
               </div>
             </div>
           </div>
@@ -242,6 +250,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Курс</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Тип курса</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Пара</TableHead>
+            <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Направление</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white")}>Срок</TableHead>
             <TableHead className={cn("font-medium", theme === "light" ? "text-foreground" : "text-white w-[50px]")}></TableHead>
           </TableRow>

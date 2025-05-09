@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Filter, ArrowDownUp, List, LayoutGrid } from "lucide-react";
+import { ArrowDownUp, List, LayoutGrid } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
 import { useOrders, OrdersQueryParams } from "@/hooks/useOrders";
@@ -20,7 +20,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Progress } from "@/components/ui/progress";
 
 export default function OrdersPage() {
   const { theme } = useTheme();
@@ -66,7 +65,7 @@ export default function OrdersPage() {
   };
 
   // Get orders with the query parameters
-  const { useOrdersQuery } = useOrders();
+  const { useOrdersQuery, convertToUSD } = useOrders();
   const { 
     data: ordersData,
     isLoading: queryLoading,
@@ -165,19 +164,6 @@ export default function OrdersPage() {
   }, 0) || 0;
   
   const totalVolumeUSD = buyOrdersVolume + sellOrdersVolume;
-
-  // Функция для конвертации в USD
-  const convertToUSD = (amount: number, currency: string, rate: string): number => {
-    if (currency === "USD" || currency === "USDT") return amount;
-    
-    const numericRate = Number(rate.replace(/[^0-9.]/g, ''));
-    
-    if (isNaN(numericRate) || numericRate === 0) {
-      return amount;
-    }
-    
-    return amount / numericRate;
-  };
 
   // Generate pagination items
   const renderPaginationItems = () => {
@@ -388,21 +374,6 @@ export default function OrdersPage() {
                   <SelectItem value="oldest">Старые заявки</SelectItem>
                 </SelectContent>
               </Select>
-              
-              {/* Кнопка дополнительных фильтров */}
-              <Button 
-                variant="outline" 
-                onClick={() => setIsAdvancedFiltersOpen(!isAdvancedFiltersOpen)}
-                className={cn(
-                  "flex items-center gap-1",
-                  theme === "light" 
-                    ? "border-border" 
-                    : "border-otc-active text-white"
-                )}
-              >
-                <Filter className="h-4 w-4" />
-                Фильтры
-              </Button>
             </div>
           </div>
           
