@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { ArrowDownUp, List, LayoutGrid, Archive } from "lucide-react";
+import { ArrowDownUp, List, LayoutGrid, Archive, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
 import { OrdersTable } from "../components/orders/OrdersTable";
 import { useOrders, OrdersQueryParams } from "@/hooks/useOrders";
@@ -13,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { tradePairs } from "@/data/mockData";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Pagination,
   PaginationContent,
@@ -21,6 +23,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function OrdersPage() {
   const { theme } = useTheme();
@@ -283,202 +291,213 @@ export default function OrdersPage() {
         </Button>
       </div>
       
-      {/* Компактная панель фильтров */}
+      {/* Улучшенная адаптивная панель фильтров */}
       <Card className={cn(
         "p-3",
         theme === "light" 
           ? "bg-card border-border" 
           : "bg-otc-card border-otc-active"
       )}>
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-3 items-center justify-between">
-            {/* Панель фильтров по типу заявки */}
-            <div className="flex flex-wrap items-center gap-4">
-              <ToggleGroup 
-                type="single" 
-                value={selectedType} 
-                onValueChange={(value) => value && setSelectedType(value)}
-                className="border rounded-md"
-              >
-                <ToggleGroupItem value="all" aria-label="Toggle all types">
-                  Все типы
-                </ToggleGroupItem>
-                <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500">
-                  Покупка
-                </ToggleGroupItem>
-                <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500">
-                  Продажа
-                </ToggleGroupItem>
-              </ToggleGroup>
-              
-              <div className="flex items-center gap-2">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="archived-mode"
-                    checked={showArchived}
-                    onCheckedChange={setShowArchived}
-                  />
-                  <label
-                    htmlFor="archived-mode"
-                    className="text-sm flex items-center gap-1 cursor-pointer"
-                  >
-                    <Archive className="h-4 w-4" />
-                    {showArchived ? "Показывать архивные" : "Только активные"}
-                  </label>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {/* Режим отображения */}
-              <div className="flex gap-1">
-                <Button 
-                  variant={viewMode === "cards" ? "default" : "outline"} 
-                  size="icon"
-                  className={cn(
-                    viewMode === "cards"
-                      ? "bg-otc-primary hover:bg-otc-primary/90"
-                      : theme === "light" 
-                        ? "border-border hover:bg-accent" 
-                        : "border-otc-active hover:bg-otc-active",
-                    theme === "light" && viewMode !== "cards" ? "text-foreground" : "text-black",
-                  )}
-                  onClick={() => setViewMode("cards")}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant={viewMode === "table" ? "default" : "outline"} 
-                  size="icon"
-                  className={cn(
-                    viewMode === "table"
-                      ? "bg-otc-primary hover:bg-otc-primary/90"
-                      : theme === "light" 
-                        ? "border-border hover:bg-accent" 
-                        : "border-otc-active hover:bg-otc-active",
-                    theme === "light" && viewMode !== "table" ? "text-foreground" : "text-black",
-                  )}
-                  onClick={() => setViewMode("table")}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {/* Сортировка */}
-              <Select 
-                value={sortBy === 'amount' && sortOrder === 'desc' ? 'highest_volume' : 
-                       sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
-                       sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
-                       sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
-                       sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
-                       sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
-                onValueChange={handleSortChange}
-              >
-                <SelectTrigger className={cn(
-                  "w-[180px]",
-                  theme === "light" 
-                    ? "bg-accent/50 border-accent" 
-                    : "bg-otc-active border-otc-active text-white"
-                )}>
-                  <ArrowDownUp className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Сортировка" />
-                </SelectTrigger>
-                <SelectContent className={cn(
-                  theme === "light" 
-                    ? "bg-card border-border" 
-                    : "bg-otc-card border-otc-active"
-                )}>
-                  <SelectItem value="highest_volume">Объем (макс)</SelectItem>
-                  <SelectItem value="lowest_volume">Объем (мин)</SelectItem>
-                  <SelectItem value="highest_rate">Курс (макс)</SelectItem>
-                  <SelectItem value="lowest_rate">Курс (мин)</SelectItem>
-                  <SelectItem value="newest">Новые заявки</SelectItem>
-                  <SelectItem value="oldest">Старые заявки</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          {/* Кнопки фильтрации по торговым парам - обновлены на основе tradePairs из mockData */}
-          <div className="flex flex-wrap gap-2">
-            <ToggleGroup 
-              type="single" 
-              value={selectedPair}
-              onValueChange={(value) => value && setSelectedPair(value)}
-              className="flex flex-wrap gap-1"
-            >
-              <ToggleGroupItem 
-                value="all" 
-                className={cn(
-                  "text-sm px-3 py-1 rounded-full",
-                  selectedPair === "all" ? "bg-otc-primary text-black" : 
-                  theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
-                )}
-              >
-                Все пары
-              </ToggleGroupItem>
-              {tradingPairOptions.map(pair => (
-                <ToggleGroupItem 
-                  key={pair.id} 
-                  value={pair.id}
-                  className={cn(
-                    "text-sm px-3 py-1 rounded-full",
-                    selectedPair === pair.id ? "bg-otc-primary text-black" : 
-                    theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
-                  )}
-                >
-                  {pair.display}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-          
-          {/* Дополнительные фильтры (сворачиваемые) */}
-          {isAdvancedFiltersOpen && (
-            <div className="pt-3 border-t border-border">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="flex-1 w-full">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-xs text-muted-foreground">Объем: {formatVolumeLabel(volumeRange[0])} - {formatVolumeLabel(volumeRange[1])}</span>
+        {/* Используем аккордеон для лучшей мобильной адаптивности */}
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="filters" className="border-none">
+            <div className="flex flex-col space-y-3">
+              {/* Компактная панель с основными фильтрами и сортировкой */}
+              <div className="flex flex-wrap gap-3 items-center justify-between">
+                {/* Панель фильтров по типу заявки - адаптивная */}
+                <div className="flex flex-wrap items-center gap-2 md:gap-4">
+                  <div className="w-full md:w-auto">
+                    <ToggleGroup 
+                      type="single" 
+                      value={selectedType} 
+                      onValueChange={(value) => value && setSelectedType(value)}
+                      className="border rounded-md w-full md:w-auto"
+                    >
+                      <ToggleGroupItem value="all" aria-label="Toggle all types" className="flex-1 md:flex-auto">
+                        Все типы
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500 flex-1 md:flex-auto">
+                        Покупка
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500 flex-1 md:flex-auto">
+                        Продажа
+                      </ToggleGroupItem>
+                    </ToggleGroup>
                   </div>
-                  <Slider
-                    value={volumeRange}
-                    onValueChange={(value) => {
-                      setVolumeRange(value);
-                    }}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
+                  
+                  <div className="flex items-center gap-2 ml-auto md:ml-0">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="archived-mode"
+                        checked={showArchived}
+                        onCheckedChange={setShowArchived}
+                      />
+                      <label
+                        htmlFor="archived-mode"
+                        className="text-sm flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                      >
+                        <Archive className="h-4 w-4" />
+                        {showArchived ? "Архивные" : "Только активные"}
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="w-full md:w-56">
-                  <Select value={selectedPairGroup} onValueChange={value => {
-                    setSelectedPairGroup(value);
-                  }}>
+                {/* Управление видом и сортировкой - справа на десктопе, внизу на мобильных */}
+                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                  {/* Режим отображения */}
+                  <div className="flex gap-1">
+                    <Button 
+                      variant={viewMode === "cards" ? "default" : "outline"} 
+                      size="icon"
+                      className={cn(
+                        viewMode === "cards"
+                          ? "bg-otc-primary hover:bg-otc-primary/90"
+                          : theme === "light" 
+                            ? "border-border hover:bg-accent" 
+                            : "border-otc-active hover:bg-otc-active",
+                        theme === "light" && viewMode !== "cards" ? "text-foreground" : "text-black",
+                      )}
+                      onClick={() => setViewMode("cards")}
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant={viewMode === "table" ? "default" : "outline"} 
+                      size="icon"
+                      className={cn(
+                        viewMode === "table"
+                          ? "bg-otc-primary hover:bg-otc-primary/90"
+                          : theme === "light" 
+                            ? "border-border hover:bg-accent" 
+                            : "border-otc-active hover:bg-otc-active",
+                        theme === "light" && viewMode !== "table" ? "text-foreground" : "text-black",
+                      )}
+                      onClick={() => setViewMode("table")}
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Сортировка */}
+                  <Select 
+                    value={sortBy === 'amount' && sortOrder === 'desc' ? 'highest_volume' : 
+                          sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
+                          sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
+                          sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
+                          sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
+                          sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
+                    onValueChange={handleSortChange}
+                  >
                     <SelectTrigger className={cn(
+                      "w-[180px]",
                       theme === "light" 
                         ? "bg-accent/50 border-accent" 
                         : "bg-otc-active border-otc-active text-white"
                     )}>
-                      <SelectValue placeholder="Группа пар" />
+                      <ArrowDownUp className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Сортировка" />
                     </SelectTrigger>
                     <SelectContent className={cn(
                       theme === "light" 
                         ? "bg-card border-border" 
                         : "bg-otc-card border-otc-active"
                     )}>
-                      <SelectItem value="all">Все группы</SelectItem>
-                      <SelectItem value="RUB_NR">RUB (НР)</SelectItem>
-                      <SelectItem value="RUB_CASH">RUB (Нал)</SelectItem>
-                      <SelectItem value="TOKENIZED">Токенизированные</SelectItem>
+                      <SelectItem value="highest_volume">Объем (макс)</SelectItem>
+                      <SelectItem value="lowest_volume">Объем (мин)</SelectItem>
+                      <SelectItem value="highest_rate">Курс (макс)</SelectItem>
+                      <SelectItem value="lowest_rate">Курс (мин)</SelectItem>
+                      <SelectItem value="newest">Новые заявки</SelectItem>
+                      <SelectItem value="oldest">Старые заявки</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+              
+              {/* Аккордеон для торговых пар, чтобы они не ломали макет на мобильных */}
+              <AccordionTrigger className="py-2 hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <span className="text-sm font-medium">Торговые пары и фильтры</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                {/* Кнопки фильтрации по торговым парам - улучшены для адаптивности */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2">
+                  <ToggleGroupItem 
+                    value="all" 
+                    className={cn(
+                      "text-sm px-3 py-1 rounded-full text-center",
+                      selectedPair === "all" ? "bg-otc-primary text-black" : 
+                      theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
+                    )}
+                    onClick={() => setSelectedPair("all")}
+                  >
+                    Все пары
+                  </ToggleGroupItem>
+                  {tradingPairOptions.map(pair => (
+                    <ToggleGroupItem 
+                      key={pair.id} 
+                      value={pair.id}
+                      className={cn(
+                        "text-sm px-3 py-1 rounded-full text-center",
+                        selectedPair === pair.id ? "bg-otc-primary text-black" : 
+                        theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
+                      )}
+                      onClick={() => setSelectedPair(pair.id)}
+                    >
+                      {pair.display}
+                    </ToggleGroupItem>
+                  ))}
+                </div>
+                
+                {/* Дополнительные фильтры */}
+                <div className="mt-4 space-y-4">
+                  <div className="flex flex-col md:flex-row items-start gap-6">
+                    <div className="flex-1 w-full">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">Объем: {formatVolumeLabel(volumeRange[0])} - {formatVolumeLabel(volumeRange[1])}</span>
+                      </div>
+                      <Slider
+                        value={volumeRange}
+                        onValueChange={(value) => {
+                          setVolumeRange(value);
+                        }}
+                        max={100}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div className="w-full md:w-56">
+                      <Select value={selectedPairGroup} onValueChange={value => {
+                        setSelectedPairGroup(value);
+                      }}>
+                        <SelectTrigger className={cn(
+                          theme === "light" 
+                            ? "bg-accent/50 border-accent" 
+                            : "bg-otc-active border-otc-active text-white"
+                        )}>
+                          <SelectValue placeholder="Группа пар" />
+                        </SelectTrigger>
+                        <SelectContent className={cn(
+                          theme === "light" 
+                            ? "bg-card border-border" 
+                            : "bg-otc-card border-otc-active"
+                        )}>
+                          <SelectItem value="all">Все группы</SelectItem>
+                          <SelectItem value="RUB_NR">RUB (НР)</SelectItem>
+                          <SelectItem value="RUB_CASH">RUB (Нал)</SelectItem>
+                          <SelectItem value="TOKENIZED">Токенизированные</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
             </div>
-          )}
-        </div>
+          </AccordionItem>
+        </Accordion>
       </Card>
       
       {/* Таблица заявок со статистикой */}

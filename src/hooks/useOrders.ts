@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
@@ -67,7 +66,7 @@ export interface OrdersQueryParams {
     maxAmount?: number;
     search?: string;
     tradePair?: string;
-    showArchived?: boolean; // Add a new filter to show/hide archived orders
+    showArchived?: boolean;
   };
 }
 
