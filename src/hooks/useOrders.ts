@@ -66,6 +66,7 @@ export interface OrdersQueryParams {
     minAmount?: number;
     maxAmount?: number;
     search?: string;
+    tradePair?: string;
   };
 }
 
@@ -146,6 +147,20 @@ export function useOrders() {
     
     if (filter.search) {
       query = query.or(`purpose.ilike.%${filter.search}%,notes.ilike.%${filter.search}%`);
+    }
+    
+    // Filter by trading pair if specified
+    if (filter.tradePair && filter.tradePair !== 'all') {
+      // This is a mock implementation since we don't have actual trade_pair_id column yet
+      // In a real implementation, you would use something like:
+      // query = query.eq('trade_pair_id', filter.tradePair);
+      
+      // For now, filter by amount_currency as a placeholder
+      if (filter.tradePair.includes('RUB')) {
+        query = query.eq('amount_currency', 'RUB');
+      } else if (filter.tradePair.includes('USD')) {
+        query = query.eq('amount_currency', 'USD');
+      }
     }
     
     // Apply sorting

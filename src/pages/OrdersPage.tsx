@@ -13,6 +13,7 @@ import { Order } from "@/types";
 import { Slider } from "@/components/ui/slider";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Pagination,
   PaginationContent,
@@ -37,6 +38,17 @@ export default function OrdersPage() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
+  const [selectedPair, setSelectedPair] = useState<string>("all");
+
+  // Trading pairs for quick filtering
+  const tradingPairs = [
+    { id: "USDT_RUB", display: "USDT/RUB" },
+    { id: "USD_RUB", display: "USD/RUB" },
+    { id: "EUR_RUB", display: "EUR/RUB" },
+    { id: "USDT_CNY", display: "USDT/CNY" },
+    { id: "RUB_AED", display: "RUB/AED" },
+  ];
 
   // Calculate actual min/max amounts for filtering
   const actualMinVolume = minVolume + (maxVolume - minVolume) * volumeRange[0] / 100;
@@ -52,7 +64,8 @@ export default function OrdersPage() {
       type: selectedType === 'all' ? undefined : selectedType as 'BUY' | 'SELL' | undefined,
       search: debouncedSearchTerm || undefined,
       minAmount: actualMinVolume,
-      maxAmount: actualMaxVolume
+      maxAmount: actualMaxVolume,
+      tradePair: selectedPair === 'all' ? undefined : selectedPair
     }
   };
 
@@ -92,7 +105,7 @@ export default function OrdersPage() {
   // Reset to first page when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedType, selectedPairGroup, debouncedSearchTerm, volumeRange]);
+  }, [selectedType, selectedPairGroup, debouncedSearchTerm, volumeRange, selectedPair]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -232,23 +245,24 @@ export default function OrdersPage() {
           </Button>
         </div>
         
-        {/* Filters */}
+        {/* Compact Filters */}
         <Card className={cn(
           "p-4",
           theme === "light" 
             ? "bg-card border-border" 
             : "bg-otc-card border-otc-active"
         )}>
-          <div className="flex flex-col space-y-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-3 items-center">
+              {/* Search input */}
+              <div className="relative flex-1 min-w-[200px] max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Поиск заявок..."
                   value={searchTerm}
                   onChange={handleSearch}
                   className={cn(
-                    "pl-10",
+                    "pl-10 h-10",
                     theme === "light" 
                       ? "bg-accent/50 border-accent" 
                       : "bg-otc-active border-otc-active text-white"
@@ -256,56 +270,26 @@ export default function OrdersPage() {
                 />
               </div>
               
-              <div className="flex gap-4">
-                <div className="w-40">
-                  <Select value={selectedType} onValueChange={value => {
-                    setSelectedType(value);
-                  }}>
-                    <SelectTrigger className={cn(
-                      theme === "light" 
-                        ? "bg-accent/50 border-accent" 
-                        : "bg-otc-active border-otc-active text-white"
-                    )}>
-                      <SelectValue placeholder="Тип заявки" />
-                    </SelectTrigger>
-                    <SelectContent className={cn(
-                      theme === "light" 
-                        ? "bg-card border-border" 
-                        : "bg-otc-card border-otc-active"
-                    )}>
-                      <SelectItem value="all">Все типы</SelectItem>
-                      <SelectItem value="BUY">Покупка</SelectItem>
-                      <SelectItem value="SELL">Продажа</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="w-40">
-                  <Select value={selectedPairGroup} onValueChange={value => {
-                    setSelectedPairGroup(value);
-                  }}>
-                    <SelectTrigger className={cn(
-                      theme === "light" 
-                        ? "bg-accent/50 border-accent" 
-                        : "bg-otc-active border-otc-active text-white"
-                    )}>
-                      <SelectValue placeholder="Группа пар" />
-                    </SelectTrigger>
-                    <SelectContent className={cn(
-                      theme === "light" 
-                        ? "bg-card border-border" 
-                        : "bg-otc-card border-otc-active"
-                    )}>
-                      <SelectItem value="all">Все группы</SelectItem>
-                      <SelectItem value="RUB_NR">RUB (NR)</SelectItem>
-                      <SelectItem value="RUB_CASH">RUB (Cash)</SelectItem>
-                      <SelectItem value="TOKENIZED">Tokenized</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
+              {/* Type filter */}
+              <ToggleGroup 
+                type="single" 
+                value={selectedType} 
+                onValueChange={(value) => value && setSelectedType(value)}
+                className="border rounded-md"
+              >
+                <ToggleGroupItem value="all" aria-label="Toggle all types">
+                  Все типы
+                </ToggleGroupItem>
+                <ToggleGroupItem value="BUY" aria-label="Toggle buy" className="text-green-500">
+                  Покупка
+                </ToggleGroupItem>
+                <ToggleGroupItem value="SELL" aria-label="Toggle sell" className="text-red-500">
+                  Продажа
+                </ToggleGroupItem>
+              </ToggleGroup>
+              
+              {/* View mode toggle */}
+              <div className="flex gap-1 ml-auto">
                 <Button 
                   variant={viewMode === "cards" ? "default" : "outline"} 
                   size="icon"
@@ -337,32 +321,16 @@ export default function OrdersPage() {
                   <List className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-            
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-1">
-                <div className="flex justify-between mb-1">
-                  <span className="text-xs text-muted-foreground">Объем: {formatVolumeLabel(volumeRange[0])} - {formatVolumeLabel(volumeRange[1])} RUB</span>
-                </div>
-                <Slider
-                  defaultValue={[0, 100]}
-                  value={volumeRange}
-                  onValueChange={(value) => {
-                    setVolumeRange(value);
-                  }}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-              <div className="w-40 md:w-56">
+              
+              {/* Sort dropdown */}
+              <div className="w-44">
                 <Select value={sortBy === 'amount' && sortOrder === 'desc' ? 'highest_volume' : 
-                           sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
-                           sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
-                           sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
-                           sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
-                           sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
-                       onValueChange={handleSortChange}>
+                         sortBy === 'amount' && sortOrder === 'asc' ? 'lowest_volume' :
+                         sortBy === 'created_at' && sortOrder === 'desc' ? 'newest' :
+                         sortBy === 'created_at' && sortOrder === 'asc' ? 'oldest' :
+                         sortBy === 'rate' && sortOrder === 'desc' ? 'highest_rate' :
+                         sortBy === 'rate' && sortOrder === 'asc' ? 'lowest_rate' : 'highest_volume'} 
+                      onValueChange={handleSortChange}>
                   <SelectTrigger className={cn(
                     theme === "light" 
                       ? "bg-accent/50 border-accent" 
@@ -385,7 +353,103 @@ export default function OrdersPage() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsAdvancedFiltersOpen(!isAdvancedFiltersOpen)}
+                className={cn(
+                  "flex items-center gap-1",
+                  theme === "light" 
+                    ? "border-border" 
+                    : "border-otc-active text-white"
+                )}
+              >
+                <Filter className="h-4 w-4" />
+                Фильтры
+              </Button>
             </div>
+            
+            {/* Trading pairs filter buttons */}
+            <div className="flex flex-wrap gap-2">
+              <ToggleGroup 
+                type="single" 
+                value={selectedPair}
+                onValueChange={(value) => value && setSelectedPair(value)}
+                className="flex flex-wrap gap-1"
+              >
+                <ToggleGroupItem 
+                  value="all" 
+                  className={cn(
+                    "text-sm px-3 py-1 rounded-full",
+                    selectedPair === "all" ? "bg-otc-primary text-black" : 
+                    theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
+                  )}
+                >
+                  Все пары
+                </ToggleGroupItem>
+                {tradingPairs.map(pair => (
+                  <ToggleGroupItem 
+                    key={pair.id} 
+                    value={pair.id}
+                    className={cn(
+                      "text-sm px-3 py-1 rounded-full",
+                      selectedPair === pair.id ? "bg-otc-primary text-black" : 
+                      theme === "light" ? "bg-accent/50" : "bg-otc-active text-white"
+                    )}
+                  >
+                    {pair.display}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+            
+            {/* Advanced filters (collapsible) */}
+            {isAdvancedFiltersOpen && (
+              <div className="pt-3 border-t border-border">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="flex-1 w-full">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Объем: {formatVolumeLabel(volumeRange[0])} - {formatVolumeLabel(volumeRange[1])} RUB</span>
+                    </div>
+                    <Slider
+                      defaultValue={[0, 100]}
+                      value={volumeRange}
+                      onValueChange={(value) => {
+                        setVolumeRange(value);
+                      }}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="w-full md:w-56">
+                    <Select value={selectedPairGroup} onValueChange={value => {
+                      setSelectedPairGroup(value);
+                    }}>
+                      <SelectTrigger className={cn(
+                        theme === "light" 
+                          ? "bg-accent/50 border-accent" 
+                          : "bg-otc-active border-otc-active text-white"
+                      )}>
+                        <SelectValue placeholder="Группа пар" />
+                      </SelectTrigger>
+                      <SelectContent className={cn(
+                        theme === "light" 
+                          ? "bg-card border-border" 
+                          : "bg-otc-card border-otc-active"
+                      )}>
+                        <SelectItem value="all">Все группы</SelectItem>
+                        <SelectItem value="RUB_NR">RUB (NR)</SelectItem>
+                        <SelectItem value="RUB_CASH">RUB (Cash)</SelectItem>
+                        <SelectItem value="TOKENIZED">Tokenized</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
         

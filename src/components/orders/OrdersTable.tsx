@@ -104,21 +104,21 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           "group-hover:from-accent/20 group-hover:via-accent/20 group-hover:to-transparent transition-all duration-300"
         )} />
         <div className={cn(
-          "relative flex items-center justify-between p-3 border-b",
+          "relative flex items-center justify-between p-2 border-b",
           theme === "light" ? "border-border" : "border-white/10"
         )}>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             {type === "BUY" ? (
-              <ArrowUpRight className="h-4 w-4 text-green-500" />
+              <ArrowUpRight className="h-4 w-4 text-green-500 flex-shrink-0" />
             ) : (
-              <ArrowDownRight className="h-4 w-4 text-red-500" />
+              <ArrowDownRight className="h-4 w-4 text-red-500 flex-shrink-0" />
             )}
             <div>
               <div className="flex items-center gap-1">
-                <span className={`text-lg font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`text-base font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
                   {order.rate}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {rateType}
                 </span>
               </div>
@@ -174,7 +174,7 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
   );
 
   const CardsView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-3">
       {/* Buy Orders */}
       <div className={cn(
         "backdrop-blur-xl border rounded-lg overflow-hidden",
@@ -183,10 +183,10 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           : "bg-white/5 border-white/10"
       )}>
         <div className={cn(
-          "p-3 border-b",
+          "p-2 border-b",
           theme === "light" ? "bg-green-500/10 border-border" : "bg-green-500/10 border-white/10"
         )}>
-          <h3 className="text-base font-semibold text-green-500">Buy Orders</h3>
+          <h3 className="text-sm font-semibold text-green-500">Buy Orders</h3>
           <p className="text-xs text-muted-foreground">
             Total: {formatAmount(buyOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
           </p>
@@ -209,10 +209,10 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
           : "bg-white/5 border-white/10"
       )}>
         <div className={cn(
-          "p-3 border-b",
+          "p-2 border-b",
           theme === "light" ? "bg-red-500/10 border-border" : "bg-red-500/10 border-white/10"
         )}>
-          <h3 className="text-base font-semibold text-red-500">Sell Orders</h3>
+          <h3 className="text-sm font-semibold text-red-500">Sell Orders</h3>
           <p className="text-xs text-muted-foreground">
             Total: {formatAmount(sellOrders.reduce((sum, order) => sum + Number(order.amount), 0))} RUB
           </p>
