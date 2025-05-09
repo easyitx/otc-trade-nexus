@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -13,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { tradePairs } from "@/data/mockData";
 import {
   Pagination,
   PaginationContent,
@@ -39,14 +39,11 @@ export default function OrdersPage() {
   const [isOrdersLoading, setIsOrdersLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
 
-  // Trading pairs for quick filtering
-  const tradingPairs = [
-    { id: "USDT_RUB", display: "USDT/RUB" },
-    { id: "USD_RUB", display: "USD/RUB" },
-    { id: "EUR_RUB", display: "EUR/RUB" },
-    { id: "USDT_CNY", display: "USDT/CNY" },
-    { id: "RUB_AED", display: "RUB/AED" },
-  ];
+  // Get trading pairs from the mockData for consistency between pages
+  const tradingPairOptions = tradePairs.map(pair => ({
+    id: pair.name,
+    display: pair.displayName.replace(" – ", "/")
+  }));
 
   // Calculate actual min/max amounts for filtering
   const actualMinVolume = minVolume + (maxVolume - minVolume) * volumeRange[0] / 100;
@@ -402,7 +399,7 @@ export default function OrdersPage() {
             </div>
           </div>
           
-          {/* Кнопки фильтрации по торговым парам */}
+          {/* Кнопки фильтрации по торговым парам - обновлены на основе tradePairs из mockData */}
           <div className="flex flex-wrap gap-2">
             <ToggleGroup 
               type="single" 
@@ -420,7 +417,7 @@ export default function OrdersPage() {
               >
                 Все пары
               </ToggleGroupItem>
-              {tradingPairs.map(pair => (
+              {tradingPairOptions.map(pair => (
                 <ToggleGroupItem 
                   key={pair.id} 
                   value={pair.id}

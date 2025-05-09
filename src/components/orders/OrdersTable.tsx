@@ -191,22 +191,33 @@ export const OrdersTable = ({ orders, showDetailedView = false }: OrdersTablePro
     if (showDetailedView) {
       return (
         <TableRow className={cn(
-          "hover:bg-accent/20",
+          "hover:bg-accent/20 relative", // Added relative positioning
           isExpiredOrArchived && "opacity-60"
         )}>
-          <TableCell className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
+          {/* Background fill for table row based on volume percentage */}
+          <div 
+            className={cn(
+              "absolute inset-0 opacity-20 z-0",
+              isGreen ? "bg-green-500" : "bg-red-500"
+            )}
+            style={{
+              width: `${volumePercentage}%`,
+              maxWidth: '100%'
+            }}
+          />
+          <TableCell className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'} relative z-10`}>
             {type === "BUY" ? "Покупка" : "Продажа"}
             {getOrderStatusBadge(order)}
           </TableCell>
-          <TableCell>{formatAmount(Number(order.amount))} {order.amountCurrency}</TableCell>
-          <TableCell className={`${isGreen ? 'text-green-500' : 'text-red-500'}`}>
+          <TableCell className="relative z-10">{formatAmount(Number(order.amount))} {order.amountCurrency}</TableCell>
+          <TableCell className={`${isGreen ? 'text-green-500' : 'text-red-500'} relative z-10`}>
             {formattedRate}
           </TableCell>
-          <TableCell>{rateType}</TableCell>
-          <TableCell>{tradePairDisplay}</TableCell>
-          <TableCell>{tradeDirection.fullDirection}</TableCell>
-          <TableCell>{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}</TableCell>
-          <TableCell>
+          <TableCell className="relative z-10">{rateType}</TableCell>
+          <TableCell className="relative z-10">{tradePairDisplay}</TableCell>
+          <TableCell className="relative z-10">{tradeDirection.fullDirection}</TableCell>
+          <TableCell className="relative z-10">{formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}</TableCell>
+          <TableCell className="relative z-10">
             <Button 
               variant="ghost" 
               size="sm"
