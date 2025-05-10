@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -11,9 +12,11 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { tradePairs } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
 
 export default function OrdersPage() {
   const { theme } = useTheme();
+  const { toast } = useToast();
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedPairGroup, setSelectedPairGroup] = useState<string>("all");
   const [volumeRange, setVolumeRange] = useState([0, 100]);
@@ -62,15 +65,16 @@ export default function OrdersPage() {
     refetch
   } = useOrdersQuery(queryParams);
 
+  // Refetch data whenever filter states change 
+  useEffect(() => {
+    console.log("Filters changed, refetching data...");
+    refetch();
+  }, [showArchived, selectedType, selectedPair, volumeRange, refetch]);
+
   // Track loading state for skeleton display
   useEffect(() => {
     setIsOrdersLoading(queryLoading);
   }, [queryLoading]);
-
-  // Refetch when sort parameters change
-  useEffect(() => {
-    refetch();
-  }, [sortBy, sortOrder, refetch]);
 
   // Update min and max volume for range slider based on data
   useEffect(() => {
@@ -136,6 +140,12 @@ export default function OrdersPage() {
     }
   };
 
+  // Функция для управления состоянием архива
+  const handleArchiveToggle = (value: boolean) => {
+    console.log("Setting showArchived to:", value);
+    setShowArchived(value);
+  };
+
   // Calculate volumes in USD for buy and sell orders
   const buyOrdersVolume = ordersData?.orders.filter(o => o.type === "BUY").reduce((sum, order) => {
     return sum + convertToUSD(Number(order.amount), order.amountCurrency || 'USD', order.rate);
@@ -196,13 +206,6 @@ export default function OrdersPage() {
       </div>
     );
   }
-
-    // Handle archive toggle specifically
-    const handleArchiveToggle = (value: boolean) => {
-      setShowArchived(value);
-      // Reset to first page when toggling archive filter
-      setCurrentPage(1);
-    };
 
   return (
     <div className="space-y-4">

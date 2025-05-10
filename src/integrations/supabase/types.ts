@@ -252,12 +252,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_expired_orders_now: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          archived_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      setup_archive_cron_job: {
+        Args: { function_url: string; anon_key: string }
+        Returns: undefined
+      }
+      setup_archiving_extensions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

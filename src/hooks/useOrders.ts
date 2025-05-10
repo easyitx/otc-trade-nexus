@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
@@ -200,30 +201,35 @@ export function useOrders() {
       query = query.or(`purpose.ilike.%${filter.search}%,notes.ilike.%${filter.search}%`);
     }
     
-    // Enhanced trading pair filter
+    // Улучшенный фильтр по торговым парам
     if (filter.tradePair && filter.tradePair !== 'all') {
-      // Extract currency info from pair name
-      if (filter.tradePair.includes('RUB')) {
-        query = query.eq('amount_currency', 'RUB');
-      } else if (filter.tradePair.includes('USD')) {
-        query = query.eq('amount_currency', 'USD');
-      } else if (filter.tradePair.includes('USDT')) {
-        // Additional handling for pairs containing USDT
-        // This is a placeholder until proper trade_pair_id is implemented
-        query = query.or('amount_currency.eq.USDT,amount_currency.eq.USD');
+      // Извлекаем информацию о валюте из названия пары
+      const pairCurrency = filter.tradePair.includes('RUB') ? 'RUB' : 
+                           filter.tradePair.includes('USD') ? 'USD' : 
+                           filter.tradePair.includes('USDT') ? 'USDT' : undefined;
+      
+      if (pairCurrency) {
+        console.log(`Filtering by pair currency: ${pairCurrency}`);
+        query = query.eq('amount_currency', pairCurrency);
       }
     }
 
-    // Improved archived filter logic - handles both status and expiration date
+    // Исправленная логика фильтра архивных заявок
     if (filter.showArchived === true) {
-      // When the archive filter is enabled, show orders where:
-      // 1. Status is already ARCHIVED OR
-      // 2. The order has expired (expires_at is in the past)
+      // Когда фильтр архива включен, показываем заявки, у которых:
+      // 1. Статус уже установлен как ARCHIVED ИЛИ
+      // 2. Заявка истекла (expires_at в прошлом)
+      console.log("Showing ARCHIVED orders");
       const now = new Date().toISOString();
       query = query.or(`status.eq.ARCHIVED,expires_at.lt.${now}`);
     } else {
-      // When archive filter is disabled, hide orders with ARCHIVED status
+      // Когда фильтр архива отключен, скрываем заявки со статусом ARCHIVED
+      console.log("Hiding ARCHIVED orders");
       query = query.neq('status', 'ARCHIVED');
+      
+      // И также исключаем истёкшие заявки (которые должны быть архивными)
+      const now = new Date().toISOString();
+      query = query.gte('expires_at', now);
     }
     
     // Apply sorting - Map frontend field names to database column names
@@ -251,7 +257,7 @@ export function useOrders() {
     
     console.log(`Retrieved ${data?.length || 0} orders. Total: ${count}`);
 
-    // Check for expired orders and update them to ARCHIVED status if needed
+    // Проверка на истекшие заказы и обновление их до статуса ARCHIVED при необходимости
     const expiredOrderIds: string[] = [];
     data?.forEach(order => {
       if (order.status === 'ACTIVE' && isOrderExpired(order.expires_at)) {
@@ -260,7 +266,7 @@ export function useOrders() {
       }
     });
 
-    // Update expired orders in the database
+    // Обновляем истекшие заказы в базе данных
     if (expiredOrderIds.length > 0) {
       console.log(`Updating ${expiredOrderIds.length} expired orders to ARCHIVED status`);
       await supabase

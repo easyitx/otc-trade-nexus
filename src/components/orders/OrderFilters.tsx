@@ -14,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TradingPairOption {
   id: string;
@@ -71,6 +72,12 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
     }).format(actualValue);
   };
 
+  // Handle archive toggle specifically with a proper React handler
+  const handleArchiveToggleChange = (checked: boolean) => {
+    console.log("Changing archive filter to:", checked);
+    setShowArchived(checked);
+  };
+
   return (
     <div className={cn(
       "p-3",
@@ -110,7 +117,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
                     <Switch
                       id="archived-mode"
                       checked={showArchived}
-                      onCheckedChange={setShowArchived}
+                      onCheckedChange={handleArchiveToggleChange}
                     />
                     <label
                       htmlFor="archived-mode"
@@ -203,8 +210,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
             <AccordionContent>
               {/* Trading pair buttons */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-2">
-                <ToggleGroupItem 
-                  value="all" 
+                <button 
                   className={cn(
                     "text-sm px-3 py-1 rounded-full text-center",
                     selectedPair === "all" ? "bg-purple-500 text-white" : 
@@ -213,11 +219,10 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
                   onClick={() => setSelectedPair("all")}
                 >
                   Все пары
-                </ToggleGroupItem>
+                </button>
                 {tradingPairOptions.map(pair => (
-                  <ToggleGroupItem 
+                  <button 
                     key={pair.id} 
-                    value={pair.id}
                     className={cn(
                       "text-sm px-3 py-1 rounded-full text-center",
                       selectedPair === pair.id ? "bg-purple-500 text-white" : 
@@ -226,7 +231,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
                     onClick={() => setSelectedPair(pair.id)}
                   >
                     {pair.display}
-                  </ToggleGroupItem>
+                  </button>
                 ))}
               </div>
               
