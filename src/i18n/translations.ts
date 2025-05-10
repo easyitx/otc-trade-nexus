@@ -30,7 +30,14 @@ export type TranslationKey =
     | "calculationTitle" | "youPay" | "youReceive" | "exchangeRate" | "totalFee" 
     | "totalAmount" | "continue" | "calculateSummary" | "orderSummary" | "calculate"
     | "serviceFeeAmount" | "adjustmentAmount" | "baseExchangeRate" | "calculationDetails"
-    | "paymentDetails" | "basicDetails" | "additionalDetails";
+    | "paymentDetails" | "basicDetails" | "additionalDetails"
+    // Currency rates management translations
+    | "accessDenied" | "noPermission" | "restrictedArea" | "onlyAdminManager" | "loading"
+    | "failedToLoadRates" | "dataLoadingError" | "rateFetchProblem" | "reloadPage"
+    | "currencyRatesManagement" | "refreshExternalRates" | "currencyExchangeRates"
+    | "manageRatesDescription" | "searchCurrencyPairs" | "all" | "major" | "crypto"
+    | "exotic" | "noCurrencyRates" | "activeRate" | "autoRate" | "manualRate"
+    | "useManualRate" | "lastUpdated" | "saveChanges" | "edit" | "source" | "noSource";
 
 export const translations = {
   en: {
@@ -148,6 +155,36 @@ export const translations = {
     basicDetails: "Basic Details",
     additionalDetails: "Additional Details",
     receive: "receive",
+    
+    // Currency rates management translations
+    accessDenied: "Access Denied",
+    noPermission: "You do not have permission to view this page.",
+    restrictedArea: "Restricted Area",
+    onlyAdminManager: "Only managers and administrators can manage currency rates.",
+    loading: "Loading",
+    failedToLoadRates: "Failed to load currency rates.",
+    dataLoadingError: "Data Loading Error",
+    rateFetchProblem: "There was a problem loading the currency rates. Please try again later.",
+    reloadPage: "Reload Page",
+    currencyRatesManagement: "Currency Rates Management",
+    refreshExternalRates: "Refresh External Rates",
+    currencyExchangeRates: "Currency Exchange Rates",
+    manageRatesDescription: "Manage currency exchange rates for the platform. You can set manual rates or use automatically fetched rates.",
+    searchCurrencyPairs: "Search currency pairs...",
+    all: "All",
+    major: "Major",
+    crypto: "Crypto",
+    exotic: "Exotic",
+    noCurrencyRates: "No currency rates found.",
+    activeRate: "Active Rate",
+    autoRate: "Auto Rate",
+    manualRate: "Manual Rate",
+    useManualRate: "Use Manual Rate",
+    lastUpdated: "Last updated",
+    saveChanges: "Save Changes",
+    edit: "Edit",
+    source: "Source",
+    noSource: "No source",
   },
   ru: {
     welcome: "Добро пожаловать",
@@ -351,6 +388,36 @@ export const translations = {
     basicDetails: "Основные детали",
     additionalDetails: "Дополнительные детали",
     receive: "получить",
+    
+    // Currency rates management translations
+    accessDenied: "Доступ запрещен",
+    noPermission: "У вас нет прав для просмотра этой страницы.",
+    restrictedArea: "Закрытая зона",
+    onlyAdminManager: "Только менеджеры и администраторы могут управлять курсами валют.",
+    loading: "Загрузка",
+    failedToLoadRates: "Не удалось загрузить курсы валют.",
+    dataLoadingError: "Ошибка загрузки данных",
+    rateFetchProblem: "Возникла проблема при загрузке курсов валют. Пожалуйста, повторите попытку позже.",
+    reloadPage: "Перезагрузить страницу",
+    currencyRatesManagement: "Управление курсами валют",
+    refreshExternalRates: "Обновить внешние курсы",
+    currencyExchangeRates: "Курсы обмена валют",
+    manageRatesDescription: "Управление курсами обмена валют для платформы. Вы можете установить ручные курсы или использовать автоматически полученные курсы.",
+    searchCurrencyPairs: "Поиск валютных пар...",
+    all: "Все",
+    major: "Основные",
+    crypto: "Крипто",
+    exotic: "Экзотические",
+    noCurrencyRates: "Курсы валют не найдены.",
+    activeRate: "Активный курс",
+    autoRate: "Авто курс",
+    manualRate: "Ручной курс",
+    useManualRate: "Использовать ручной курс",
+    lastUpdated: "Последнее обновление",
+    saveChanges: "Сохранить изменения",
+    edit: "Изменить",
+    source: "Источник",
+    noSource: "Без источника",
   }
 };
 

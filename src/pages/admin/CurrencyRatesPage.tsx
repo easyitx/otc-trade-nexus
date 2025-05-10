@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,10 +13,12 @@ import { usePlatformSettings } from '@/hooks/usePlatformSettings';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
 export default function CurrencyRatesPage() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const { useCurrencyRatesQuery, updateRate, createRate, refreshExternalRates } = useCurrencyRates();
   const { userRoles, isLoadingRoles } = usePlatformSettings();
   const { toast } = useToast();
@@ -74,23 +77,23 @@ export default function CurrencyRatesPage() {
             theme === "light" ? "bg-card" : "bg-otc-card border-otc-active"
           )}>
             <CardHeader>
-              <CardTitle>Access Denied</CardTitle>
+              <CardTitle>{t('accessDenied')}</CardTitle>
               <CardDescription>
-                You do not have permission to view this page.
+                {t('noPermission')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Alert className="bg-red-900/20 border-red-500">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
-                <AlertTitle>Restricted Area</AlertTitle>
+                <AlertTitle>{t('restrictedArea')}</AlertTitle>
                 <AlertDescription>
-                  Only managers and administrators can manage currency rates.
+                  {t('onlyAdminManager')}
                 </AlertDescription>
               </Alert>
             </CardContent>
             <div className="p-6">
               <Button onClick={() => navigate('/')}>
-                Return to Dashboard
+                {t('returnHome')}
               </Button>
             </div>
           </Card>
@@ -103,7 +106,7 @@ export default function CurrencyRatesPage() {
     return (
       <>
         <div className="flex items-center justify-center h-full">
-          <p className={theme === "light" ? "text-foreground" : "text-white"}>Loading...</p>
+          <p className={theme === "light" ? "text-foreground" : "text-white"}>{t('loading')}...</p>
         </div>
       </>
     );
@@ -117,23 +120,23 @@ export default function CurrencyRatesPage() {
           theme === "light" ? "bg-card" : "bg-otc-card border-otc-active"
         )}>
           <CardHeader>
-            <CardTitle>Error</CardTitle>
+            <CardTitle>{t('error')}</CardTitle>
             <CardDescription>
-              Failed to load currency rates.
+              {t('failedToLoadRates')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Alert className="bg-red-900/20 border-red-500">
               <AlertTriangle className="h-4 w-4 text-red-500" />
-              <AlertTitle>Data Loading Error</AlertTitle>
+              <AlertTitle>{t('dataLoadingError')}</AlertTitle>
               <AlertDescription>
-                There was a problem loading the currency rates. Please try again later.
+                {t('rateFetchProblem')}
               </AlertDescription>
             </Alert>
           </CardContent>
           <div className="p-6">
             <Button onClick={() => window.location.reload()}>
-              Reload Page
+              {t('reloadPage')}
             </Button>
           </div>
         </Card>
@@ -149,7 +152,7 @@ export default function CurrencyRatesPage() {
             "text-2xl font-bold", 
             theme === "light" ? "text-foreground" : "text-white"
           )}>
-            Currency Rates Management
+            {t('currencyRatesManagement')}
           </h1>
           
           <div className="flex gap-2">
@@ -161,7 +164,7 @@ export default function CurrencyRatesPage() {
               )}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh External Rates
+              {t('refreshExternalRates')}
             </Button>
             
             <CreateRateModal 
@@ -175,9 +178,9 @@ export default function CurrencyRatesPage() {
           theme === "light" ? "bg-card" : "bg-otc-card border-otc-active"
         )}>
           <CardHeader>
-            <CardTitle>Currency Exchange Rates</CardTitle>
+            <CardTitle>{t('currencyExchangeRates')}</CardTitle>
             <CardDescription>
-              Manage currency exchange rates for the platform. You can set manual rates or use automatically fetched rates.
+              {t('manageRatesDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -186,7 +189,7 @@ export default function CurrencyRatesPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search currency pairs..."
+                    placeholder={t('searchCurrencyPairs')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className={cn(
@@ -198,17 +201,17 @@ export default function CurrencyRatesPage() {
                 
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className={theme === "light" ? "bg-accent" : "bg-otc-active"}>
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="major">Major</TabsTrigger>
-                    <TabsTrigger value="crypto">Crypto</TabsTrigger>
-                    <TabsTrigger value="exotic">Exotic</TabsTrigger>
+                    <TabsTrigger value="all">{t('all')}</TabsTrigger>
+                    <TabsTrigger value="major">{t('major')}</TabsTrigger>
+                    <TabsTrigger value="crypto">{t('crypto')}</TabsTrigger>
+                    <TabsTrigger value="exotic">{t('exotic')}</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
 
               {filteredRates.length === 0 ? (
                 <div className="text-center p-8 border rounded-md border-dashed">
-                  <p className="text-muted-foreground">No currency rates found.</p>
+                  <p className="text-muted-foreground">{t('noCurrencyRates')}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

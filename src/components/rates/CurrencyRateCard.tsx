@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { CurrencyRate, CurrencyRateUpdate } from '@/hooks/useCurrencyRates';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Edit2, Save, RefreshCw, ArrowRight } from 'lucide-react';
 
@@ -16,6 +18,7 @@ interface CurrencyRateCardProps {
 
 export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpdate }) => {
   const { theme } = useTheme();
+  const { t, language } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [manualRate, setManualRate] = useState(rate.manual_rate !== null ? rate.manual_rate.toString() : '');
   const [useManualRate, setUseManualRate] = useState(rate.use_manual_rate);
@@ -23,7 +26,7 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
   // Format date to readable format
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString();
+    return date.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US');
   };
 
   // Handle save changes
@@ -57,27 +60,27 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
             {rate.base_currency}/{rate.quote_currency}
           </span>
           <div className="text-sm font-normal text-muted-foreground">
-            {rate.source ? `Source: ${rate.source}` : 'No source'}
+            {rate.source ? `${t('source')}: ${rate.source}` : t('noSource')}
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Current rate display */}
         <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Active Rate:</span>
+          <span className="text-sm text-muted-foreground">{t('activeRate')}:</span>
           <span className="text-xl font-bold">
             {activeRate !== null 
-              ? activeRate.toLocaleString('ru-RU', { maximumFractionDigits: 6 })
+              ? activeRate.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US', { maximumFractionDigits: 6 })
               : '—'}
           </span>
         </div>
 
         {/* Auto rate display */}
         <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Auto Rate:</span>
+          <span className="text-sm text-muted-foreground">{t('autoRate')}:</span>
           <span>
             {rate.auto_rate !== null 
-              ? rate.auto_rate.toLocaleString('ru-RU', { maximumFractionDigits: 6 })
+              ? rate.auto_rate.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US', { maximumFractionDigits: 6 })
               : '—'}
           </span>
         </div>
@@ -85,7 +88,7 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
         {/* Manual rate input or display */}
         {isEditing ? (
           <div className="space-y-2">
-            <Label htmlFor={`rate-${rate.id}`}>Manual Rate:</Label>
+            <Label htmlFor={`rate-${rate.id}`}>{t('manualRate')}:</Label>
             <Input
               id={`rate-${rate.id}`}
               type="number"
@@ -97,10 +100,10 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
           </div>
         ) : (
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Manual Rate:</span>
+            <span className="text-sm text-muted-foreground">{t('manualRate')}:</span>
             <span>
               {rate.manual_rate !== null 
-                ? rate.manual_rate.toLocaleString('ru-RU', { maximumFractionDigits: 6 })
+                ? rate.manual_rate.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US', { maximumFractionDigits: 6 })
                 : '—'}
             </span>
           </div>
@@ -109,7 +112,7 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
         {/* Use manual rate toggle */}
         {isEditing && (
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor={`use-manual-${rate.id}`}>Use Manual Rate:</Label>
+            <Label htmlFor={`use-manual-${rate.id}`}>{t('useManualRate')}:</Label>
             <Switch
               id={`use-manual-${rate.id}`}
               checked={useManualRate}
@@ -120,7 +123,7 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
 
         {/* Last updated info */}
         <div className="text-xs text-muted-foreground">
-          Last updated: {formatDate(rate.last_updated)}
+          {t('lastUpdated')}: {formatDate(rate.last_updated)}
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -130,7 +133,7 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
             className="bg-green-600 hover:bg-green-700 text-white"
           >
             <Save className="h-4 w-4 mr-2" />
-            Save Changes
+            {t('saveChanges')}
           </Button>
         ) : (
           <Button 
@@ -138,7 +141,7 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
             className="bg-otc-primary hover:bg-otc-primary/90 text-black"
           >
             <Edit2 className="h-4 w-4 mr-2" />
-            Edit
+            {t('edit')}
           </Button>
         )}
         
@@ -151,7 +154,7 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
               setIsEditing(false);
             }}
           >
-            Cancel
+            {t('cancel')}
           </Button>
         )}
       </CardFooter>
