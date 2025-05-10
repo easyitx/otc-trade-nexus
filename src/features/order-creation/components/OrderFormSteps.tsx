@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -31,14 +32,14 @@ export default function OrderFormSteps({
     isCashPair, 
     city, 
     setCurrentStep,
-    showCalculation
+    showCalculation,
+    safeParseFloat
   } = formProps;
 
-  // Helper to safely parse amount
+  // Helper to safely validate amount
   const isValidAmount = () => {
     if (!amount) return false;
-    const sanitizedAmount = amount.toString().replace(/,/g, '');
-    return !isNaN(parseFloat(sanitizedAmount)) && parseFloat(sanitizedAmount) > 0;
+    return safeParseFloat(amount) > 0;
   };
 
   return (
