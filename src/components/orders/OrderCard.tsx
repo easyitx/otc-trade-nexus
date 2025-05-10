@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -28,6 +27,17 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   const { toast } = useToast();
   const isGreen = order.type === "BUY";
 
+  // Safe parsing function to prevent errors with undefined values
+  const safeParseFloat = (value: string | number | null | undefined): number => {
+    if (value === null || value === undefined) return 0;
+    // Handle string values that might contain commas
+    if (typeof value === 'string') {
+      const sanitized = value.replace(/,/g, '');
+      return isNaN(parseFloat(sanitized)) ? 0 : parseFloat(sanitized);
+    }
+    return typeof value === 'number' ? value : 0;
+  };
+
   // Format large numbers with spaces as thousand separators
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat("ru-RU", {
@@ -38,10 +48,12 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   };
 
   // Calculate and format volume (amount * rate)
-  const formatVolume = (amount: number, rate: string) => {
+  const formatVolume = (amount: number, rate: string | undefined) => {
     try {
-      const numericRate = parseFloat(rate.replace(/[^0-9.]/g, ''));
-      if (isNaN(numericRate) || numericRate === 0) return formatAmount(amount);
+      if (!rate) return formatAmount(amount);
+      
+      const numericRate = safeParseFloat(rate);
+      if (numericRate === 0) return formatAmount(amount);
       
       const volume = amount * numericRate;
       return formatAmount(volume);
@@ -70,7 +82,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   const getFormattedRateDisplay = (order: Order) => {
     return order.rateDetails?.type === "dynamic" 
       ? `ЦБ+${order.rateDetails.adjustment}%` 
-      : `${order.rate}`;
+      : `${order.rate || 'N/A'}`;
   };
 
   // Function to determine trading pair components
@@ -222,12 +234,12 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           <div>
             {/* Volume - Amount * Rate */}
             <div className="font-medium">
-              Объем: {formatVolume(Number(order.amount), order.rate)} {quoteCurrency}
+              Объем: {formatVolume(Number(order.amount || 0), order.rate)} {quoteCurrency}
             </div>
             
             {/* Quantity - Original Amount */}
             <div className="font-medium">
-              Количество: {formatAmount(Number(order.amount))} {baseCurrency}
+              Количество: {formatAmount(Number(order.amount || 0))} {baseCurrency}
             </div>
           </div>
           

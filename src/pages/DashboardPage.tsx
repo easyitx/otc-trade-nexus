@@ -17,6 +17,17 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 
+// Safe parsing function to prevent errors with undefined values
+const safeParseFloat = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined) return 0;
+  // Handle string values that might contain commas
+  if (typeof value === 'string') {
+    const sanitized = value.replace(/,/g, '');
+    return isNaN(parseFloat(sanitized)) ? 0 : parseFloat(sanitized);
+  }
+  return typeof value === 'number' ? value : 0;
+};
+
 // Order card component for the dashboard
 const OrderCard = ({ order }: { order: Order }) => {
   const { theme } = useTheme();
@@ -53,14 +64,14 @@ const OrderCard = ({ order }: { order: Order }) => {
             <span className={cn(
               "font-medium",
               theme === "light" ? "text-foreground" : "text-white"
-            )}>${Number(order.amount).toLocaleString()}</span>
+            )}>${order.amount ? Number(order.amount).toLocaleString() : '0'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Rate:</span>
             <span className={cn(
               "font-medium",
               theme === "light" ? "text-foreground" : "text-white"
-            )}>{order.rate}</span>
+            )}>{order.rate || 'N/A'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground text-sm">Expires:</span>

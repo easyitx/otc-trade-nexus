@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -33,6 +32,17 @@ export const OrderTableRow: React.FC<OrderTableRowProps> = ({
     }).format(amount);
   };
 
+  // Safe parsing function to prevent errors with undefined values
+  const safeParseFloat = (value: string | number | null | undefined): number => {
+    if (value === null || value === undefined) return 0;
+    // Handle string values that might contain commas
+    if (typeof value === 'string') {
+      const sanitized = value.replace(/,/g, '');
+      return isNaN(parseFloat(sanitized)) ? 0 : parseFloat(sanitized);
+    }
+    return typeof value === 'number' ? value : 0;
+  };
+
   // Get rate description 
   const getRateDescription = (order: Order) => {
     if (!order.rateDetails) return "Фиксированный";
@@ -53,11 +63,11 @@ export const OrderTableRow: React.FC<OrderTableRowProps> = ({
     if (order.type === "BUY") {
       return order.rateDetails?.type === "dynamic" 
         ? `ЦБ+${order.rateDetails.adjustment}%` 
-        : `${order.rate}`;
+        : `${order.rate || 'N/A'}`;
     } else {
       return order.rateDetails?.type === "dynamic" 
         ? `ЦБ+${order.rateDetails.adjustment}%` 
-        : `${order.rate}`;
+        : `${order.rate || 'N/A'}`;
     }
   };
 
@@ -150,7 +160,7 @@ export const OrderTableRow: React.FC<OrderTableRowProps> = ({
         {order.type === "BUY" ? "Покупка" : "Продажа"}
         {getOrderStatusBadge(order)}
       </TableCell>
-      <TableCell className="relative z-10">{formatAmount(Number(order.amount))} {order.amountCurrency}</TableCell>
+      <TableCell className="relative z-10">{formatAmount(Number(order.amount || 0))} {order.amountCurrency}</TableCell>
       <TableCell className={`${isGreen ? 'text-green-500' : 'text-red-500'} relative z-10`}>
         {formattedRate}
       </TableCell>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order as SupabaseOrder } from '@/lib/supabase-types';
@@ -6,6 +5,7 @@ import type { Order as FrontendOrder, RateDetails, Geography } from '@/types';
 import { useToast } from './use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { safeParseFloat } from '@/lib/utils';
 
 // Adapter function to convert from Supabase format to frontend format
 const adaptOrderFromSupabase = (order: SupabaseOrder): FrontendOrder => {
@@ -87,14 +87,17 @@ export const convertToUSD = (amount: number, currency: string, rate: string): nu
       return conversionCache.get(cacheKey)!;
     }
     
-    // Remove non-numeric characters from rate string, except decimal point
-    const cleanRate = String(rate).replace(/[^0-9.]/g, '');
+    // Handle undefined or null rate
+    if (!rate) {
+      console.warn('Rate is undefined or null for conversion');
+      return amount;
+    }
     
-    // Convert to USD based on rate
-    const numericRate = parseFloat(cleanRate);
+    // Convert to USD based on rate using the safe parse function
+    const numericRate = safeParseFloat(rate);
     
     // Check for valid rate and division by zero
-    if (isNaN(numericRate) || numericRate === 0) {
+    if (numericRate === 0) {
       console.warn(`Invalid rate for conversion: ${rate}`);
       return amount;
     }
@@ -336,6 +339,7 @@ export function useOrders() {
     createOrder,
     updateOrderStatus,
     useOrdersQuery,
-    convertToUSD
+    convertToUSD,
+    safeParseFloat // Export the safe parsing function
   };
 }
