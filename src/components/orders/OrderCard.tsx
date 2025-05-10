@@ -3,13 +3,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { ArrowRight, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ArrowDownRight, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Archive } from 'lucide-react';
 import { Order } from '@/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface OrderCardProps {
   order: Order;
@@ -23,6 +24,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   isExpiredOrArchived
 }) => {
   const { theme } = useTheme();
+  const { toast } = useToast();
   const isGreen = order.type === "BUY";
 
   // Format large numbers with spaces as thousand separators
@@ -32,6 +34,20 @@ export const OrderCard: React.FC<OrderCardProps> = ({
       maximumFractionDigits: 2,
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  // Calculate and format volume (amount * rate)
+  const formatVolume = (amount: number, rate: string) => {
+    try {
+      const numericRate = parseFloat(rate.replace(/[^0-9.]/g, ''));
+      if (isNaN(numericRate) || numericRate === 0) return formatAmount(amount);
+      
+      const volume = amount * numericRate;
+      return formatAmount(volume);
+    } catch (error) {
+      console.error("Error calculating volume:", error);
+      return formatAmount(amount);
+    }
   };
 
   // Get rate description 
@@ -119,9 +135,36 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     return null;
   };
 
+  // Function to copy order ID to clipboard
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        toast({
+          title: "ID скопирован",
+          description: "ID заявки скопирован в буфер обмена",
+          duration: 2000,
+        });
+      })
+      .catch(err => {
+        console.error("Failed to copy:", err);
+        toast({
+          title: "Ошибка",
+          description: "Не удалось скопировать ID",
+          variant: "destructive",
+          duration: 2000,
+        });
+      });
+  };
+
   const tradeDirection = getTradeDirection(order);
   const formattedRate = getFormattedRateDisplay(order);
   const rateType = getRateDescription(order);
+  const { baseCurrency, quoteCurrency } = getTradePairComponents(order);
+  
+  // Get location info if available
+  const locationInfo = order.geography ? 
+    `${order.geography.country || ''}${order.geography.country && order.geography.city ? ', ' : ''}${order.geography.city || ''}` : 
+    '';
 
   return (
     <div className={cn(
@@ -140,51 +183,71 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         }}
       />
       <div className={cn(
-        "relative flex items-center justify-between p-3 border-b z-10",
+        "relative flex flex-col p-3 border-b z-10",
         theme === "light" ? "border-border" : "border-white/10",
       )}>
-        <div className="flex items-center space-x-2">
-          {isGreen ? (
-            <ArrowUpRight className="h-5 w-5 text-green-500 flex-shrink-0" />
-          ) : (
-            <ArrowDownRight className="h-5 w-5 text-red-500 flex-shrink-0" />
-          )}
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={`text-lg font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-                {formattedRate}
-              </span>
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {rateType}
-              </span>
-              {getOrderStatusBadge(order)}
+        {/* Header with order ID and type icon */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            {isGreen ? (
+              <ArrowUpRight className="h-5 w-5 text-green-500 flex-shrink-0" />
+            ) : (
+              <ArrowDownRight className="h-5 w-5 text-red-500 flex-shrink-0" />
+            )}
+            <div className="flex items-center cursor-pointer" onClick={() => copyToClipboard(order.id)}>
+              <span className="text-xs text-muted-foreground">ID: {order.id.slice(0, 8)}...</span>
+              <Copy className="h-3 w-3 ml-1 text-muted-foreground" />
             </div>
-            <div className="text-base font-semibold flex items-center gap-1">
-              <span>{formatAmount(Number(order.amount))} {order.amountCurrency}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              <span className="font-medium">{tradeDirection.fullDirection}</span> • 
-              {order.status === "ARCHIVED" ? (
-                <span className="ml-1">архивная</span>
-              ) : (
-                <span className="ml-1">
-                  истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
-                </span>
-              )}
-            </div>
+            {getOrderStatusBadge(order)}
           </div>
+          
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            asChild
+          >
+            <Link to={`/orders/${order.id}`}>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
 
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
-          asChild
-        >
-          <Link to={`/orders/${order.id}`}>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+        {/* Main Content */}
+        <div className="space-y-1">
+          {/* Volume - Amount * Rate */}
+          <div className="text-base font-medium flex items-center gap-1">
+            <span>Объем: {formatVolume(Number(order.amount), order.rate)} {quoteCurrency}</span>
+          </div>
+          
+          {/* Quantity - Original Amount */}
+          <div className="text-base font-medium">
+            <span>Количество: {formatAmount(Number(order.amount))} {baseCurrency}</span>
+          </div>
+          
+          {/* Rate with details and location */}
+          <div className="text-base">
+            <span className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
+              Курс: {formattedRate} 
+            </span>
+            <span className="text-xs text-muted-foreground ml-1">
+              {rateType}
+              {locationInfo && <span className="ml-1">{locationInfo}</span>}
+            </span>
+          </div>
+          
+          {/* Trade direction and expiration */}
+          <div className="text-xs text-muted-foreground">
+            <span className="font-medium">{tradeDirection.fullDirection}</span> • 
+            {order.status === "ARCHIVED" ? (
+              <span className="ml-1">архивная</span>
+            ) : (
+              <span className="ml-1">
+                истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
