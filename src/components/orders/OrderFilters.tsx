@@ -270,7 +270,7 @@ export const OrderFilters: React.FC<OrderFiltersProps> = ({
                           ? "bg-card border-border" 
                           : "bg-otc-card border-otc-active"
                       )}>
-                        <SelectItem value="all">Все группы</SelectItem>
+                        <SelectItem value="all-groups">Все группы</SelectItem>
                         <SelectItem value="RUB_NR">RUB (НР)</SelectItem>
                         <SelectItem value="RUB_CASH">RUB (Нал)</SelectItem>
                         <SelectItem value="TOKENIZED">Токенизированные</SelectItem>

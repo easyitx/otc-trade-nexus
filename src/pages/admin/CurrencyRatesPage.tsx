@@ -240,7 +240,7 @@ export default function CurrencyRatesPage() {
                       <SelectValue placeholder={t('selectSource')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('allSources')}</SelectItem>
+                      <SelectItem value="all-sources">{t('allSources')}</SelectItem>
                       {allSources.map((source) => (
                         <SelectItem key={source} value={source}>
                           {source}

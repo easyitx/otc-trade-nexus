@@ -112,7 +112,7 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
                 <SelectValue placeholder={t('selectSource')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('noSource')}</SelectItem>
+                <SelectItem value="none">{t('noSource')}</SelectItem>
                 {sources.map(s => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
