@@ -1,4 +1,3 @@
-import { enUS } from "date-fns/locale";
 
 export type Language = "en" | "ru";
 
@@ -18,17 +17,28 @@ export const translationResources = {
 };
 
 export type TranslationKey =
+    // Common UI
     | "appName" | "back" | "login" | "register" | "logout" | "welcome" | "email" | "password"
     | "name" | "confirmPassword" | "alreadyHaveAccount" | "dontHaveAccount" | "dashboard"
-    | "profile" | "settings" | "orders" | "leaderboard" | "logout" | "chat" | "submitOrder"
+    | "profile" | "settings" | "orders" | "leaderboard" | "chat" | "submitOrder"
     | "explanation" | "myProfile" | "updateProfile" | "updatePassword" | "fullName" | "company"
     | "telegram" | "save" | "saveChanges" | "cancel" | "updateSuccessful" | "updateFailed"
     | "passwordUpdated" | "passwordUpdateFailed" | "currentPassword" | "newPassword"
     | "confirmNewPassword" | "error" | "errorOccurred" | "success" | "successful" | "hi"
     | "viewProfile" | "home" | "dark" | "light" | "language" | "english" | "russian" 
     | "passwordsDoNotMatch" | "fieldRequired" | "invalidEmail" | "copy" | "copied" | "copyToClipboard"
-    | "error404" | "oopsNotFound" | "returnHome" | "status" | "total"
+    | "error404" | "oopsNotFound" | "returnHome" | "status" | "total" | "user" | "loggedOut" | "loggedOutSuccess"
+
+    // Layout
+    | "exchangeRates" | "search" | "searchPlaceholder" | "noResults" | "tradingPairs" | "quickNav"
+    | "popularPairs" | "deals" | "createNewOrder"
     
+    // Profile
+    | "personalInfo" | "memberSince" | "notSet" | "notAvailable" | "notConnected" | "editProfile"
+    
+    // Dashboard
+    | "tradeVolume" | "last30Days" | "acrossMarkets" | "activeTraders" | "thisWeek"
+
     // Notification settings
     | "notificationChannels" | "emailNotifications" | "webNotifications" | "telegramNotifications"
     | "orderCreated" | "orderStatusChanged" | "newMessage" | "newDeal" | "newProposal" | "dealCompleted"
@@ -53,15 +63,15 @@ export type TranslationKey =
     | "hoursAgo" | "minutesAgo" | "justNow" | "loadingMessages" | "noMessages" | "details"
     
     // Order statistics
-    | "orderStatistics" | "buyOrders" | "sellOrders" | "totalVolume" | "ordersByStatus" | "active" 
-    | "completed" | "cancelled" | "expired" | "recentOrders" | "noRecentOrders" | "seeAllOrders" 
+    | "orderStatistics" | "buyOrders" | "sellOrders" | "totalVolume" | "ordersByStatus" | "active"  
+    | "cancelled" | "expired" | "recentOrders" | "noRecentOrders" | "seeAllOrders" 
     | "archiving" | "ordersByType" | "ordersTodayVsYesterday" | "today" | "yesterday"
     
     // Order form
-    | "orderType" | "calculationTitle" | "youPay" | "youReceive" | "exchangeRate" | "totalFee" 
-    | "totalAmount" | "continue" | "calculateSummary" | "orderSummary" | "calculate"
+    | "orderType" | "calculationTitle" | "youPay" | "youReceive" | "exchangeRate" | "totalFee"
+    | "continue" | "calculateSummary" | "orderSummary" | "calculate"
     | "serviceFeeAmount" | "adjustmentAmount" | "baseExchangeRate" | "calculationDetails"
-    | "paymentDetails" | "basicDetails" | "additionalDetails" | "total"
+    | "paymentDetails" | "basicDetails" | "fillRequiredFields" | "otcMinimumReq" | "receive"
     
     // Currency rates management translations
     | "accessDenied" | "noPermission" | "restrictedArea" | "onlyAdminManager" | "loading"
@@ -69,15 +79,15 @@ export type TranslationKey =
     | "currencyExchangeRates" | "currencyRatesManagement" | "manageRatesDescription"
     | "refreshExternalRates" | "createNewRate" | "createNewCurrencyRate" | "addNewCurrencyPairDescription"
     | "baseCurrency" | "quoteCurrency" | "selectCurrency" | "create" | "searchCurrencyPairs"
-    | "all" | "major" | "crypto" | "exotic" | "noCurrencyRates" | "activeRate" | "autoRate"
-    | "manualRate" | "useManualRate" | "lastUpdated" | "edit" | "source" | "noSource"
+    | "all" | "major" | "exotic" | "noCurrencyRates" | "activeRate" | "autoRate"
+    | "manualRate" | "useManualRate" | "lastUpdated" | "source" | "noSource"
     | "selectSource" | "optional" | "pairExists" | "pairExistsForSource" | "sourceUpdated" 
-    | "allSources" | "noCurrencyRatesForSource" | "ratesUpdatedAutomatically" | "exchangeRates"
+    | "allSources" | "noCurrencyRatesForSource" | "ratesUpdatedAutomatically";
 
-    // Layout
-    | "exchangeRates"
+// Import needed for date-fns locale
+import { enUS } from "date-fns/locale";
 
-// English translations
+// Define the English translations
 const en = {
     appName: "OTC Platform",
     back: "Back",
@@ -138,6 +148,35 @@ const en = {
     returnHome: "Return Home",
     status: "Status",
     total: "Total",
+    user: "User",
+    loggedOut: "Logged Out",
+    loggedOutSuccess: "You have been successfully logged out",
+
+    // Layout
+    exchangeRates: "Exchange Rates",
+    search: "Search",
+    searchPlaceholder: "Search for orders, pairs...",
+    noResults: "No results found",
+    tradingPairs: "Trading Pairs",
+    quickNav: "Quick Navigation",
+    popularPairs: "Popular Pairs",
+    deals: "Deals",
+    createNewOrder: "Create Order",
+
+    // Profile
+    personalInfo: "Personal Information",
+    memberSince: "Member Since",
+    notSet: "Not set",
+    notAvailable: "Not available",
+    notConnected: "Not connected",
+    editProfile: "Edit Profile",
+
+    // Dashboard
+    tradeVolume: "Trade Volume",
+    last30Days: "Last 30 days",
+    acrossMarkets: "Across Markets",
+    activeTraders: "Active Traders",
+    thisWeek: "This Week",
 
     // Notification settings
     notificationChannels: "Notification Channels",
@@ -242,7 +281,6 @@ const en = {
     totalVolume: "Total Volume",
     ordersByStatus: "Orders by Status",
     active: "Active",
-    completed: "Completed",
     cancelled: "Cancelled",
     expired: "Expired",
     recentOrders: "Recent Orders",
@@ -261,7 +299,6 @@ const en = {
     youReceive: "You Receive",
     exchangeRate: "Exchange Rate",
     totalFee: "Total Fee",
-    totalAmount: "Total Amount",
     continue: "Continue",
     calculateSummary: "Calculate Summary",
     orderSummary: "Order Summary",
@@ -272,8 +309,9 @@ const en = {
     calculationDetails: "Calculation Details",
     paymentDetails: "Payment Details",
     basicDetails: "Basic Details",
-    additionalDetails: "Additional Details",
-    total: "Total",
+    fillRequiredFields: "Please fill in all required fields",
+    otcMinimumReq: "Minimum order amount is 500,000 USD",
+    receive: "receive",
 
     // Currency rates management translations
     accessDenied: "Access Denied",
@@ -299,7 +337,6 @@ const en = {
     searchCurrencyPairs: "Search currency pairs",
     all: "All",
     major: "Major",
-    crypto: "Crypto",
     exotic: "Exotic",
     noCurrencyRates: "No currency rates found.",
     activeRate: "Active Rate",
@@ -307,8 +344,6 @@ const en = {
     manualRate: "Manual Rate",
     useManualRate: "Use Manual Rate",
     lastUpdated: "Last Updated",
-    saveChanges: "Save Changes",
-    edit: "Edit",
     source: "Source",
     noSource: "No Source",
     selectSource: "Select Source",
@@ -318,14 +353,10 @@ const en = {
     sourceUpdated: "Source Updated",
     allSources: "All Sources",
     noCurrencyRatesForSource: "No currency rates found for the selected source.",
-    ratesUpdatedAutomatically: "Rates are updated automatically from external sources",
-    exchangeRates: "Exchange Rates",
-
-    // Layout
-    exchangeRates: "Exchange Rates",
+    ratesUpdatedAutomatically: "Rates are updated automatically from external sources"
 };
 
-// Russian translations
+// Define the Russian translations
 const ru = {
     appName: "OTC Платформа",
     back: "Назад",
@@ -386,6 +417,35 @@ const ru = {
     returnHome: "Вернуться домой",
     status: "Статус",
     total: "Итого",
+    user: "Пользователь",
+    loggedOut: "Вы вышли из системы",
+    loggedOutSuccess: "Вы успешно вышли из системы",
+
+    // Layout
+    exchangeRates: "Курсы валют",
+    search: "Поиск",
+    searchPlaceholder: "Поиск ордеров, пар...",
+    noResults: "Результаты не найдены",
+    tradingPairs: "Торговые пары",
+    quickNav: "Быстрая навигация",
+    popularPairs: "Популярные пары",
+    deals: "Сделки",
+    createNewOrder: "Создать ордер",
+
+    // Profile
+    personalInfo: "Персональная информация",
+    memberSince: "Зарегистрирован с",
+    notSet: "Не указано",
+    notAvailable: "Недоступно",
+    notConnected: "Не подключено",
+    editProfile: "Редактировать профиль",
+
+    // Dashboard
+    tradeVolume: "Объем торговли",
+    last30Days: "Последние 30 дней",
+    acrossMarkets: "По всем рынкам",
+    activeTraders: "Активных трейдеров",
+    thisWeek: "На этой неделе",
 
     // Notification settings
     notificationChannels: "Каналы уведомлений",
@@ -443,7 +503,7 @@ const ru = {
     expireDate: "Дата истечения",
     action: "Действие",
     view: "Просмотр",
-    edit: "Редактировать",
+    edit: "Изменить",
     delete: "Удалить",
     orderDetails: "Детали заказа",
     orderExpired: "Срок действия заказа истек",
@@ -490,7 +550,6 @@ const ru = {
     totalVolume: "Общий объем",
     ordersByStatus: "Заказы по статусу",
     active: "Активные",
-    completed: "Завершенные",
     cancelled: "Отмененные",
     expired: "Просроченные",
     recentOrders: "Недавние заказы",
@@ -509,7 +568,6 @@ const ru = {
     youReceive: "Вы получаете",
     exchangeRate: "Курс обмена",
     totalFee: "Общая комиссия",
-    totalAmount: "Общая сумма",
     continue: "Продолжить",
     calculateSummary: "Рассчитать сводку",
     orderSummary: "Сводка заказа",
@@ -520,8 +578,9 @@ const ru = {
     calculationDetails: "Детали расчета",
     paymentDetails: "Детали платежа",
     basicDetails: "Основные детали",
-    additionalDetails: "Дополнительные детали",
-    total: "Итого",
+    fillRequiredFields: "Пожалуйста, заполните все обязательные поля",
+    otcMinimumReq: "Минимальная сумма ордера составляет 500,000 USD",
+    receive: "получить",
 
     // Currency rates management translations
     accessDenied: "Доступ запрещен",
@@ -547,7 +606,6 @@ const ru = {
     searchCurrencyPairs: "Поиск валютных пар",
     all: "Все",
     major: "Основные",
-    crypto: "Крипто",
     exotic: "Экзотические",
     noCurrencyRates: "Курсы валют не найдены.",
     activeRate: "Активный курс",
@@ -555,8 +613,6 @@ const ru = {
     manualRate: "Ручной курс",
     useManualRate: "Использовать ручной курс",
     lastUpdated: "Последнее обновление",
-    saveChanges: "Сохранить изменения",
-    edit: "Изменить",
     source: "Источник",
     noSource: "Без источника",
     selectSource: "Выберите источник",
@@ -566,11 +622,8 @@ const ru = {
     sourceUpdated: "Источник обновлен",
     allSources: "Все источники",
     noCurrencyRatesForSource: "Курсы валют для выбранного источника не найдены.",
-    ratesUpdatedAutomatically: "Курсы обновляются автоматически из внешних источников",
-    exchangeRates: "Курсы валют",
-
-    // Layout
-    exchangeRates: "Курсы валют",
+    ratesUpdatedAutomatically: "Курсы обновляются автоматически из внешних источников"
 };
 
-export { en, ru };
+// Export translations object that combines all languages
+export const translations = { en, ru };
