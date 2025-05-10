@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Refresh, AlertTriangle, Search } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Search } from 'lucide-react';
 import { CurrencyRateCard } from '@/components/rates/CurrencyRateCard';
 import { CreateRateModal } from '@/components/rates/CreateRateModal';
 import { useCurrencyRates, CurrencyCode } from '@/hooks/useCurrencyRates';
@@ -161,7 +160,7 @@ export default function CurrencyRatesPage() {
                 theme === "light" ? "bg-accent" : "bg-otc-active border-otc-active"
               )}
             >
-              <Refresh className="mr-2 h-4 w-4" />
+              <RefreshCw className="mr-2 h-4 w-4" />
               Refresh External Rates
             </Button>
             

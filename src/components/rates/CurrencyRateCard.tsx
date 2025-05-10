@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { CurrencyRate, CurrencyRateUpdate } from '@/hooks/useCurrencyRates';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
-import { Edit2, Save, Refresh, ArrowRight } from 'lucide-react';
+import { Edit2, Save, RefreshCw, ArrowRight } from 'lucide-react';
 
 interface CurrencyRateCardProps {
   rate: CurrencyRate;
