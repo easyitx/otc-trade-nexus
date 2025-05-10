@@ -72,7 +72,18 @@ export type TranslationKey =
     | "paymentDetails" | "basicDetails" | "fillRequiredFields" | "otcMinimumReq" | "receive"
     | "serviceFee" | "adjustment" | "finalExchangeRate" | "selectTradingPair" | "selectOrderType"
     | "minAmount" | "rateSource" | "selectRateSource" | "rateType" | "dynamic" | "fixed"
-    | "customRate" | "rateAdjustment" | "currentRate" | "rubNonCash" | "rubCash" | "tokenized";
+    | "customRate" | "rateAdjustment" | "currentRate" | "rubNonCash" | "rubCash" | "tokenized"
+
+    // Admin & Currency Rates
+    | "loading" | "accessDenied" | "noPermission" | "restrictedArea" | "onlyAdminManager"
+    | "failedToLoadRates" | "dataLoadingError" | "rateFetchProblem" | "reloadPage"
+    | "currencyExchangeRates" | "currencyRatesManagement" | "manageRatesDescription"
+    | "refreshExternalRates" | "createNewRate" | "createNewCurrencyRate"
+    | "addNewCurrencyPairDescription" | "baseCurrency" | "quoteCurrency" | "selectCurrency"
+    | "source" | "selectSource" | "manualRate" | "optional" | "useManualRate" | "create"
+    | "searchCurrencyPairs" | "all" | "major" | "exotic" | "crypto" | "noCurrencyRates" 
+    | "activeRate" | "autoRate" | "lastUpdated" | "sourceUpdated" | "noSource"
+    | "pairExists" | "pairExistsForSource" | "allSources" | "noCurrencyRatesForSource";
 
 // Define translations object with imported JSON
 export const translations = {
