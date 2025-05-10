@@ -30,7 +30,7 @@ export type TranslationKey =
     | "calculationTitle" | "youPay" | "youReceive" | "exchangeRate" | "totalFee" 
     | "totalAmount" | "continue" | "calculateSummary" | "orderSummary" | "calculate"
     | "serviceFeeAmount" | "adjustmentAmount" | "baseExchangeRate" | "calculationDetails"
-    | "paymentDetails" | "basicDetails" | "additionalDetails"
+    | "paymentDetails" | "basicDetails" | "additionalDetails" | "total"
     // Currency rates management translations
     | "accessDenied" | "noPermission" | "restrictedArea" | "onlyAdminManager" | "loading"
     | "failedToLoadRates" | "dataLoadingError" | "rateFetchProblem" | "reloadPage"
@@ -281,6 +281,7 @@ export const translations = {
     error404: "404 - Страница не найдена",
     oopsNotFound: "Упс! Мы не смогли найти страницу, которую вы ищете.",
     returnHome: "Вернуться на главную",
+    status: "Статус",
 
     // Notification settings
     notificationChannels: "Каналы уведомлений",
@@ -353,7 +354,6 @@ export const translations = {
     startedOn: "Начата",
     proposal: "Предложение",
     orderExpiry: "Истечение заявки",
-    status: "Статус",
     transactionDetails: "Детали транзакции",
     discussing: "Обсуждение",
     agreed: "Согласовано",
@@ -414,7 +414,6 @@ export const translations = {
     manualRate: "Ручной курс",
     useManualRate: "Использовать ручной курс",
     lastUpdated: "Последнее обновление",
-    saveChanges: "Сохранить изменения",
     edit: "Изменить",
     source: "Источник",
     noSource: "Без источника",
