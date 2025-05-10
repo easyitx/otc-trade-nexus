@@ -29,7 +29,7 @@ export type TranslationKey =
 
     // Layout
     | "exchangeRates" | "search" | "searchPlaceholder" | "noResults" | "tradingPairs" | "quickNav"
-    | "popularPairs" | "deals" | "createNewOrder"
+    | "popularPairs" | "deals" | "createNewOrder" | "noRatesForSource" | "ratesUpdatedAutomatically"
     
     // Profile
     | "personalInfo" | "memberSince" | "notSet" | "notAvailable" | "notConnected" | "editProfile"
@@ -70,17 +70,9 @@ export type TranslationKey =
     | "continue" | "calculateSummary" | "orderSummary" | "calculate"
     | "serviceFeeAmount" | "adjustmentAmount" | "baseExchangeRate" | "calculationDetails"
     | "paymentDetails" | "basicDetails" | "fillRequiredFields" | "otcMinimumReq" | "receive"
-    
-    // Currency rates management translations
-    | "accessDenied" | "noPermission" | "restrictedArea" | "onlyAdminManager" | "loading"
-    | "failedToLoadRates" | "dataLoadingError" | "rateFetchProblem" | "reloadPage"
-    | "currencyExchangeRates" | "currencyRatesManagement" | "manageRatesDescription"
-    | "refreshExternalRates" | "createNewRate" | "createNewCurrencyRate" | "addNewCurrencyPairDescription"
-    | "baseCurrency" | "quoteCurrency" | "selectCurrency" | "create" | "searchCurrencyPairs"
-    | "all" | "major" | "exotic" | "noCurrencyRates" | "activeRate" | "autoRate"
-    | "manualRate" | "useManualRate" | "lastUpdated" | "source" | "noSource"
-    | "selectSource" | "optional" | "pairExists" | "pairExistsForSource" | "sourceUpdated" 
-    | "allSources" | "noCurrencyRatesForSource" | "ratesUpdatedAutomatically";
+    | "serviceFee" | "adjustment" | "finalExchangeRate" | "selectTradingPair" | "selectOrderType"
+    | "minAmount" | "rateSource" | "selectRateSource" | "rateType" | "dynamic" | "fixed"
+    | "customRate" | "rateAdjustment" | "currentRate" | "rubNonCash" | "rubCash" | "tokenized";
 
 // Define translations object with imported JSON
 export const translations = {

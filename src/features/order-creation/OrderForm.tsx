@@ -77,7 +77,7 @@ export default function OrderForm() {
     setCurrentRates(ratesMap);
     
     // Recalculate if auto-calculate is enabled
-    if (autoCalculate && amount && parseFloat(amount) > 0 && selectedPairInfo) {
+    if (autoCalculate && amount && parseFloat(amount.toString().replace(/,/g, '')) > 0 && selectedPairInfo) {
       setTimeout(() => calculateOrder(), 100);
     }
   }, [allRates, rateSource]);
@@ -127,7 +127,7 @@ export default function OrderForm() {
     if (selectedPairInfo) {
       updateAmountCurrency(selectedPairInfo, orderType);
       // Re-calculate when order type changes if auto-calculate is enabled
-      if (autoCalculate && amount && parseFloat(amount) > 0) {
+      if (autoCalculate && amount && parseFloat(amount.toString().replace(/,/g, '')) > 0) {
         setTimeout(() => calculateOrder(), 100);
       } else {
         // Reset calculation when order type changes
@@ -193,7 +193,13 @@ export default function OrderForm() {
 
   // Calculate order details based on inputs
   const calculateOrder = () => {
-    if (!selectedPairInfo || !amount || parseFloat(amount) <= 0) {
+    if (!selectedPairInfo || !amount) {
+      return;
+    }
+
+    // Handle string amount with commas
+    const sanitizedAmount = amount.toString().replace(/,/g, '');
+    if (parseFloat(sanitizedAmount) <= 0) {
       return;
     }
 
@@ -238,7 +244,7 @@ export default function OrderForm() {
     // Calculate final rate including service fee
     const finalRate = adjustedRate * serviceFeeMultiplier;
 
-    const amountValue = parseFloat(amount.replace(/,/g, ''));
+    const amountValue = parseFloat(sanitizedAmount);
     let youPay, youReceive, serviceFeeAmount, adjustmentAmount, totalAmount;
 
     // Determine pay/receive amounts based on order type
@@ -331,7 +337,7 @@ export default function OrderForm() {
     }
 
     // Validate minimum amount (500,000 USD)
-    const parsedAmount = parseFloat(amount.replace(/,/g, ''));
+    const parsedAmount = parseFloat(amount.toString().replace(/,/g, ''));
     if (isNaN(parsedAmount) || parsedAmount < 500000) {
       alert(t('otcMinimumReq'));
       setIsSubmitting(false);

@@ -52,6 +52,8 @@ export default function BasicDetailsStep({ formProps }: BasicDetailsStepProps) {
     calculationResult,
     availableSources,
     autoCalculate,
+    getCurrencySymbol,
+    setCurrentStep
   } = formProps;
 
   // Group pairs for easier selection
@@ -318,7 +320,13 @@ export default function BasicDetailsStep({ formProps }: BasicDetailsStepProps) {
 
       {/* Transaction Summary */}
       {showCalculation && calculationResult && (
-        <TransactionSummary calculationResult={calculationResult} theme={theme} t={t} />
+        <TransactionSummary 
+          calculationResult={calculationResult} 
+          theme={theme} 
+          t={t} 
+          getCurrencySymbol={getCurrencySymbol} 
+          setCurrentStep={setCurrentStep}
+        />
       )}
     </div>
   );

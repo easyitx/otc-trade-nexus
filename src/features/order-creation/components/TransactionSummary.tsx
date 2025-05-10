@@ -1,15 +1,22 @@
+
 import { cn } from "@/lib/utils";
 import { ArrowRight, Calculator, EuroIcon, DollarSign, BadgePercent } from "lucide-react";
 
-export default function TransactionSummary({
-                                             theme, t, calculationResult, getCurrencySymbol, setCurrentStep
-                                           }: {
+interface TransactionSummaryProps {
   theme: string;
   t: (key: string) => string;
   calculationResult: any;
   getCurrencySymbol: (currency: string) => string;
   setCurrentStep: (step: number) => void;
-}) {
+}
+
+export default function TransactionSummary({
+  theme, 
+  t, 
+  calculationResult,
+  getCurrencySymbol,
+  setCurrentStep
+}: TransactionSummaryProps) {
   return (
       <div className={cn(
           "mt-6 rounded-xl p-6 border animate-fade-in",
