@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
@@ -364,7 +365,7 @@ export default function OrderForm() {
       serviceFee
     };
 
-    const { error } } from await createOrder({
+    const { error } = await createOrder({
       type: orderType as "BUY" | "SELL",
       amount: parsedAmount,
       amountCurrency,
