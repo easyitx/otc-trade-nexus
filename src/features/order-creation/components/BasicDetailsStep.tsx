@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -53,7 +52,8 @@ export default function BasicDetailsStep({ formProps }: BasicDetailsStepProps) {
     availableSources,
     autoCalculate,
     getCurrencySymbol,
-    setCurrentStep
+    setCurrentStep,
+    safeParseFloat
   } = formProps;
 
   // Group pairs for easier selection
@@ -87,6 +87,14 @@ export default function BasicDetailsStep({ formProps }: BasicDetailsStepProps) {
     }
     // Format with commas for thousands
     return new Intl.NumberFormat().format(parseFloat(sanitized));
+  };
+
+  // Helper to check if amount is valid for enabling calculate button
+  const isAmountValid = () => {
+    if (!amount) return false;
+    const sanitized = amount.toString().replace(/,/g, '');
+    const parsed = parseFloat(sanitized);
+    return !isNaN(parsed) && parsed > 0;
   };
 
   return (
@@ -306,7 +314,7 @@ export default function BasicDetailsStep({ formProps }: BasicDetailsStepProps) {
                       "gap-2",
                       theme === "light" ? "bg-primary" : "bg-otc-primary text-black"
                     )}
-                    disabled={!selectedPairInfo || !amount || parseFloat(amount.replace(/,/g, '')) <= 0}
+                    disabled={!selectedPairInfo || !isAmountValid()}
                   >
                     <Calculator className="h-4 w-4" />
                     {t("calculate")}

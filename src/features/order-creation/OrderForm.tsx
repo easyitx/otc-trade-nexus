@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
@@ -77,7 +76,7 @@ export default function OrderForm() {
     setCurrentRates(ratesMap);
     
     // Recalculate if auto-calculate is enabled
-    if (autoCalculate && amount && parseFloat(amount.toString().replace(/,/g, '')) > 0 && selectedPairInfo) {
+    if (autoCalculate && amount && safeParseFloat(amount) > 0 && selectedPairInfo) {
       setTimeout(() => calculateOrder(), 100);
     }
   }, [allRates, rateSource]);
@@ -99,13 +98,20 @@ export default function OrderForm() {
   
   const [showCalculation, setShowCalculation] = useState<boolean>(false);
 
+  // Helper function to safely parse float from string with commas
+  const safeParseFloat = (value: string | undefined | null): number => {
+    if (!value) return 0;
+    const sanitized = value.toString().replace(/,/g, '');
+    const parsed = parseFloat(sanitized);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
   // Check if the selected pair involves cash
   const isCashPair = () => {
     const pair = tradePairs.find(p => p.id === selectedPair);
     return pair?.group === "RUB_CASH";
   };
 
-  // Update selected pair info when pair changes
   useEffect(() => {
     if (selectedPair) {
       const pair = tradePairs.find(p => p.id === selectedPair);
@@ -127,7 +133,7 @@ export default function OrderForm() {
     if (selectedPairInfo) {
       updateAmountCurrency(selectedPairInfo, orderType);
       // Re-calculate when order type changes if auto-calculate is enabled
-      if (autoCalculate && amount && parseFloat(amount.toString().replace(/,/g, '')) > 0) {
+      if (autoCalculate && amount && safeParseFloat(amount) > 0) {
         setTimeout(() => calculateOrder(), 100);
       } else {
         // Reset calculation when order type changes
@@ -197,9 +203,9 @@ export default function OrderForm() {
       return;
     }
 
-    // Handle string amount with commas
-    const sanitizedAmount = amount.toString().replace(/,/g, '');
-    if (parseFloat(sanitizedAmount) <= 0) {
+    // Safely parse amount and validate
+    const amountValue = safeParseFloat(amount);
+    if (amountValue <= 0) {
       return;
     }
 
@@ -244,7 +250,6 @@ export default function OrderForm() {
     // Calculate final rate including service fee
     const finalRate = adjustedRate * serviceFeeMultiplier;
 
-    const amountValue = parseFloat(sanitizedAmount);
     let youPay, youReceive, serviceFeeAmount, adjustmentAmount, totalAmount;
 
     // Determine pay/receive amounts based on order type
@@ -336,9 +341,9 @@ export default function OrderForm() {
       return;
     }
 
-    // Validate minimum amount (500,000 USD)
-    const parsedAmount = parseFloat(amount.toString().replace(/,/g, ''));
-    if (isNaN(parsedAmount) || parsedAmount < 500000) {
+    // Safely parse amount and validate minimum
+    const parsedAmount = safeParseFloat(amount);
+    if (parsedAmount < 500000) {
       alert(t('otcMinimumReq'));
       setIsSubmitting(false);
       return;
@@ -359,7 +364,7 @@ export default function OrderForm() {
       serviceFee
     };
 
-    const { error } = await createOrder({
+    const { error } } from await createOrder({
       type: orderType as "BUY" | "SELL",
       amount: parsedAmount,
       amountCurrency,
@@ -430,7 +435,8 @@ export default function OrderForm() {
     totalSteps,
     getCurrencySymbol,
     autoCalculate,
-    availableSources
+    availableSources,
+    safeParseFloat
   };
 
   return (

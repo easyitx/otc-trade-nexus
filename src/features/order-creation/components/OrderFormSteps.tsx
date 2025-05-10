@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -34,6 +33,13 @@ export default function OrderFormSteps({
     setCurrentStep,
     showCalculation
   } = formProps;
+
+  // Helper to safely parse amount
+  const isValidAmount = () => {
+    if (!amount) return false;
+    const sanitizedAmount = amount.toString().replace(/,/g, '');
+    return !isNaN(parseFloat(sanitizedAmount)) && parseFloat(sanitizedAmount) > 0;
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -163,7 +169,7 @@ export default function OrderFormSteps({
                   : "bg-otc-primary text-black hover:bg-otc-primary/90"
               )}
               onClick={() => showCalculation && calculationResult ? setCurrentStep(2) : calculateOrder()}
-              disabled={!selectedPair || !amount || parseFloat(amount) <= 0}
+              disabled={!selectedPair || !isValidAmount()}
             >
               <span className="flex items-center gap-2 text-sm">
                 {showCalculation && calculationResult ? t('continue') : t('calculateSummary')}
@@ -196,7 +202,7 @@ export default function OrderFormSteps({
                     ? ""
                     : "bg-otc-primary text-black hover:bg-otc-primary/90"
                 )}
-                disabled={isSubmitting || !selectedPair || !amount || !country || (isCashPair() && !city)}
+                disabled={isSubmitting || !selectedPair || !isValidAmount() || !country || (isCashPair() && !city)}
               >
                 <span className="flex items-center gap-2 text-sm">
                   {isSubmitting ? t('creatingOrder') : t('createOrder')}
