@@ -11,6 +11,7 @@ import { Order } from '@/types';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 interface OrderCardProps {
   order: Order;
@@ -109,7 +110,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   const getOrderStatusBadge = (order: Order) => {
     if (order.status === "ARCHIVED") {
       return (
-        <Badge variant="outline" className="bg-gray-100 text-gray-500 flex items-center gap-1 ml-2">
+        <Badge variant="outline" className="bg-gray-100 text-gray-500 flex items-center gap-1 text-[10px] py-0 h-5">
           <Archive className="h-3 w-3" /> 
           Архивная
         </Badge>
@@ -118,7 +119,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     
     if (order.status === "CANCELLED") {
       return (
-        <Badge variant="outline" className="bg-red-100 text-red-500 ml-2">
+        <Badge variant="outline" className="bg-red-100 text-red-500 text-[10px] py-0 h-5">
           Отменена
         </Badge>
       );
@@ -126,7 +127,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     
     if (isOrderExpired(new Date(order.expiresAt))) {
       return (
-        <Badge variant="outline" className="bg-yellow-100 text-yellow-700 ml-2">
+        <Badge variant="outline" className="bg-yellow-100 text-yellow-700 text-[10px] py-0 h-5">
           Истекла
         </Badge>
       );
@@ -183,70 +184,78 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         }}
       />
       <div className={cn(
-        "relative flex flex-col p-3 border-b z-10",
+        "relative flex flex-col p-2 border-b z-10",
         theme === "light" ? "border-border" : "border-white/10",
       )}>
-        {/* Header with order ID and type icon */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
+        {/* Header with order ID, type icon and actions */}
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-1.5">
             {isGreen ? (
-              <ArrowUpRight className="h-5 w-5 text-green-500 flex-shrink-0" />
+              <ArrowUpRight className="h-4 w-4 text-green-500 flex-shrink-0" />
             ) : (
-              <ArrowDownRight className="h-5 w-5 text-red-500 flex-shrink-0" />
+              <ArrowDownRight className="h-4 w-4 text-red-500 flex-shrink-0" />
             )}
-            <div className="flex items-center cursor-pointer" onClick={() => copyToClipboard(order.id)}>
+            <div 
+              className="flex items-center cursor-pointer group/copy" 
+              onClick={() => copyToClipboard(order.id)}
+            >
               <span className="text-xs text-muted-foreground">ID: {order.id.slice(0, 8)}...</span>
-              <Copy className="h-3 w-3 ml-1 text-muted-foreground" />
+              <Copy className="h-3 w-3 ml-0.5 text-muted-foreground opacity-50 group-hover/copy:opacity-100" />
             </div>
             {getOrderStatusBadge(order)}
           </div>
           
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            asChild
-          >
-            <Link to={`/orders/${order.id}`}>
+          <Link to={`/orders/${order.id}`}>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
               <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
 
-        {/* Main Content */}
-        <div className="space-y-1">
-          {/* Volume - Amount * Rate */}
-          <div className="text-base font-medium flex items-center gap-1">
-            <span>Объем: {formatVolume(Number(order.amount), order.rate)} {quoteCurrency}</span>
+        {/* Main Content in a compact layout */}
+        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-sm">
+          {/* Left column - Volume and Amount */}
+          <div>
+            {/* Volume - Amount * Rate */}
+            <div className="font-medium">
+              Объем: {formatVolume(Number(order.amount), order.rate)} {quoteCurrency}
+            </div>
+            
+            {/* Quantity - Original Amount */}
+            <div className="font-medium">
+              Количество: {formatAmount(Number(order.amount))} {baseCurrency}
+            </div>
           </div>
           
-          {/* Quantity - Original Amount */}
-          <div className="text-base font-medium">
-            <span>Количество: {formatAmount(Number(order.amount))} {baseCurrency}</span>
-          </div>
-          
-          {/* Rate with details and location */}
-          <div className="text-base">
-            <span className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-              Курс: {formattedRate} 
-            </span>
-            <span className="text-xs text-muted-foreground ml-1">
-              {rateType}
-              {locationInfo && <span className="ml-1">{locationInfo}</span>}
-            </span>
-          </div>
-          
-          {/* Trade direction and expiration */}
-          <div className="text-xs text-muted-foreground">
-            <span className="font-medium">{tradeDirection.fullDirection}</span> • 
-            {order.status === "ARCHIVED" ? (
-              <span className="ml-1">архивная</span>
-            ) : (
-              <span className="ml-1">
-                истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
+          {/* Right column - Rate and Details */}
+          <div>
+            {/* Rate with details and location */}
+            <div className="">
+              <span className={`font-medium ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
+                Курс: {formattedRate} 
               </span>
-            )}
+              <div className="text-xs text-muted-foreground">
+                {rateType}
+                {locationInfo && <span className="block italic">{locationInfo}</span>}
+              </div>
+            </div>
           </div>
+        </div>
+        
+        {/* Trade direction and expiration at the bottom */}
+        <div className="text-xs text-muted-foreground mt-1 border-t border-dashed pt-0.5">
+          <span className="font-medium">{tradeDirection.fullDirection}</span> • 
+          {order.status === "ARCHIVED" ? (
+            <span className="ml-1">архивная</span>
+          ) : (
+            <span className="ml-1">
+              истекает {formatDistanceToNow(new Date(order.expiresAt), { addSuffix: true, locale: ru })}
+            </span>
+          )}
         </div>
       </div>
     </div>
