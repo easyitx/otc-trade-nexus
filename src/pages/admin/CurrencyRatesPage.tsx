@@ -15,21 +15,45 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function CurrencyRatesPage() {
   const { theme } = useTheme();
   const { t } = useLanguage();
-  const { useCurrencyRatesQuery, updateRate, createRate, refreshExternalRates } = useCurrencyRates();
+  const { 
+    useCurrencyRatesQuery, 
+    updateRate, 
+    createRate, 
+    refreshExternalRates 
+  } = useCurrencyRates();
   const { userRoles, isLoadingRoles } = usePlatformSettings();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedSource, setSelectedSource] = useState('');
 
   const { data: rates = [], isLoading, isError } = useCurrencyRatesQuery();
 
-  // Filter rates based on search and active tab
+  // Define available rate sources
+  const rateSources = ['CBR', 'Binance', 'CoinMarketCap', 'CoinGecko', 'Forex'];
+  
+  // Get unique sources from the rates data
+  const existingSources = Array.from(
+    new Set(rates.map(rate => rate.source).filter(Boolean))
+  );
+  
+  // Combine hardcoded sources with any additional sources from the database
+  const allSources = Array.from(new Set([...rateSources, ...existingSources])).filter(Boolean);
+
+  // Filter rates based on search, active tab, and selected source
   const filteredRates = rates.filter((rate) => {
     const searchMatch = 
       `${rate.base_currency}${rate.quote_currency}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -40,14 +64,18 @@ export default function CurrencyRatesPage() {
       (activeTab === 'major' && isMajorPair(rate.base_currency, rate.quote_currency)) ||
       (activeTab === 'crypto' && isCryptoPair(rate.base_currency, rate.quote_currency)) ||
       (activeTab === 'exotic' && !isMajorPair(rate.base_currency, rate.quote_currency) && !isCryptoPair(rate.base_currency, rate.quote_currency));
+      
+    const sourceMatch = 
+      selectedSource === '' || rate.source === selectedSource;
 
-    return searchMatch && tabMatch;
+    return searchMatch && tabMatch && sourceMatch;
   });
 
   // Get existing pairs for create modal validation
   const existingPairs = rates.map(rate => ({
     base: rate.base_currency,
-    quote: rate.quote_currency
+    quote: rate.quote_currency,
+    source: rate.source
   }));
 
   // Check if a pair is a major pair (commonly traded)
@@ -170,6 +198,7 @@ export default function CurrencyRatesPage() {
             <CreateRateModal 
               onCreateRate={createRate}
               existingPairs={existingPairs}
+              sources={allSources}
             />
           </div>
         </div>
@@ -185,33 +214,62 @@ export default function CurrencyRatesPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="relative flex-1">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                <div className="relative flex-1 w-full">
                   <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={t('searchCurrencyPairs')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className={cn(
-                      "pl-8",
+                      "pl-8 w-full",
                       theme === "light" ? "" : "bg-otc-active border-otc-active"
                     )}
                   />
                 </div>
                 
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className={theme === "light" ? "bg-accent" : "bg-otc-active"}>
-                    <TabsTrigger value="all">{t('all')}</TabsTrigger>
-                    <TabsTrigger value="major">{t('major')}</TabsTrigger>
-                    <TabsTrigger value="crypto">{t('crypto')}</TabsTrigger>
-                    <TabsTrigger value="exotic">{t('exotic')}</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <div className="w-full md:w-auto">
+                  <Select
+                    value={selectedSource}
+                    onValueChange={setSelectedSource}
+                  >
+                    <SelectTrigger className={cn(
+                      "w-full md:w-[180px]",
+                      theme === "light" ? "" : "bg-otc-active border-otc-active"
+                    )}>
+                      <SelectValue placeholder={t('selectSource')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">{t('allSources')}</SelectItem>
+                      {allSources.map((source) => (
+                        <SelectItem key={source} value={source}>
+                          {source}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="w-full md:w-auto">
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className={cn(
+                      "w-full",
+                      theme === "light" ? "bg-accent" : "bg-otc-active"
+                    )}>
+                      <TabsTrigger value="all" className="flex-1">{t('all')}</TabsTrigger>
+                      <TabsTrigger value="major" className="flex-1">{t('major')}</TabsTrigger>
+                      <TabsTrigger value="crypto" className="flex-1">{t('crypto')}</TabsTrigger>
+                      <TabsTrigger value="exotic" className="flex-1">{t('exotic')}</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
               </div>
 
               {filteredRates.length === 0 ? (
                 <div className="text-center p-8 border rounded-md border-dashed">
-                  <p className="text-muted-foreground">{t('noCurrencyRates')}</p>
+                  <p className="text-muted-foreground">
+                    {selectedSource ? t('noCurrencyRatesForSource') : t('noCurrencyRates')}
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

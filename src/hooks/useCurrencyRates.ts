@@ -39,6 +39,7 @@ export function useCurrencyRates() {
       const { data, error } = await supabase
         .from('currency_rates')
         .select('*')
+        .order('source', { ascending: true })
         .order('base_currency', { ascending: true })
         .order('quote_currency', { ascending: true });
 
@@ -84,6 +85,7 @@ export function useCurrencyRates() {
     quote_currency: CurrencyCode;
     manual_rate?: number | null;
     use_manual_rate?: boolean;
+    source?: string | null;
   }) => {
     setLoading(true);
     try {

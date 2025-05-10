@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -30,15 +31,30 @@ function parseRussianNumber(str: string): number {
   return parseFloat(cleaned);
 }
 
+interface RatesBySource {
+  [source: string]: {
+    [baseCurrency: string]: {
+      [quoteCurrency: string]: number;
+    }
+  }
+}
+
 // Fetch currency rates from various sources
 async function fetchCurrencyRates() {
-  const rates: Record<string, Record<string, number>> = {
-    USD: {},
-    EUR: {},
-    RUB: {},
-    GBP: {},
-    CNY: {},
-    USDT: {}
+  const rates: RatesBySource = {
+    'CBR': {
+      'USD': { 'RUB': 0 },
+      'EUR': { 'RUB': 0 },
+      'RUB': { 'USD': 0, 'EUR': 0 },
+    },
+    'Binance': {
+      'BTC': { 'USDT': 0 },
+      'ETH': { 'USDT': 0, 'BTC': 0 },
+    },
+    'CoinGecko': {
+      'BTC': { 'USD': 0 },
+      'ETH': { 'USD': 0 },
+    }
   };
   
   try {
@@ -47,29 +63,40 @@ async function fetchCurrencyRates() {
     
     if (cbrRates) {
       // Set USD/RUB rate from CBR
-      rates.USD.RUB = cbrRates.USD;
-      rates.RUB.USD = 1 / cbrRates.USD;
+      rates.CBR.USD.RUB = cbrRates.USD;
+      rates.CBR.RUB.USD = 1 / cbrRates.USD;
       
       // Set EUR/RUB rate from CBR
-      rates.EUR.RUB = cbrRates.EUR;
-      rates.RUB.EUR = 1 / cbrRates.EUR;
+      rates.CBR.EUR.RUB = cbrRates.EUR;
+      rates.CBR.RUB.EUR = 1 / cbrRates.EUR;
       
-      // Set GBP/RUB rate from CBR
+      // Set GBP/RUB rate from CBR if available
       if (cbrRates.GBP) {
-        rates.GBP.RUB = cbrRates.GBP;
-        rates.RUB.GBP = 1 / cbrRates.GBP;
+        if (!rates.CBR.GBP) rates.CBR.GBP = {};
+        if (!rates.CBR.RUB) rates.CBR.RUB = {};
+        
+        rates.CBR.GBP.RUB = cbrRates.GBP;
+        rates.CBR.RUB.GBP = 1 / cbrRates.GBP;
       }
       
-      // Set CNY/RUB rate from CBR
+      // Set CNY/RUB rate from CBR if available
       if (cbrRates.CNY) {
-        rates.CNY.RUB = cbrRates.CNY;
-        rates.RUB.CNY = 1 / cbrRates.CNY;
+        if (!rates.CBR.CNY) rates.CBR.CNY = {};
+        if (!rates.CBR.RUB) rates.CBR.RUB = {};
+        
+        rates.CBR.CNY.RUB = cbrRates.CNY;
+        rates.CBR.RUB.CNY = 1 / cbrRates.CNY;
       }
-      
-      // For USDT/RUB, we can approximate it similar to USD/RUB for now
-      rates.USDT.RUB = rates.USD.RUB;
-      rates.RUB.USDT = 1 / rates.USD.RUB;
     }
+    
+    // Mock rates for Binance for demo
+    rates.Binance.BTC.USDT = 68500.32;
+    rates.Binance.ETH.USDT = 3456.78;
+    rates.Binance.ETH.BTC = rates.Binance.ETH.USDT / rates.Binance.BTC.USDT;
+    
+    // Mock rates for CoinGecko for demo
+    rates.CoinGecko.BTC.USD = 68400.25;
+    rates.CoinGecko.ETH.USD = 3445.96;
     
     return rates;
   } catch (error) {
@@ -126,24 +153,26 @@ async function fetchCBRRates() {
 }
 
 // Update rates in the database
-async function updateRatesInDatabase(rates: Record<string, Record<string, number>>) {
+async function updateRatesInDatabase(ratesBySource: RatesBySource) {
   try {
     const timestamp = new Date().toISOString();
     const updates = [];
     
-    for (const baseCurrency in rates) {
-      for (const quoteCurrency in rates[baseCurrency]) {
-        const rate = rates[baseCurrency][quoteCurrency];
-        
-        if (rate) {
-          updates.push({
-            base_currency: baseCurrency,
-            quote_currency: quoteCurrency,
-            auto_rate: rate,
-            source: 'CBR',
-            source_timestamp: timestamp,
-            last_updated: timestamp
-          });
+    for (const source in ratesBySource) {
+      for (const baseCurrency in ratesBySource[source]) {
+        for (const quoteCurrency in ratesBySource[source][baseCurrency]) {
+          const rate = ratesBySource[source][baseCurrency][quoteCurrency];
+          
+          if (rate) {
+            updates.push({
+              base_currency: baseCurrency,
+              quote_currency: quoteCurrency,
+              auto_rate: rate,
+              source: source,
+              source_timestamp: timestamp,
+              last_updated: timestamp
+            });
+          }
         }
       }
     }
@@ -154,7 +183,7 @@ async function updateRatesInDatabase(rates: Record<string, Record<string, number
         const { error } = await supabase
           .from('currency_rates')
           .upsert(update, {
-            onConflict: 'base_currency,quote_currency',
+            onConflict: 'base_currency,quote_currency,source',
             ignoreDuplicates: false
           });
           
@@ -181,6 +210,17 @@ serve(async (req) => {
     // Check if this is an automated request or a user request
     const url = new URL(req.url);
     const isAutomated = url.searchParams.get('automated') === 'true';
+    
+    let requestBody = {};
+    if (req.method === 'POST') {
+      const contentType = req.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        requestBody = await req.json();
+        if (requestBody.automated) {
+          isAutomated = true;
+        }
+      }
+    }
     
     // Fetch rates from various sources
     const rates = await fetchCurrencyRates();

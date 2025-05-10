@@ -10,6 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Edit2, Save, RefreshCw, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface CurrencyRateCardProps {
   rate: CurrencyRate;
@@ -59,9 +60,17 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
           <span>
             {rate.base_currency}/{rate.quote_currency}
           </span>
-          <div className="text-sm font-normal text-muted-foreground">
-            {rate.source ? `${t('source')}: ${rate.source}` : t('noSource')}
-          </div>
+          {rate.source && (
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "ml-2 font-normal text-xs",
+                theme === "light" ? "bg-accent/50" : "bg-otc-active/50"
+              )}
+            >
+              {rate.source}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -121,6 +130,13 @@ export const CurrencyRateCard: React.FC<CurrencyRateCardProps> = ({ rate, onUpda
           </div>
         )}
 
+        {/* Source and timestamp info */}
+        {rate.source_timestamp && (
+          <div className="text-xs text-muted-foreground">
+            {t('sourceUpdated')}: {formatDate(rate.source_timestamp)}
+          </div>
+        )}
+        
         {/* Last updated info */}
         <div className="text-xs text-muted-foreground">
           {t('lastUpdated')}: {formatDate(rate.last_updated)}
