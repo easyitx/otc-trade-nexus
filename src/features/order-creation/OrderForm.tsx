@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCurrencyRates, CurrencyRate } from "@/hooks/useCurrencyRates";
 import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
 import { getDefaultExpiryDate, getCurrencySymbol } from "./utils/dateUtils";
@@ -18,6 +19,8 @@ export default function OrderForm() {
   const { rateAdjustments, isLoading: isLoadingSettings } = usePlatformSettings();
   const { t, language } = useLanguage();
   const { theme } = useTheme();
+  const { useCurrencyRatesQuery } = useCurrencyRates();
+  const { data: allRates = [] } = useCurrencyRatesQuery();
 
   // Auto calculation flag
   const [autoCalculate, setAutoCalculate] = useState<boolean>(true);
@@ -32,7 +35,7 @@ export default function OrderForm() {
   const [amount, setAmount] = useState<string>("");
   const [amountCurrency, setAmountCurrency] = useState<string>("USD");
   const [rateType, setRateType] = useState<"dynamic" | "fixed">("dynamic");
-  const [rateSource, setRateSource] = useState<string>("cbr");
+  const [rateSource, setRateSource] = useState<string>("CBR");
   const [customRateValue, setCustomRateValue] = useState<string>("");
   const [rateAdjustment, setRateAdjustment] = useState<number>(0);
   const [serviceFee] = useState<number>(1); // Fixed 1% service fee
@@ -44,12 +47,40 @@ export default function OrderForm() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [selectedPairInfo, setSelectedPairInfo] = useState<any>(null);
-  const [currentRates, setCurrentRates] = useState<Record<string, string>>({
-    cbr: "90.50",
-    profinance: "91.25",
-    investing: "90.75",
-    xe: "91.00"
-  });
+  
+  // Get available sources from rates data
+  const availableSources = Array.from(
+    new Set(allRates.map(rate => rate.source).filter(Boolean))
+  );
+
+  // Current rates from database
+  const [currentRates, setCurrentRates] = useState<Record<string, string>>({});
+
+  // Update current rates when allRates changes
+  useEffect(() => {
+    if (!rateSource) return;
+
+    const relevantRates = allRates.filter(rate => rate.source === rateSource);
+    const ratesMap: Record<string, string> = {};
+
+    relevantRates.forEach(rate => {
+      const pairKey = `${rate.base_currency}_${rate.quote_currency}`;
+      const rateValue = rate.use_manual_rate && rate.manual_rate !== null 
+        ? rate.manual_rate 
+        : rate.auto_rate;
+        
+      if (rateValue !== null) {
+        ratesMap[pairKey] = rateValue.toString();
+      }
+    });
+
+    setCurrentRates(ratesMap);
+    
+    // Recalculate if auto-calculate is enabled
+    if (autoCalculate && amount && parseFloat(amount) > 0 && selectedPairInfo) {
+      setTimeout(() => calculateOrder(), 100);
+    }
+  }, [allRates, rateSource]);
   
   // Calculation state
   const [calculationResult, setCalculationResult] = useState<{
@@ -117,12 +148,32 @@ export default function OrderForm() {
     }
   };
 
+  // Get rate key for the selected pair and source
+  const getRateKey = (baseCurrency: string, quoteCurrency: string): string => {
+    return `${baseCurrency}_${quoteCurrency}`;
+  };
+
   // Apply selected rate source value to custom rate when in fixed mode
   const applyRateSourceToFixed = (source: string) => {
-    if (currentRates[source]) {
-      setCustomRateValue(currentRates[source]);
-      // Don't auto-calculate here to fix the issue
-      // Let user click the calculate button deliberately
+    setRateSource(source);
+    
+    if (!selectedPairInfo) return;
+    
+    // Find the appropriate rate from database
+    const { baseCurrency, quoteCurrency } = selectedPairInfo;
+    const rateKey = getRateKey(baseCurrency, quoteCurrency);
+    
+    if (currentRates[rateKey]) {
+      setCustomRateValue(currentRates[rateKey]);
+    } else {
+      // Try reverse pair
+      const reverseRateKey = getRateKey(quoteCurrency, baseCurrency);
+      if (currentRates[reverseRateKey]) {
+        const reverseRate = parseFloat(currentRates[reverseRateKey]);
+        if (reverseRate > 0) {
+          setCustomRateValue((1 / reverseRate).toFixed(6));
+        }
+      }
     }
   };
 
@@ -132,14 +183,7 @@ export default function OrderForm() {
       return customRateValue ? `Фикс: ${customRateValue}` : "Нет значения";
     }
 
-    const sourceMap = {
-      "cbr": "ЦБ",
-      "profinance": "PF",
-      "investing": "IV",
-      "xe": "XE"
-    };
-
-    const sourceName = sourceMap[rateSource as keyof typeof sourceMap] || rateSource;
+    const sourceName = rateSource || "CBR";
     // Only include user adjustment and service fee
     const totalAdjustment = rateAdjustment + serviceFee;
 
@@ -153,15 +197,35 @@ export default function OrderForm() {
       return;
     }
 
-    // Get base rate from source
-    let baseRate = parseFloat(
-      rateType === "fixed" 
-        ? customRateValue || currentRates[rateSource]
-        : currentRates[rateSource]
-    );
+    // Get base rate from selected source
+    const { baseCurrency, quoteCurrency } = selectedPairInfo;
+    const rateKey = getRateKey(baseCurrency, quoteCurrency);
+    const reverseRateKey = getRateKey(quoteCurrency, baseCurrency);
+    
+    let baseRate: number;
+    
+    if (rateType === "fixed") {
+      baseRate = parseFloat(customRateValue);
+      if (isNaN(baseRate) || baseRate <= 0) {
+        // If invalid fixed rate, try to use rate from source
+        baseRate = parseFloat(currentRates[rateKey] || "0");
+      }
+    } else {
+      // Try to get rate from source
+      baseRate = parseFloat(currentRates[rateKey] || "0");
+      
+      // If rate doesn't exist, try reverse calculation
+      if (baseRate <= 0 && currentRates[reverseRateKey]) {
+        const reverseRate = parseFloat(currentRates[reverseRateKey]);
+        if (reverseRate > 0) {
+          baseRate = 1 / reverseRate;
+        }
+      }
+    }
 
-    if (isNaN(baseRate)) {
-      baseRate = 90.0; // Fallback value
+    // Fallback if no valid rates found
+    if (isNaN(baseRate) || baseRate <= 0) {
+      baseRate = 90.0; // Default fallback value
     }
 
     // Calculate adjusted rate with the adjustment percentage
@@ -359,7 +423,8 @@ export default function OrderForm() {
     setCurrentStep,
     totalSteps,
     getCurrencySymbol,
-    autoCalculate
+    autoCalculate,
+    availableSources
   };
 
   return (

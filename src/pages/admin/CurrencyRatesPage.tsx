@@ -38,12 +38,12 @@ export default function CurrencyRatesPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [selectedSource, setSelectedSource] = useState('');
+  const [selectedSource, setSelectedSource] = useState('all-sources');
 
   const { data: rates = [], isLoading, isError } = useCurrencyRatesQuery();
 
   // Define available rate sources
-  const rateSources = ['CBR', 'Binance', 'CoinMarketCap', 'CoinGecko', 'Forex'];
+  const rateSources = ['CBR', 'Profinance', 'Investing', 'XE', 'Binance', 'Forex', 'CoinMarketCap', 'OEX'];
   
   // Get unique sources from the rates data
   const existingSources = Array.from(
@@ -66,7 +66,7 @@ export default function CurrencyRatesPage() {
       (activeTab === 'exotic' && !isMajorPair(rate.base_currency, rate.quote_currency) && !isCryptoPair(rate.base_currency, rate.quote_currency));
       
     const sourceMatch = 
-      selectedSource === '' || rate.source === selectedSource;
+      selectedSource === 'all-sources' || rate.source === selectedSource;
 
     return searchMatch && tabMatch && sourceMatch;
   });
@@ -239,7 +239,7 @@ export default function CurrencyRatesPage() {
                     )}>
                       <SelectValue placeholder={t('selectSource')} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className={theme === "light" ? "" : "bg-otc-card border-otc-active"}>
                       <SelectItem value="all-sources">{t('allSources')}</SelectItem>
                       {allSources.map((source) => (
                         <SelectItem key={source} value={source}>
@@ -268,7 +268,7 @@ export default function CurrencyRatesPage() {
               {filteredRates.length === 0 ? (
                 <div className="text-center p-8 border rounded-md border-dashed">
                   <p className="text-muted-foreground">
-                    {selectedSource ? t('noCurrencyRatesForSource') : t('noCurrencyRates')}
+                    {selectedSource !== 'all-sources' ? t('noCurrencyRatesForSource') : t('noCurrencyRates')}
                   </p>
                 </div>
               ) : (

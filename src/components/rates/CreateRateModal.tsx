@@ -27,7 +27,7 @@ interface CreateRateModalProps {
 export const CreateRateModal: React.FC<CreateRateModalProps> = ({ 
   onCreateRate, 
   existingPairs,
-  sources = ['CBR', 'Binance', 'CoinMarketCap']
+  sources = ['CBR', 'Binance', 'CoinMarketCap', 'Profinance', 'Investing', 'XE', 'Forex', 'OEX']
 }) => {
   const { t } = useLanguage();
   const { theme } = useTheme();
@@ -36,7 +36,7 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
   const [quoteCurrency, setQuoteCurrency] = useState<CurrencyCode>('RUB');
   const [manualRate, setManualRate] = useState<string>('');
   const [useManualRate, setUseManualRate] = useState<boolean>(false);
-  const [source, setSource] = useState<string>('');
+  const [source, setSource] = useState<string>('CBR');
   const [error, setError] = useState<string>('');
   
   // List of available currency codes
@@ -51,7 +51,7 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
     setQuoteCurrency('RUB');
     setManualRate('');
     setUseManualRate(false);
-    setSource('');
+    setSource('CBR');
     setError('');
   };
   
@@ -61,15 +61,14 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
     const existingPair = existingPairs.find(pair => 
       pair.base === baseCurrency && 
       pair.quote === quoteCurrency &&
-      (source === '' || pair.source === source)
+      pair.source === source
     );
     
     if (existingPair) {
-      if (source) {
-        setError(t('pairExistsForSource').replace('{base}', baseCurrency).replace('{quote}', quoteCurrency).replace('{source}', source));
-      } else {
-        setError(t('pairExists').replace('{base}', baseCurrency).replace('{quote}', quoteCurrency));
-      }
+      setError(t('pairExistsForSource')
+        .replace('{base}', baseCurrency)
+        .replace('{quote}', quoteCurrency)
+        .replace('{source}', source || ""));
       return;
     }
     
@@ -78,7 +77,7 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
       quote_currency: quoteCurrency,
       manual_rate: manualRate ? parseFloat(manualRate) : null,
       use_manual_rate: useManualRate,
-      source: source || null
+      source: source
     });
     
     setIsOpen(false);
@@ -111,8 +110,7 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
               <SelectTrigger id="source" className={theme === "light" ? "" : "bg-otc-active border-otc-active"}>
                 <SelectValue placeholder={t('selectSource')} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{t('noSource')}</SelectItem>
+              <SelectContent className={theme === "light" ? "" : "bg-otc-card border-otc-active"}>
                 {sources.map(s => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
@@ -127,7 +125,7 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
                 <SelectTrigger id="base-currency" className={theme === "light" ? "" : "bg-otc-active border-otc-active"}>
                   <SelectValue placeholder={t('selectCurrency')} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={theme === "light" ? "" : "bg-otc-card border-otc-active"}>
                   {currencyCodes.map(code => (
                     <SelectItem key={code} value={code}>{code}</SelectItem>
                   ))}
@@ -141,7 +139,7 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
                 <SelectTrigger id="quote-currency" className={theme === "light" ? "" : "bg-otc-active border-otc-active"}>
                   <SelectValue placeholder={t('selectCurrency')} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={theme === "light" ? "" : "bg-otc-card border-otc-active"}>
                   {currencyCodes.map(code => (
                     <SelectItem key={code} value={code}>{code}</SelectItem>
                   ))}

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useCurrencyRates, CurrencyCode, CurrencyRate } from '@/hooks/useCurrencyRates';
 import { Skeleton } from '../ui/skeleton';
 import {
   Popover,
@@ -9,223 +10,187 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
-
-interface ExchangeRatesData {
-  cbr: number;
-  profinance: number;
-  investing: number;
-  xe: number;
-}
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from '@/components/ui/badge';
 
 export const CurrencyRates: React.FC = () => {
-  const [rates, setRates] = useState<ExchangeRatesData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { useCurrencyRatesQuery } = useCurrencyRates();
+  const { data: allRates = [], isLoading } = useCurrencyRatesQuery();
+  const [selectedSource, setSelectedSource] = useState<string>("CBR");
   const { t } = useLanguage();
   const { theme } = useTheme();
 
+  // Filter rates by selected source
+  const filteredRates = allRates.filter(rate => rate.source === selectedSource);
+
+  // Find main currency pairs to display in the compact view
+  const getMainPair = (baseCurrency: CurrencyCode, quoteCurrency: CurrencyCode): CurrencyRate | undefined => {
+    return filteredRates.find(rate => 
+      rate.base_currency === baseCurrency && rate.quote_currency === quoteCurrency
+    );
+  };
+
+  // Get the rate value considering manual or auto rate
+  const getRateValue = (rate: CurrencyRate | undefined): number | null => {
+    if (!rate) return null;
+    return rate.use_manual_rate && rate.manual_rate !== null ? rate.manual_rate : rate.auto_rate;
+  };
+
+  // Get main pairs to show in the navbar
+  const usdRubRate = getRateValue(getMainPair('USD', 'RUB'));
+  const eurRubRate = getRateValue(getMainPair('EUR', 'RUB'));
+  const btcUsdtRate = getRateValue(getMainPair('BTC', 'USDT'));
+
+  // Get all available sources from rates data
+  const availableSources = React.useMemo(() => {
+    const sources = Array.from(new Set(allRates.map(rate => rate.source)));
+    // Ensure CBR is prioritized if available
+    if (sources.includes('CBR')) {
+      return ['CBR', ...sources.filter(s => s !== 'CBR')];
+    }
+    return sources;
+  }, [allRates]);
+
+  // Select first available source if current selection is not available
   useEffect(() => {
-    const fetchRates = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('exchange-rates');
+    if (availableSources.length > 0 && !availableSources.includes(selectedSource)) {
+      setSelectedSource(availableSources[0]);
+    }
+  }, [availableSources, selectedSource]);
 
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        setRates(data as ExchangeRatesData);
-      } catch (err) {
-        console.error("Ошибка получения курсов валют:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRates();
-
-    // Обновлять каждые 5 минут
-    const interval = setInterval(fetchRates, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Compact view that shows all rates in a single row
+  // Compact view that shows main rate pairs in a single row
   const CompactRatesView = () => (
-      <div className="flex items-center gap-3 text-sm">
-        {loading ? (
-            <div className="flex gap-3">
-              <Skeleton className="w-12 h-4" />
-              <Skeleton className="w-12 h-4" />
-              <Skeleton className="w-12 h-4" />
-              <Skeleton className="w-12 h-4" />
-            </div>
-        ) : (
-            <>
-              <RateBadge
-                  icon={
-                    <div className="h-5 w-5 rounded-sm bg-gray-600 flex items-center justify-center">
-                      <span className="text-white text-[10px] font-bold leading-none">ЦБ</span>
-                    </div>
-                  }
-                  rate={rates?.cbr}
-                  highlight
-              />
-
-              <RateBadge
-                  icon={
-                    <div className="h-5 w-5 rounded-sm bg-blue-600 flex items-center justify-center">
-                      <span className="text-white text-[10px] font-bold leading-none">PF</span>
-                    </div>
-                  }
-                  rate={rates?.profinance}
-              />
-
-              <RateBadge
-                  icon={
-                    <div className="h-5 w-5 rounded-sm bg-black flex items-center justify-center">
-                      <span className="text-white text-[10px] font-bold leading-none">IN</span>
-                    </div>
-                  }
-                  rate={rates?.investing}
-              />
-
-              <RateBadge
-                  icon={
-                    <div className="h-5 w-5 rounded-full border border-blue-800 flex items-center justify-center">
-                      <span className="text-blue-800 text-[10px] font-bold leading-none">XE</span>
-                    </div>
-                  }
-                  rate={rates?.xe}
-              />
-            </>
-        )}
-      </div>
-  );
-
-  return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className={cn(
-              "px-3 py-1.5 rounded-lg flex items-center transition-colors",
-              theme === "light"
-                  ? "bg-accent hover:bg-accent/80 text-accent-foreground"
-                  : "bg-otc-active hover:bg-otc-active/80 text-white"
-          )}>
-            <CompactRatesView />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className={cn(
-            "w-72 p-0",
-            theme === "light" ? "bg-card border-border" : "bg-otc-card border-otc-active"
-        )}>
-          <div className="p-4">
-            <h3 className="font-medium mb-3 text-lg">{t('exchangeRates')}</h3>
-            <div className="space-y-3">
-              <RateItem
-                  source="ЦБ РФ"
-                  rate={rates?.cbr}
-                  loading={loading}
-                  icon={
-                    <img
-                        src="/uploads/bc5cf6ea-c699-4ae0-b309-690868aa27a7.png"
-                        alt="CBR"
-                        className="h-6 w-6 rounded-full object-contain"
-                    />
-                  }
-                  highlight
-              />
-              <RateItem
-                  source="Profinance"
-                  rate={rates?.profinance}
-                  loading={loading}
-                  icon={
-                    <div className="h-6 w-6 rounded-sm bg-blue-600 flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">PF</span>
-                    </div>
-                  }
-              />
-              <RateItem
-                  source="Investing"
-                  rate={rates?.investing}
-                  loading={loading}
-                  icon={
-                    <div className="h-6 w-6 rounded-sm bg-black flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">IN</span>
-                    </div>
-                  }
-              />
-              <RateItem
-                  source="XE"
-                  rate={rates?.xe}
-                  loading={loading}
-                  icon={
-                    <div className="h-6 w-6 rounded-full border-2 border-blue-800 flex items-center justify-center">
-                      <span className="text-blue-800 text-xs font-bold">XE</span>
-                    </div>
-                  }
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-4 text-center">
-              {t('ratesUpdatedAutomatically')}
-            </p>
-          </div>
-        </PopoverContent>
-      </Popover>
-  );
-};
-
-interface RateBadgeProps {
-  icon: React.ReactNode;
-  rate: number | null | undefined;
-  highlight?: boolean;
-}
-
-const RateBadge: React.FC<RateBadgeProps> = ({ icon, rate, highlight = false }) => {
-  return (
-      <div className="flex items-center gap-1">
-        <div className="shrink-0">
-          {icon}
+    <div className="flex items-center gap-3 text-sm">
+      {isLoading ? (
+        <div className="flex gap-3">
+          <Skeleton className="w-20 h-4" />
+          <Skeleton className="w-20 h-4" />
+          <Skeleton className="w-20 h-4" />
         </div>
-        <span className={cn(
-            "text-xs font-medium",
-            highlight ? "font-bold" : "text-muted-foreground"
+      ) : (
+        <>
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className={theme === "light" ? "bg-accent" : "bg-otc-active"}>
+              {selectedSource}
+            </Badge>
+
+            {usdRubRate !== null && (
+              <div className="flex items-center gap-1">
+                <span className="font-semibold">USD/RUB:</span>
+                <span>{usdRubRate.toLocaleString('ru-RU', { maximumFractionDigits: 2 })}</span>
+              </div>
+            )}
+
+            {eurRubRate !== null && (
+              <div className="flex items-center gap-1">
+                <span className="font-semibold">EUR/RUB:</span>
+                <span>{eurRubRate.toLocaleString('ru-RU', { maximumFractionDigits: 2 })}</span>
+              </div>
+            )}
+
+            {btcUsdtRate !== null && (
+              <div className="flex items-center gap-1">
+                <span className="font-semibold">BTC/USDT:</span>
+                <span>{btcUsdtRate.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className={cn(
+          "px-3 py-1.5 rounded-lg flex items-center transition-colors",
+          theme === "light"
+            ? "bg-accent hover:bg-accent/80 text-accent-foreground"
+            : "bg-otc-active hover:bg-otc-active/80 text-white"
         )}>
-        {rate ? rate.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—'}
-      </span>
-      </div>
+          <CompactRatesView />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className={cn(
+        "w-72 p-0",
+        theme === "light" ? "bg-card border-border" : "bg-otc-card border-otc-active"
+      )}>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-medium text-lg">{t('exchangeRates')}</h3>
+            
+            <Select value={selectedSource} onValueChange={setSelectedSource}>
+              <SelectTrigger className="w-24 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className={theme === "light" ? "" : "bg-otc-card border-otc-active"}>
+                {availableSources.map(source => (
+                  <SelectItem key={source} value={source}>{source}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-3">
+            {isLoading ? (
+              Array(5).fill(0).map((_, i) => (
+                <div key={i} className="flex justify-between items-center">
+                  <Skeleton className="w-24 h-5" />
+                  <Skeleton className="w-16 h-5" />
+                </div>
+              ))
+            ) : filteredRates.length > 0 ? (
+              filteredRates.slice(0, 8).map((rate) => (
+                <RateItem
+                  key={`${rate.id}`}
+                  pair={`${rate.base_currency}/${rate.quote_currency}`}
+                  rate={getRateValue(rate)}
+                  quoteCurrency={rate.quote_currency}
+                />
+              ))
+            ) : (
+              <div className="text-center py-3 text-muted-foreground">
+                {t('noRatesForSource').replace('{source}', selectedSource)}
+              </div>
+            )}
+          </div>
+          
+          <p className="text-xs text-muted-foreground mt-4 text-center">
+            {t('ratesUpdatedAutomatically')}
+          </p>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
 interface RateItemProps {
-  source: string;
-  rate: number | null | undefined;
-  loading: boolean;
-  icon: React.ReactNode;
-  highlight?: boolean;
+  pair: string;
+  rate: number | null;
+  quoteCurrency: string;
 }
 
-const RateItem: React.FC<RateItemProps> = ({ source, rate, loading, icon, highlight = false }) => {
+const RateItem: React.FC<RateItemProps> = ({ pair, rate, quoteCurrency }) => {
+  const symbol = quoteCurrency === 'RUB' ? '₽' : 
+                 quoteCurrency === 'USD' || quoteCurrency === 'USDT' ? '$' : '';
+  
   return (
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="shrink-0">
-            {icon}
-          </div>
-          <span className={cn(
-              "text-sm",
-              highlight ? "font-semibold" : ""
-          )}>
-          {source}
+    <div className="flex items-center justify-between">
+      <span className="font-medium">{pair}</span>
+      {rate !== null ? (
+        <span className="font-semibold">
+          {rate.toLocaleString('ru-RU', { maximumFractionDigits: 4 })} {symbol}
         </span>
-        </div>
-        {loading ? (
-            <Skeleton className="w-16 h-5" />
-        ) : (
-            <span className={cn(
-                "font-medium",
-                highlight ? "text-lg" : ""
-            )}>
-          {rate ? rate.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) : '—'} ₽
-        </span>
-        )}
-      </div>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      )}
+    </div>
   );
 };

@@ -27,26 +27,72 @@ export type CurrencyRateUpdate = {
   use_manual_rate: boolean;
 };
 
+export type CurrencyRateFilter = {
+  source?: string | null;
+  baseCurrency?: CurrencyCode;
+  quoteCurrency?: CurrencyCode;
+};
+
 export function useCurrencyRates() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
-  // Fetch all currency rates
-  const fetchCurrencyRates = async () => {
+  // Fetch all currency rates with optional filtering
+  const fetchCurrencyRates = async (filters?: CurrencyRateFilter) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('currency_rates')
-        .select('*')
+        .select('*');
+      
+      // Apply filters if provided
+      if (filters?.source) {
+        query = query.eq('source', filters.source);
+      }
+      
+      if (filters?.baseCurrency) {
+        query = query.eq('base_currency', filters.baseCurrency);
+      }
+      
+      if (filters?.quoteCurrency) {
+        query = query.eq('quote_currency', filters.quoteCurrency);
+      }
+      
+      // Apply sorting
+      query = query
         .order('source', { ascending: true })
         .order('base_currency', { ascending: true })
         .order('quote_currency', { ascending: true });
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as CurrencyRate[];
     } catch (error) {
       console.error('Error fetching currency rates:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get a specific currency rate by source and pair
+  const getCurrencyRate = async (baseCurrency: CurrencyCode, quoteCurrency: CurrencyCode, source: string = 'CBR') => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('currency_rates')
+        .select('*')
+        .eq('base_currency', baseCurrency)
+        .eq('quote_currency', quoteCurrency)
+        .eq('source', source)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as CurrencyRate | null;
+    } catch (error) {
+      console.error('Error fetching currency rate:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -130,10 +176,18 @@ export function useCurrencyRates() {
   };
 
   // React Query hooks
-  const useCurrencyRatesQuery = () => {
+  const useCurrencyRatesQuery = (filters?: CurrencyRateFilter) => {
     return useQuery({
-      queryKey: ['currency-rates'],
-      queryFn: fetchCurrencyRates,
+      queryKey: ['currency-rates', filters],
+      queryFn: () => fetchCurrencyRates(filters),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+  };
+
+  const useCurrencyRateQuery = (baseCurrency: CurrencyCode, quoteCurrency: CurrencyCode, source: string = 'CBR') => {
+    return useQuery({
+      queryKey: ['currency-rate', baseCurrency, quoteCurrency, source],
+      queryFn: () => getCurrencyRate(baseCurrency, quoteCurrency, source),
       staleTime: 5 * 60 * 1000, // 5 minutes
     });
   };
@@ -195,6 +249,7 @@ export function useCurrencyRates() {
   return {
     loading,
     useCurrencyRatesQuery,
+    useCurrencyRateQuery,
     updateRate: updateRateMutation.mutate,
     createRate: createRateMutation.mutate,
     refreshExternalRates: refreshRatesMutation.mutate,
