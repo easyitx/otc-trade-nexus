@@ -1,3 +1,4 @@
+
 import {Toaster} from "@/components/ui/toaster";
 import {Toaster as Sonner} from "@/components/ui/sonner";
 import {TooltipProvider} from "@/components/ui/tooltip";
@@ -15,6 +16,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import ConnectTelegramPage from "./pages/ConnectTelegramPage";
 import RateManagementPage from "./pages/admin/RateManagementPage";
+import CurrencyRatesPage from "./pages/admin/CurrencyRatesPage";
 import NotFound from "./pages/NotFound";
 import {LanguageProvider} from "./contexts/LanguageContext";
 import {ThemeProvider} from "./contexts/ThemeContext";
@@ -45,6 +47,7 @@ const App = () => (
                     <Route path="settings" element={<SettingsPage/>}/>
                     {/*<Route path="telegram" element={<ConnectTelegramPage />} />*/}
                     <Route path="admin/rate-management" element={<RateManagementPage/>}/>
+                    <Route path="admin/currency-rates" element={<CurrencyRatesPage/>}/>
                     <Route path="*" element={<NotFound/>}/>
                   </Route>
                 </Routes>

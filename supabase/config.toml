@@ -9,3 +9,9 @@ verify_jwt = false
 
 [functions.setup-cron-job]
 verify_jwt = false
+
+[functions.currency-rates]
+verify_jwt = false
+
+[functions.setup-rates-cron]
+verify_jwt = false
