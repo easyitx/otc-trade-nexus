@@ -66,9 +66,9 @@ export const CreateRateModal: React.FC<CreateRateModalProps> = ({
     
     if (existingPair) {
       if (source) {
-        setError(`${t('pairExistsForSource').replace('{base}', baseCurrency).replace('{quote}', quoteCurrency).replace('{source}', source)}`);
+        setError(t('pairExistsForSource').replace('{base}', baseCurrency).replace('{quote}', quoteCurrency).replace('{source}', source));
       } else {
-        setError(`${t('pairExists').replace('{base}', baseCurrency).replace('{quote}', quoteCurrency)}`);
+        setError(t('pairExists').replace('{base}', baseCurrency).replace('{quote}', quoteCurrency));
       }
       return;
     }
