@@ -1,7 +1,26 @@
+
 import { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import axios from 'axios';
 import { apiUrl, wsUrl } from '../../config.ts';
+
+export interface CurrencyRate {
+    id: number | string;
+    base_currency: string;
+    quote_currency: string;
+    auto_rate: number | null;
+    manual_rate: number | null;
+    use_manual_rate: boolean;
+    source?: string;
+    source_timestamp?: string;
+    last_updated: string;
+}
+
+export interface CurrencyRateUpdate {
+    id: number | string;
+    manual_rate: number | null;
+    use_manual_rate: boolean;
+}
 
 interface CurrencyPair {
     value: string;

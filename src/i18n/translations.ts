@@ -1,360 +1,382 @@
-// Define the Language type for TypeScript
-export type Language = "en" | "ru";
 
-// Define the TranslationKey type for TypeScript
-export type TranslationKey =
-    | "user" | "orders" | "deals" | "search" | "fullName" | "company" | "email"
-    | "RUB_NR" | "RUB_CASH" | "TOKENIZED" | "status" | "amount" | "rate" | "error"
-    | "security" | "createOrder" | "viewAllOrders" | "cancel" | "createAnotherOrder"
-    | "orderCreatedSuccess" | "orderSubmitted" | "creatingOrder"
-    | "fillRequiredFields" | "otcMinimumReq" | "createNewOrder" | "minOrderSize"
-    | "orderDetails" | "enterOrderDetails" | "tradingPair" | "selectTradingPair"
-    | "orderType" | "buyUSD" | "sellUSD" | "autoSelectedBasedOnPair"
-    | "minimumOrder" | "rateType" | "dynamicRate" | "fixedRate"
-    | "rateSource" | "selectSource" | "rateAdjustment" | "enterFixedRate"
-    | "enterRateValue" | "platformAdjustment" | "serviceFee" | "finalRate"
-    | "orderLifetime" | "day" | "days" | "expiresOn" | "paymentPurpose"
-    | "purposeExample" | "geography" | "country" | "city" | "selectCountry"
-    | "selectCity" | "additionalNotes" | "notesPlaceholder" | "in" | "buy" | "sell"
-    | "with" | "for" | "adjustment" | "expiryDate" | "receive"
-    // Additional translation keys
-    | "dashboard" | "profile" | "settings" | "login" | "register" | "logout" | "currencyRates"
-    | "loggedOut" | "loggedOutSuccess"
-    | "exchangeRates" | "ratesUpdatedAutomatically"
-    | "searchPlaceholder" | "noResults" | "tradingPairs" | "quickNav" | "popularPairs"
-    | "personalInfo" | "notSet" | "memberSince" | "notAvailable" | "notConnected" | "editProfile"
-    | "error404" | "oopsNotFound" | "returnHome"
-    | "welcome" | "tradeVolume" | "last30Days" | "activeOrders" | "acrossMarkets" | "activeTraders" | "thisWeek"
-    | "selectWhenExpires"
-    // Calculation section keys
-    | "calculationTitle" | "youPay" | "youReceive" | "exchangeRate" | "totalFee" 
-    | "totalAmount" | "continue" | "calculateSummary" | "orderSummary" | "calculate"
-    | "serviceFeeAmount" | "adjustmentAmount" | "baseExchangeRate" | "calculationDetails"
-    | "paymentDetails" | "basicDetails" | "additionalDetails";
+export type Language = 'en' | 'ru';
 
-export const translations = {
+export type TranslationKey = 
+    | 'loading'
+    | 'error'
+    | 'success'
+    | 'submit'
+    | 'cancel'
+    | 'edit'
+    | 'delete'
+    | 'save'
+    | 'saveChanges'
+    | 'create'
+    | 'update'
+    | 'view'
+    | 'search'
+    | 'filter'
+    | 'sort'
+    | 'clear'
+    | 'close'
+    | 'confirm'
+    | 'yes'
+    | 'no'
+    | 'back'
+    | 'next'
+    | 'previous'
+    | 'settings'
+    | 'profile'
+    | 'logout'
+    | 'login'
+    | 'register'
+    | 'forgotPassword'
+    | 'resetPassword'
+    | 'changePassword'
+    | 'name'
+    | 'email'
+    | 'password'
+    | 'confirmPassword'
+    | 'phone'
+    | 'address'
+    | 'city'
+    | 'country'
+    | 'zipCode'
+    | 'company'
+    | 'role'
+    | 'date'
+    | 'time'
+    | 'amount'
+    | 'status'
+    | 'type'
+    | 'description'
+    | 'title'
+    | 'price'
+    | 'quantity'
+    | 'total'
+    | 'subtotal'
+    | 'tax'
+    | 'discount'
+    | 'shipping'
+    | 'payment'
+    | 'order'
+    | 'orders'
+    | 'product'
+    | 'products'
+    | 'customer'
+    | 'customers'
+    | 'supplier'
+    | 'suppliers'
+    | 'employee'
+    | 'employees'
+    | 'dashboard'
+    | 'reports'
+    | 'analytics'
+    | 'sales'
+    | 'purchases'
+    | 'inventory'
+    | 'accounting'
+    | 'finance'
+    | 'marketing'
+    | 'hr'
+    | 'admin'
+    | 'user'
+    | 'users'
+    | 'role'
+    | 'roles'
+    | 'permission'
+    | 'permissions'
+    | 'notification'
+    | 'notifications'
+    | 'message'
+    | 'messages'
+    | 'chat'
+    | 'conversations'
+    | 'calendar'
+    | 'events'
+    | 'tasks'
+    | 'projects'
+    | 'invoices'
+    | 'quotes'
+    | 'expenses'
+    | 'income'
+    | 'balance'
+    | 'transactions'
+    | 'accounts'
+    | 'budget'
+    | 'reports'
+    | 'charts'
+    | 'statistics'
+    | 'analytics'
+    | 'dashboard'
+    | 'createNewOrder'
+    | 'buy'
+    | 'sell'
+    | 'receive'
+    | 'otcMinimumReq'
+    | 'fillRequiredFields'
+    | 'activeRate'
+    | 'autoRate'
+    | 'manualRate'
+    | 'useManualRate'
+    | 'sourceUpdated'
+    | 'lastUpdated'
+    | 'currency'
+    | 'rates'
+    | 'selectCurrencyPair'
+    | 'noRatesAvailable';
+
+type TranslationType = Record<TranslationKey, string>;
+
+export const translations: Record<Language, TranslationType> = {
   en: {
-    user: "User",
-    orders: "Orders",
-    deals: "Deals",
-    search: "Search",
-    fullName: "Full Name",
-    company: "Company",
-    email: "Email",
-    RUB_NR: "RUB Non-cash",
-    RUB_CASH: "RUB Cash",
-    TOKENIZED: "Tokenized Assets",
-    status: "Status",
-    amount: "Amount",
-    rate: "Rate",
+    loading: "Loading...",
     error: "Error",
-    security: "Security",
-    createOrder: "Create Order",
-    viewAllOrders: "View All Orders",
+    success: "Success",
+    submit: "Submit",
     cancel: "Cancel",
-    createAnotherOrder: "Create Another Order",
-    orderCreatedSuccess: "Order Created Successfully!",
-    orderSubmitted: "Your order has been submitted.",
-    creatingOrder: "Creating Order...",
-    fillRequiredFields: "Please fill in all required fields.",
-    otcMinimumReq: "OTC orders require a minimum size of 500,000 USD.",
-    createNewOrder: "Create New Order",
-    minOrderSize: "Minimum Order Size",
-    orderDetails: "Order Details",
-    enterOrderDetails: "Enter the details for your order.",
-    tradingPair: "Trading Pair",
-    selectTradingPair: "Select Trading Pair",
-    orderType: "Order Type",
-    buyUSD: "Buy USD",
-    sellUSD: "Sell USD",
-    autoSelectedBasedOnPair: "Automatically selected based on the trading pair.",
-    minimumOrder: "Minimum order: 500,000 USD",
-    rateType: "Rate Type",
-    dynamicRate: "Dynamic Rate",
-    fixedRate: "Fixed Rate",
-    rateSource: "Rate Source",
-    selectSource: "Select Source",
-    rateAdjustment: "Rate Adjustment",
-    enterFixedRate: "Enter Fixed Rate",
-    enterRateValue: "Enter Rate Value",
-    platformAdjustment: "Platform Adjustment",
-    serviceFee: "Service Fee",
-    finalRate: "Final rate",
-    adjustment: "Adjustment",
-    geography: "Geography",
-    country: "Country",
-    city: "City",
-    selectCountry: "Select country",
-    selectCity: "Select city",
-    additionalNotes: "Additional Notes",
-    notesPlaceholder: "Enter any additional notes here...",
-    in: "in",
-    buy: "Buy",
-    total: "Total",
-    sell: "Sell",
-    with: "with",
-    for: "for",
-    expiryDate: "Expiry Date",
-    currencyRates: "Currency rates",
-    // Additional translations in English
-    dashboard: "Dashboard",
-    profile: "Profile",
+    edit: "Edit",
+    delete: "Delete",
+    save: "Save",
+    saveChanges: "Save Changes",
+    create: "Create",
+    update: "Update",
+    view: "View",
+    search: "Search",
+    filter: "Filter",
+    sort: "Sort",
+    clear: "Clear",
+    close: "Close",
+    confirm: "Confirm",
+    yes: "Yes",
+    no: "No",
+    back: "Back",
+    next: "Next",
+    previous: "Previous",
     settings: "Settings",
+    profile: "Profile",
+    logout: "Logout",
     login: "Login",
     register: "Register",
-    logout: "Logout",
-    loggedOut: "Logged Out",
-    loggedOutSuccess: "You have been successfully logged out.",
-    exchangeRates: "Exchange Rates",
-    ratesUpdatedAutomatically: "Rates are updated automatically every 5 minutes",
-    searchPlaceholder: "Search for trading pairs, orders...",
-    noResults: "No results found",
-    tradingPairs: "Trading Pairs",
-    quickNav: "Quick Navigation",
-    popularPairs: "Popular Pairs",
-    personalInfo: "Personal Information",
-    notSet: "Not set",
-    memberSince: "Member since",
-    notAvailable: "Not available",
-    notConnected: "Not connected",
-    editProfile: "Edit Profile",
-    error404: "404 - Page Not Found",
-    oopsNotFound: "Oops! We couldn't find the page you're looking for.",
-    returnHome: "Return to Home",
-    welcome: "Welcome",
-    tradeVolume: "Trade Volume",
-    last30Days: "Last 30 Days",
-    activeOrders: "Active Orders",
-    acrossMarkets: "Across Markets",
-    activeTraders: "Active Traders",
-    thisWeek: "This Week",
-    selectWhenExpires: "Select when order expires",
-    
-    // Calculation section translations
-    calculationTitle: "Transaction Calculation",
-    youPay: "You Pay",
-    youReceive: "You Receive",
-    exchangeRate: "Exchange Rate",
-    totalFee: "Total Fee",
-    totalAmount: "Total Amount",
-    continue: "Continue",
-    calculateSummary: "Calculate and Review",
-    orderSummary: "Order Summary",
-    calculate: "Calculate",
-    serviceFeeAmount: "Service Fee Amount",
-    adjustmentAmount: "Adjustment Amount",
-    baseExchangeRate: "Base Exchange Rate",
-    calculationDetails: "Calculation Details",
-    paymentDetails: "Payment Details",
-    basicDetails: "Basic Details",
-    additionalDetails: "Additional Details",
-    receive: "receive",
+    forgotPassword: "Forgot Password",
+    resetPassword: "Reset Password",
+    changePassword: "Change Password",
+    name: "Name",
+    email: "Email",
+    password: "Password",
+    confirmPassword: "Confirm Password",
+    phone: "Phone",
+    address: "Address",
+    city: "City",
+    country: "Country",
+    zipCode: "Zip Code",
+    company: "Company",
+    role: "Role",
+    date: "Date",
+    time: "Time",
+    amount: "Amount",
+    status: "Status",
+    type: "Type",
+    description: "Description",
+    title: "Title",
+    price: "Price",
+    quantity: "Quantity",
+    total: "Total",
+    subtotal: "Subtotal",
+    tax: "Tax",
+    discount: "Discount",
+    shipping: "Shipping",
+    payment: "Payment",
+    order: "Order",
+    orders: "Orders",
+    product: "Product",
+    products: "Products",
+    customer: "Customer",
+    customers: "Customers",
+    supplier: "Supplier",
+    suppliers: "Suppliers",
+    employee: "Employee",
+    employees: "Employees",
+    dashboard: "Dashboard",
+    reports: "Reports",
+    analytics: "Analytics",
+    sales: "Sales",
+    purchases: "Purchases",
+    inventory: "Inventory",
+    accounting: "Accounting",
+    finance: "Finance",
+    marketing: "Marketing",
+    hr: "HR",
+    admin: "Admin",
+    user: "User",
+    users: "Users",
+    role: "Role",
+    roles: "Roles",
+    permission: "Permission",
+    permissions: "Permissions",
+    notification: "Notification",
+    notifications: "Notifications",
+    message: "Message",
+    messages: "Messages",
+    chat: "Chat",
+    conversations: "Conversations",
+    calendar: "Calendar",
+    events: "Events",
+    tasks: "Tasks",
+    projects: "Projects",
+    invoices: "Invoices",
+    quotes: "Quotes",
+    expenses: "Expenses",
+    income: "Income",
+    balance: "Balance",
+    transactions: "Transactions",
+    accounts: "Accounts",
+    budget: "Budget",
+    reports: "Reports",
+    charts: "Charts",
+    statistics: "Statistics",
+    analytics: "Analytics",
+    dashboard: "Dashboard",
+    createNewOrder: "Create New Order",
+    buy: "Buy",
+    sell: "Sell",
+    receive: "Receive",
+    otcMinimumReq: "OTC minimum requirement is 500,000 USD",
+    fillRequiredFields: "Please fill in all required fields",
+    activeRate: "Active Rate",
+    autoRate: "Auto Rate",
+    manualRate: "Manual Rate",
+    useManualRate: "Use Manual Rate",
+    sourceUpdated: "Source Updated",
+    lastUpdated: "Last Updated",
+    currency: "Currency",
+    rates: "Rates",
+    selectCurrencyPair: "Select Currency Pair",
+    noRatesAvailable: "No rates available for this currency pair"
   },
   ru: {
-    welcome: "Добро пожаловать",
-    dashboard: "Главная",
-    orders: "Заявки",
-    deals: "Сделки",
-    createNewOrder: "Создать заявку",
+    loading: "Загрузка...",
+    error: "Ошибка",
+    success: "Успешно",
+    submit: "Отправить",
+    cancel: "Отменить",
+    edit: "Редактировать",
+    delete: "Удалить",
+    save: "Сохранить",
+    saveChanges: "Сохранить изменения",
+    create: "Создать",
+    update: "Обновить",
+    view: "Просмотреть",
+    search: "Поиск",
+    filter: "Фильтр",
+    sort: "Сортировать",
+    clear: "Очистить",
+    close: "Закрыть",
+    confirm: "Подтвердить",
+    yes: "Да",
+    no: "Нет",
+    back: "Назад",
+    next: "Далее",
+    previous: "Предыдущий",
     settings: "Настройки",
     profile: "Профиль",
     logout: "Выйти",
     login: "Войти",
     register: "Регистрация",
-    connectTelegram: "Подключить Telegram",
-    tradeVolume: "Объем торгов",
-    activeOrders: "Активные заявки",
-    activeTraders: "Активные пользователи",
-    last30Days: "За 30 дней",
-    acrossMarkets: "По всем рынкам",
-    thisWeek: "За эту неделю",
-    viewAllOrders: "Просмотреть все заявки",
-    createOrder: "Создать заявку",
-    searchPlaceholder: "Поиск по парам, заявкам...",
-    noResults: "Ничего не найдено",
-    quickNav: "Быстрая навигация",
-    popularPairs: "Популярные пары",
-    tradingPairs: "Торговые пары",
-    buy: "ПОКУПКА",
-    sell: "ПРОДАЖА",
-    with: "за",
-    for: "за",
-    total: "Всего",
-    loggedOut: "Выход выполнен",
-    loggedOutSuccess: "Вы успешно вышли из системы",
-    user: "Пользователь",
-    fullName: "Полное Имя",
-    company: "Компания",
-    email: "Электронная почта",
-    memberSince: "Участник с",
-    notSet: "Не указано",
-    notAvailable: "Недоступно",
-    notConnected: "Не подключено",
-    editProfile: "Редактировать профиль",
-    RUB_NR: "RUB Безналичный",
-    RUB_CASH: "Наличные/Cash",
-    TOKENIZED: "Токенизированные Активы",
-    amount: "Сумма",
-    rate: "Курс",
-    error: "Ошибка",
-    security: "Безопасность",
-    cancel: "Отменить",
-    createAnotherOrder: "Создать еще одну заявку",
-    orderCreatedSuccess: "Заявка успешно создана",
-    orderSubmitted: "Ваша заявка был отправлена.",
-    creatingOrder: "Создание заявки...",
-    fillRequiredFields: "Пожалуйста, заполните все обязательные поля.",
-    otcMinimumReq: "Для заявки требуется минимальный размер 500,000 USD.",
-    minOrderSize: "Минимальный размер заявки",
-    orderDetails: "Детали заявки",
-    enterOrderDetails: "Введите детали для вашей заявки.",
-    tradingPair: "Торговая пара",
-    selectTradingPair: "Выбрать торговую пару",
-    orderType: "Тип заявки",
-    buyUSD: "Купить USD",
-    sellUSD: "Продать USD",
-    autoSelectedBasedOnPair: "Автоматически выбирается в зависимости от торговой пары.",
-    minimumOrder: "Сумма которую отдаете",
-    rateType: "Тип курса",
-    dynamicRate: "Динамический курс",
-    fixedRate: "Фиксированный курс",
-    rateSource: "Источник курса",
-    selectSource: "Выберите источник",
-    rateAdjustment: "Надбавка курса",
-    enterFixedRate: "Ввести фиксированный курс",
-    enterRateValue: "Ввести значение курса",
-    platformAdjustment: "Надбавка к курсу",
-    serviceFee: "Комиссия сервиса",
-    finalRate: "Итоговый курс",
-    adjustment: "Надбавка",
-    geography: "География",
-    country: "Страна",
+    forgotPassword: "Забыли пароль",
+    resetPassword: "Сброс пароля",
+    changePassword: "Изменить пароль",
+    name: "Имя",
+    email: "Эл. почта",
+    password: "Пароль",
+    confirmPassword: "Подтвердите пароль",
+    phone: "Телефон",
+    address: "Адрес",
     city: "Город",
-    selectCountry: "Выберите страну",
-    selectCity: "Выберите город",
-    additionalNotes: "Дополнительные примечания",
-    notesPlaceholder: "Введите здесь любые дополнительные примечания...",
-    in: "в",
-    expiryDate: "Дата истечения",
-    selectWhenExpires: "Выберите когда заявка истекает",
-    paymentPurpose: "Назначение платежа",
-    purposeExample: "Например, Оплата импорта, Экспортная выручка и т.д.",
-    exchangeRates: "Курсы валют",
-    ratesUpdatedAutomatically: "Курсы обновляются каждые 5 минут",
-    personalInfo: "Личная информация",
-    error404: "404 - Страница не найдена",
-    oopsNotFound: "Упс! Мы не смогли найти страницу, которую вы ищете.",
-    returnHome: "Вернуться на главную",
-
-    // Notification settings
-    notificationChannels: "Каналы уведомлений",
-    chooseHowReceiveNotifications: "Выберите, как вы хотите получать уведомления",
-    emailNotifications: "Уведомления по электронной почте",
-    receiveUpdatesEmail: "Получать обновления о своих заявках по электронной почте",
-    telegramNotifications: "Уведомления в Telegram",
-    receiveUpdatesTelegram: "Получать обновления о своих заявках в Telegram",
-    notificationTypes: "Типы уведомлений",
-    orderUpdates: "Обновления заявок",
-    orderUpdatesDesc: "Уведомления о существующих заявках",
-    newDealMessages: "Новые сообщения сделок",
-    newDealMessagesDesc: "Уведомления при получении новых сообщений",
-    marketAlerts: "Оповещения о рынке",
-    marketAlertsDesc: "Уведомления об изменениях и возможностях на рынке",
-    telegramSettings: "Настройки Telegram",
-    configTelegramSettings: "Настройте параметры уведомлений в Telegram",
-    telegramAccountConnected: "Аккаунт Telegram подключен",
-    manageTelegramConnection: "Управление подключением Telegram",
-    languageRegion: "Язык и регион",
-    customizeLangRegion: "Настройте предпочтения языка и региональные параметры",
-    language: "Язык",
-    timezone: "Часовой пояс",
-    saveChanges: "Сохранить изменения",
-    savePreferences: "Сохранить настройки",
-    settingsSaved: "Настройки сохранены",
-    notificationPrefsUpdated: "Ваши настройки уведомлений обновлены.",
-    administration: "Администрирование",
-    managePlatformSettings: "Управление настройками и конфигурациями платформы",
-    rateManagement: "Управление курсами",
-    configPlatformRateAdj: "Настройка корректировок курсов платформы",
-    preferences: "Предпочтения",
-    authRequired: "Требуется аутентификация",
-    pleaseLoginSettings: "Пожалуйста, войдите в систему для доступа к настройкам",
-
-    // Telegram page
-    enterTelegramUsername: "Введите ваше имя пользователя Telegram",
-    willSendVerificationCode: "Мы отправим вам код подтверждения для проверки вашей личности.",
-    telegramUsername: "Имя пользователя Telegram",
-    dontHaveTelegram: "У вас нет Telegram? Загрузите его здесь",
-    sendVerificationCode: "Отправить код подтверждения",
-    sending: "Отправка...",
-    enterVerificationCode: "Введите код подтверждения",
-    sentCodeToTelegram: "Мы отправили 5-значный код на ваш аккаунт Telegram.",
-    verificationCode: "Код подтверждения",
-    didntReceiveCode: "Не получили код? Отправить повторно",
-    verify: "Проверить",
-    verifying: "Проверка...",
-    telegramConnected: "Telegram подключен",
-    telegramSuccessConnected: "Ваш аккаунт Telegram успешно подключен к OTC Desk. Теперь вы будете получать уведомления о ваших заказах и сделках.",
-    joinOtcChannel: "Присоединиться к каналу OTC Desk",
-    configNotificationSettings: "Настроить параметры уведомлений",
-    benefitsOfConnecting: "Преимущества подключения Telegram",
-    realTimeNotifications: "Уведомления в реальном времени",
-    instantAlerts: "Получайте мгновенные оповещения при соответствии ваших заказов или обновлениях.",
-    secureChat: "Защищенные чат-комнаты",
-    autoCreateChatRooms: "Автоматически создавайте защищенные чат-комнаты для каждой сделки.",
-    mobileAccess: "Мобильный доступ",
-    manageOrdersMobile: "Управляйте своими заказами в пути без необходимости входа в веб-приложение.",
-
-    // Deals page
-    noChatsSelected: "Чат не выбран",
-    selectChat: "Выберите чат из списка, чтобы начать общение",
-    noConversations: "Пока нет разговоров",
-    startNewConversation: "Начните новый разговор, сопоставив с заказом",
-    browseActiveOrders: "Просмотреть активные заявки",
-    typeMessage: "Введите ваше сообщение...",
-    send: "Отправить",
-    dealWith: "Сделка с",
-    startedOn: "Начата",
-    proposal: "Предложение",
-    orderExpiry: "Истечение заявки",
+    country: "Страна",
+    zipCode: "Почтовый индекс",
+    company: "Компания",
+    role: "Роль",
+    date: "Дата",
+    time: "Время",
+    amount: "Сумма",
     status: "Статус",
-    transactionDetails: "Детали транзакции",
-    discussing: "Обсуждение",
-    agreed: "Согласовано",
-    completed: "Завершено",
-    cancelled: "Отменено",
-    loadingChat: "Загрузка чата...",
-    currencyRates: "Курсы валют",
-    search: "Поиск",
-
-    // Notifications
-    success: "Успех",
-    warning: "Предупреждение",
-    info: "Информация",
-    pleaseEnterUsername: "Пожалуйста, введите ваше имя пользователя Telegram",
-    verificationCodeSent: "Код подтверждения отправлен",
-    checkTelegram: "Пожалуйста, проверьте свой Telegram на наличие кода подтверждения",
-    
-    // Calculation section translations
-    calculationTitle: "Расчет транзакции",
-    youPay: "Вы платите",
-    youReceive: "Вы получаете",
-    exchangeRate: "Обменный курс",
-    totalFee: "Общая комиссия",
-    totalAmount: "Общая сумма",
-    continue: "Продолжить",
-    calculateSummary: "Рассчитать и просмотреть",
-    orderSummary: "Сводка заявки",
-    calculate: "Рассчитать",
-    serviceFeeAmount: "Сумма комиссии сервиса",
-    adjustmentAmount: "Сумма корректировки",
-    baseExchangeRate: "Базовый обменный курс",
-    calculationDetails: "Детали расчета",
-    paymentDetails: "Детали платежа",
-    basicDetails: "Основные детали",
-    additionalDetails: "Дополнительные детали",
-    receive: "получить",
+    type: "Тип",
+    description: "Описание",
+    title: "Заголовок",
+    price: "Цена",
+    quantity: "Количество",
+    total: "Итого",
+    subtotal: "Подитог",
+    tax: "Налог",
+    discount: "Скидка",
+    shipping: "Доставка",
+    payment: "Оплата",
+    order: "Заказ",
+    orders: "Заказы",
+    product: "Товар",
+    products: "Товары",
+    customer: "Клиент",
+    customers: "Клиенты",
+    supplier: "Поставщик",
+    suppliers: "Поставщики",
+    employee: "Сотрудник",
+    employees: "Сотрудники",
+    dashboard: "Панель управления",
+    reports: "Отчеты",
+    analytics: "Аналитика",
+    sales: "Продажи",
+    purchases: "Закупки",
+    inventory: "Запасы",
+    accounting: "Бухгалтерия",
+    finance: "Финансы",
+    marketing: "Маркетинг",
+    hr: "HR",
+    admin: "Администратор",
+    user: "Пользователь",
+    users: "Пользователи",
+    role: "Роль",
+    roles: "Роли",
+    permission: "Разрешение",
+    permissions: "Разрешения",
+    notification: "Уведомление",
+    notifications: "Уведомления",
+    message: "Сообщение",
+    messages: "Сообщения",
+    chat: "Чат",
+    conversations: "Беседы",
+    calendar: "Календарь",
+    events: "События",
+    tasks: "Задачи",
+    projects: "Проекты",
+    invoices: "Счета",
+    quotes: "Предложения",
+    expenses: "Расходы",
+    income: "Доходы",
+    balance: "Баланс",
+    transactions: "Транзакции",
+    accounts: "Аккаунты",
+    budget: "Бюджет",
+    reports: "Отчеты",
+    charts: "Графики",
+    statistics: "Статистика",
+    analytics: "Аналитика",
+    dashboard: "Панель управления",
+    createNewOrder: "Создать новую заявку",
+    buy: "Купить",
+    sell: "Продать",
+    receive: "Получить",
+    otcMinimumReq: "Минимальная сумма для OTC сделки составляет 500 000 USD",
+    fillRequiredFields: "Пожалуйста, заполните все обязательные поля",
+    activeRate: "Активный курс",
+    autoRate: "Автоматический курс",
+    manualRate: "Ручной курс",
+    useManualRate: "Использовать ручной курс",
+    sourceUpdated: "Источник обновлен",
+    lastUpdated: "Последнее обновление",
+    currency: "Валюта",
+    rates: "Курсы",
+    selectCurrencyPair: "Выберите валютную пару",
+    noRatesAvailable: "Нет доступных курсов для этой валютной пары"
   }
 };
-
-export default translations;
