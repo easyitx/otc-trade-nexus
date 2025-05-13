@@ -65,35 +65,42 @@ export function calculateOrderAmount(
   amount: number,
   rate: number,
   orderType: string,
-  baseCurrency: string
+  baseCurrency: string,
+  quoteCurrency: string
 ): { youPay: number, youReceive: number } {
-  if (isNaN(amount) || amount <= 0 || isNaN(rate) || rate <= 0) {
+  if (isNaN(amount) || amount <= 0 || isNaN(rate) || rate === 0) {
     return { youPay: 0, youReceive: 0 };
   }
 
+  // Для отладки
+  console.log(`Calculate order: amount=${amount}, rate=${rate}, orderType=${orderType}, base=${baseCurrency}, quote=${quoteCurrency}`);
+
   let youPay, youReceive;
 
-  if (orderType === "BUY") { // Buying base currency
+  if (orderType === "BUY") { // Покупка базовой валюты
     if (baseCurrency === "RUB") {
-      // Buying RUB with foreign currency
-      youPay = amount;
-      youReceive = amount * rate;
+      // Покупка RUB за иностранную валюту
+      youPay = amount; // в иностранной валюте
+      youReceive = amount * rate; // в рублях
     } else {
-      // Buying foreign currency with RUB
-      youPay = amount;
-      youReceive = amount / rate;
+      // Покупка иностранной валюты за RUB
+      youPay = amount; // в рублях
+      youReceive = amount / rate; // в иностранной валюте
     }
-  } else { // SELL
+  } else { // SELL - Продажа базовой валюты
     if (baseCurrency === "RUB") {
-      // Selling RUB for foreign currency
-      youPay = amount;
-      youReceive = amount / rate;
+      // Продажа RUB за иностранную валюту
+      youPay = amount; // в рублях
+      youReceive = amount / rate; // в иностранной валюте
     } else {
-      // Selling foreign currency for RUB
-      youPay = amount;
-      youReceive = amount * rate;
+      // Продажа иностранной валюты за RUB
+      youPay = amount; // в иностранной валюте
+      youReceive = amount * rate; // в рублях
     }
   }
+
+  // Для отладки результата
+  console.log(`Result: youPay=${youPay}, youReceive=${youReceive}`);
 
   return { youPay, youReceive };
 }

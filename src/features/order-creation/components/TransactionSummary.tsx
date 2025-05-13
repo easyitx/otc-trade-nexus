@@ -1,5 +1,6 @@
+
 import { cn } from "@/lib/utils";
-import { ArrowRight, Calculator, EuroIcon, DollarSign, BadgePercent } from "lucide-react";
+import { ArrowRight, Calculator, EuroIcon, DollarSign, BadgePercent, RussianRubleIcon } from "lucide-react";
 
 export default function TransactionSummary({
                                              theme, t, calculationResult, getCurrencySymbol, setCurrentStep
@@ -10,6 +11,18 @@ export default function TransactionSummary({
   getCurrencySymbol: (currency: string) => string;
   setCurrentStep: (step: number) => void;
 }) {
+  // Получаем правильные иконки валют
+  const getCurrencyIcon = (currency: string) => {
+    switch (currency) {
+      case "EUR":
+        return <EuroIcon className="w-6 h-6 mr-3 text-white" />;
+      case "RUB":
+        return <RussianRubleIcon className="w-6 h-6 mr-3 text-white" />;
+      default:
+        return <DollarSign className="w-6 h-6 mr-3 text-white" />;
+    }
+  };
+
   return (
       <div className={cn(
           "mt-6 rounded-xl p-6 border animate-fade-in",
@@ -178,11 +191,7 @@ export default function TransactionSummary({
           )}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center">
-                {calculationResult.fromCurrency === "EUR" ? (
-                    <EuroIcon className="w-6 h-6 mr-3 text-white" />
-                ) : (
-                    <DollarSign className="w-6 h-6 mr-3 text-white" />
-                )}
+                {getCurrencyIcon(calculationResult.fromCurrency)}
                 <div>
                   <div className="text-xs text-white/80 uppercase tracking-wider">
                     {t('finalExchangeRate')}

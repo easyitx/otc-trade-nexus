@@ -11,6 +11,7 @@ import OrderSuccess from "./components/OrderSuccess";
 import { getDefaultExpiryDate, getCurrencySymbol } from "./utils/dateUtils";
 import { tradePairs } from "@/data/mockData";
 import { useCurrencyRates } from "@/hooks/useCurrencyRates.ts";
+import { calculateOrderAmount, calculateAdjustedRate } from "@/utils/rateUtils";
 
 export default function OrderForm() {
   const navigate = useNavigate();
@@ -209,57 +210,25 @@ export default function OrderForm() {
     }
 
     if (isNaN(baseRate) || baseRate === 0) {
-      baseRate = 0; // Fallback value
+      baseRate = 90; // Fallback value для рубля/доллара
     }
+
+    console.log(`Base rate: ${baseRate}, Source: ${rateSource}`);
 
     // Calculate adjusted rate with the adjustment percentage
-    const adjustmentMultiplier = 1 + (rateAdjustment / 100);
-    const adjustedRate = baseRate * adjustmentMultiplier;
-    
-    // Calculate service fee
-    const serviceFeeMultiplier = 1 + (serviceFee / 100);
-    
-    // Calculate final rate including service fee
-    const finalRate = adjustedRate * serviceFeeMultiplier;
+    const finalRate = calculateAdjustedRate(baseRate, rateAdjustment, serviceFee);
 
     const amountValue = parseFloat(amount.replace(/,/g, ''));
-    let youPay, youReceive, serviceFeeAmount, adjustmentAmount, totalAmount;
-
-    // Determine pay/receive amounts based on order type
-    if (orderType === "BUY") { // Buying base currency (e.g., RUB) with quote currency (e.g., USDT)
-      if (selectedPairInfo.baseCurrency === "RUB") {
-        // Buying RUB with USDT/USD/etc.
-        youPay = amountValue; // In quote currency (USDT)
-        youReceive = amountValue * finalRate; // In base currency (RUB)
-        serviceFeeAmount = (amountValue * baseRate * serviceFee / 100);
-        adjustmentAmount = (amountValue * baseRate * rateAdjustment / 100);
-        totalAmount = youReceive; // Total is what you receive
-      } else {
-        // Buying USDT/USD/etc. with RUB
-        youPay = amountValue; // In quote currency (RUB)
-        youReceive = amountValue / finalRate; // In base currency (USDT)
-        serviceFeeAmount = (amountValue / baseRate * serviceFee / 100);
-        adjustmentAmount = (amountValue / baseRate * rateAdjustment / 100);
-        totalAmount = youReceive; // Total is what you receive
-      }
-    } else { // Selling base currency (e.g., RUB) for quote currency (e.g., USDT)
-      if (selectedPairInfo.baseCurrency === "RUB") {
-        // Selling RUB for USDT/USD/etc.
-        youPay = amountValue; // In base currency (RUB)
-        youReceive = amountValue / finalRate; // In quote currency (USDT)
-        serviceFeeAmount = (youReceive * serviceFee / 100);
-        adjustmentAmount = (youReceive * rateAdjustment / 100);
-        totalAmount = youReceive; // Total is what you receive
-      } else {
-        // Selling USDT/USD/etc. for RUB
-        youPay = amountValue; // In base currency (USDT)
-        youReceive = amountValue * finalRate; // In quote currency (RUB)
-        serviceFeeAmount = (youReceive * serviceFee / 100);
-        adjustmentAmount = (youReceive * rateAdjustment / 100);
-        totalAmount = youReceive; // Total is what you receive
-      }
-    }
-
+    
+    // Используем рефакторинговую функцию для расчета
+    const { youPay, youReceive } = calculateOrderAmount(
+      amountValue,
+      finalRate,
+      orderType,
+      selectedPairInfo.baseCurrency,
+      selectedPairInfo.quoteCurrency
+    );
+    
     // Determine from/to currencies based on order type
     const fromCurrency = orderType === "BUY" 
       ? selectedPairInfo.quoteCurrency 
@@ -269,17 +238,26 @@ export default function OrderForm() {
       ? selectedPairInfo.baseCurrency 
       : selectedPairInfo.quoteCurrency;
 
+    // Calculate additional values for display
+    const adjustmentAmount = (orderType === "BUY")
+      ? amountValue * baseRate * (rateAdjustment / 100)
+      : youReceive * (rateAdjustment / 100);
+      
+    const serviceFeeAmount = (orderType === "BUY")
+      ? amountValue * baseRate * (serviceFee / 100)
+      : youReceive * (serviceFee / 100);
+
     // Set calculation result
     setCalculationResult({
       youPay: youPay.toLocaleString(undefined, { maximumFractionDigits: 2 }),
       youReceive: youReceive.toLocaleString(undefined, { maximumFractionDigits: 2 }),
       baseRate: baseRate.toFixed(4),
-      adjustedRate: adjustedRate.toFixed(4),
+      adjustedRate: (baseRate * (1 + rateAdjustment / 100)).toFixed(4),
       finalRate: finalRate.toFixed(4),
       serviceFeeAmount: serviceFeeAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }),
       adjustmentAmount: adjustmentAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }),
-      adjustmentPercentage: rateAdjustment.toFixed(2), // Store the adjustment percentage
-      totalAmount: totalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+      adjustmentPercentage: rateAdjustment.toFixed(2),
+      totalAmount: youReceive.toLocaleString(undefined, { maximumFractionDigits: 2 }),
       fromCurrency,
       toCurrency
     });
