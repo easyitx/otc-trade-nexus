@@ -86,7 +86,7 @@ export interface Deal {
 }
 
 // Import the TranslationKey type from the i18n file to avoid duplication
-import { TranslationKey } from "@/i18n/translations";
+import { TranslationKey } from "@/i18n/translationTypes";
 
 // Re-export the TranslationKey type
 export type { TranslationKey };

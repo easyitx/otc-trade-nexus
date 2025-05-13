@@ -1,10 +1,7 @@
-import { Language } from "@/contexts/LanguageContext";
 
-type TranslationType = {
-  [key: string]: string;
-};
+import { Language, TranslationKey } from './translationTypes';
 
-const translations: Record<Language, TranslationType> = {
+const translations: Record<Language, Record<TranslationKey, string>> = {
   en: {
     createNewOrder: "Create New Order",
     orderType: "Order Type",
@@ -39,6 +36,53 @@ const translations: Record<Language, TranslationType> = {
     finalExchangeRate: "Final Exchange Rate",
     receive: "for",
     fallbackRate: "Exchange Rate Not Available",
+    
+    // UI Components
+    searchPlaceholder: "Search...",
+    noResults: "No results found",
+    tradingPairs: "Trading Pairs",
+    quickNav: "Quick Navigation",
+    deals: "Deals",
+    popularPairs: "Popular Pairs",
+    currencyRates: "Currency Rates",
+    loggedOut: "Logged Out",
+    loggedOutSuccess: "You have been successfully logged out",
+    exchangeRates: "Exchange Rates",
+    ratesUpdatedAutomatically: "Rates updated automatically",
+    
+    // Dashboard
+    welcome: "Welcome",
+    tradeVolume: "Trade Volume",
+    last30Days: "Last 30 Days",
+    activeOrders: "Active Orders",
+    acrossMarkets: "Across Markets",
+    activeTraders: "Active Traders",
+    thisWeek: "This Week",
+    
+    // Error pages
+    error404: "404 Error",
+    oopsNotFound: "Oops! Page not found",
+    returnHome: "Return Home",
+    
+    // Profile
+    personalInfo: "Personal Information",
+    fullName: "Full Name",
+    notSet: "Not set",
+    memberSince: "Member Since",
+    notAvailable: "Not available",
+    notConnected: "Not connected",
+    editProfile: "Edit Profile",
+    
+    // Trade functionality
+    tradingPair: "Trading Pair",
+    selectTradingPair: "Select Trading Pair",
+    minimumOrder: "Minimum order",
+    rate: "Rate",
+    dynamicRate: "Dynamic Rate",
+    fixedRate: "Fixed Rate",
+    selectSource: "Select Source",
+    finalRate: "Final Rate",
+    in: "in"
   },
   ru: {
     createNewOrder: "Создать новую заявку",
@@ -72,10 +116,55 @@ const translations: Record<Language, TranslationType> = {
     serviceFee: "Комиссия сервиса",
     total: "Итого",
     finalExchangeRate: "Итоговый курс обмена",
-    sell: "Продать",
-    buy: "Купить",
     receive: "за",
     fallbackRate: "Курс обмена недоступен",
+    
+    // UI Components
+    searchPlaceholder: "Поиск...",
+    noResults: "Результаты не найдены",
+    tradingPairs: "Торговые пары",
+    quickNav: "Быстрая навигация",
+    deals: "Сделки",
+    popularPairs: "Популярные пары",
+    currencyRates: "Курсы валют",
+    loggedOut: "Выход выполнен",
+    loggedOutSuccess: "Вы успешно вышли из системы",
+    exchangeRates: "Курсы обмена",
+    ratesUpdatedAutomatically: "Курсы обновляются автоматически",
+    
+    // Dashboard
+    welcome: "Добро пожаловать",
+    tradeVolume: "Объем торгов",
+    last30Days: "За 30 дней",
+    activeOrders: "Активные заявки",
+    acrossMarkets: "По всем рынкам",
+    activeTraders: "Активные трейдеры",
+    thisWeek: "За эту неделю",
+    
+    // Error pages
+    error404: "Ошибка 404",
+    oopsNotFound: "Упс! Страница не найдена",
+    returnHome: "Вернуться на главную",
+    
+    // Profile
+    personalInfo: "Личная информация",
+    fullName: "Полное имя",
+    notSet: "Не указано",
+    memberSince: "Участник с",
+    notAvailable: "Недоступно",
+    notConnected: "Не подключено",
+    editProfile: "Редактировать профиль",
+    
+    // Trade functionality
+    tradingPair: "Торговая пара",
+    selectTradingPair: "Выберите торговую пару",
+    minimumOrder: "Минимальный ордер",
+    rate: "Курс",
+    dynamicRate: "Динамический курс",
+    fixedRate: "Фиксированный курс",
+    selectSource: "Выберите источник",
+    finalRate: "Итоговый курс",
+    in: "в"
   }
 };
 
