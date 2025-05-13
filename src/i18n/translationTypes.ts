@@ -32,4 +32,6 @@ export type TranslationKey =
   | 'lastUpdated' | 'saveChanges' | 'edit' | 'cancel' | 'rates' | 'selectCurrencyPair'
   | 'noRatesAvailable'
   // Other
-  | 'company' | 'email';
+  | 'company' | 'email'
+  // Added missing keys
+  | 'validationError' | 'error';

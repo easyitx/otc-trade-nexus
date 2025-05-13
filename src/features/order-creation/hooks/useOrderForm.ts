@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
@@ -329,7 +328,7 @@ export const useOrderForm = () => {
     // Validate required fields
     if (!formData.selectedPair || !formData.amount || !formData.country || (isCashPair() && !formData.city)) {
       toast({
-        title: t('validationError'),
+        title: t('fillRequiredFields'),
         description: t('fillRequiredFields'),
         variant: "destructive"
       });
@@ -341,7 +340,7 @@ export const useOrderForm = () => {
     const parsedAmount = parseFloat(formData.amount.replace(/,/g, ''));
     if (isNaN(parsedAmount) || parsedAmount < 500000) {
       toast({
-        title: t('validationError'),
+        title: t('fillRequiredFields'),
         description: t('otcMinimumReq'),
         variant: "destructive"
       });
@@ -383,7 +382,7 @@ export const useOrderForm = () => {
       setIsSuccess(true);
     } else {
       toast({
-        title: t('error'),
+        title: t('cancel'),
         description: error,
         variant: "destructive"
       });

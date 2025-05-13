@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import axios from 'axios';
@@ -22,12 +21,12 @@ export interface CurrencyRateUpdate {
     use_manual_rate: boolean;
 }
 
-interface CurrencyPair {
+export interface CurrencyPair {
     value: string;
     label: string;
 }
 
-interface RateSource {
+export interface RateSource {
     code: string;
     name: string;
 }

@@ -13,9 +13,11 @@ export default function RateSection({ formProps }: { formProps: FormProps }) {
     t, 
     formData,
     updateFormData,
-    formatRate,
-    serviceFee
+    formatRate
   } = formProps;
+
+  // Get the service fee from the form data instead of directly from formProps
+  const serviceFee = formData.serviceFee;
 
   return (
     <div className="space-y-6 pt-2">
