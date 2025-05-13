@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      currency_rates: {
+        Row: {
+          auto_rate: number | null
+          base_currency: Database["public"]["Enums"]["currency_code"]
+          id: string
+          last_updated: string | null
+          manual_rate: number | null
+          quote_currency: Database["public"]["Enums"]["currency_code"]
+          source: string | null
+          source_timestamp: string | null
+          updated_by: string | null
+          use_manual_rate: boolean | null
+        }
+        Insert: {
+          auto_rate?: number | null
+          base_currency: Database["public"]["Enums"]["currency_code"]
+          id?: string
+          last_updated?: string | null
+          manual_rate?: number | null
+          quote_currency: Database["public"]["Enums"]["currency_code"]
+          source?: string | null
+          source_timestamp?: string | null
+          updated_by?: string | null
+          use_manual_rate?: boolean | null
+        }
+        Update: {
+          auto_rate?: number | null
+          base_currency?: Database["public"]["Enums"]["currency_code"]
+          id?: string
+          last_updated?: string | null
+          manual_rate?: number | null
+          quote_currency?: Database["public"]["Enums"]["currency_code"]
+          source?: string | null
+          source_timestamp?: string | null
+          updated_by?: string | null
+          use_manual_rate?: boolean | null
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           buyer_id: string
@@ -252,6 +291,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_expired_orders_now: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          archived_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -259,9 +304,40 @@ export type Database = {
         }
         Returns: boolean
       }
+      setup_archive_cron_job: {
+        Args: { function_url: string; anon_key: string }
+        Returns: undefined
+      }
+      setup_archiving_extensions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_cbr_rates: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "user" | "manager" | "admin"
+      currency_code:
+        | "USD"
+        | "EUR"
+        | "RUB"
+        | "GBP"
+        | "CNY"
+        | "JPY"
+        | "CHF"
+        | "CAD"
+        | "AUD"
+        | "HKD"
+        | "SGD"
+        | "AED"
+        | "TRY"
+        | "INR"
+        | "BTC"
+        | "ETH"
+        | "USDT"
+        | "USDC"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -378,6 +454,26 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "manager", "admin"],
+      currency_code: [
+        "USD",
+        "EUR",
+        "RUB",
+        "GBP",
+        "CNY",
+        "JPY",
+        "CHF",
+        "CAD",
+        "AUD",
+        "HKD",
+        "SGD",
+        "AED",
+        "TRY",
+        "INR",
+        "BTC",
+        "ETH",
+        "USDT",
+        "USDC",
+      ],
     },
   },
 } as const

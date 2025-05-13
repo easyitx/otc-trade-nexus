@@ -40,7 +40,9 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
     applyRateSourceToFixed,
     calculateOrder,
     setCurrentStep,
-    autoCalculate
+    autoCalculate,
+    availableSources,
+    loading
   } = formProps;
 
   // Group trade pairs by category
@@ -391,6 +393,8 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
                 applyRateSourceToFixed={(source) => {
                   applyRateSourceToFixed(source);
                 }}
+                availableSources={availableSources}
+                loading={loading}
             />
 
             {/* Transaction Calculation Results */}
@@ -415,7 +419,8 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
 function RateSection({
                        theme, t, language, rateType, setRateType, rateSource, setRateSource,
                        customRateValue, setCustomRateValue, rateAdjustment, setRateAdjustment,
-                       serviceFee, currentRates, formatRate, applyRateSourceToFixed
+                       serviceFee, currentRates, formatRate, applyRateSourceToFixed,
+                       availableSources, loading
                      }: any) {
   return (
       <div className="space-y-6 pt-2">
@@ -529,6 +534,8 @@ function RateSection({
               rateAdjustment={rateAdjustment}
               setRateAdjustment={setRateAdjustment}
               currentRates={currentRates}
+              availableSources={availableSources}
+              loading={loading}
             />
           )}
 
@@ -542,6 +549,8 @@ function RateSection({
               setCustomRateValue={setCustomRateValue}
               currentRates={currentRates}
               applyRateSourceToFixed={applyRateSourceToFixed}
+              availableSources={availableSources}
+              loading={loading}
             />
           )}
 
@@ -585,8 +594,7 @@ function RateSection({
 }
 
 // DynamicRateOptions component for further modularization
-function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustment, setRateAdjustment, currentRates }: any) {
-  console.log(currentRates)
+function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustment, setRateAdjustment, currentRates, availableSources, loading }: any) {
   return (
     <div className="space-y-4 pt-2 mt-2 border-t border-dashed">
       {/* Rate Source */}
@@ -595,7 +603,7 @@ function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustmen
           "block mb-2",
           theme === "light" ? "text-gray-700" : "text-gray-300"
         )}>{t('rateSource')}</Label>
-        <Select value={rateSource} onValueChange={setRateSource}>
+        <Select value={rateSource} onValueChange={setRateSource} disabled={loading}>
           <SelectTrigger
             id="rateSource"
             className={cn(
@@ -615,14 +623,10 @@ function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustmen
               "grid grid-cols-2 gap-1",
               theme === "light" ? "bg-gray-50" : "bg-otc-active/40"
             )}>
-              {Object.entries(currentRates).map(([key, value]) => ({
-                id: key,
-                name: key,
-                value: value
-              })).map(source => (
+              {availableSources.map((source: any) => (
                 <SelectItem
-                  key={source.id}
-                  value={source.id}
+                  key={source.code}
+                  value={source.code}
                   className={cn(
                     "flex justify-between items-center",
                     theme === "light" ? "hover:bg-gray-100" : "hover:bg-otc-active"
@@ -633,7 +637,7 @@ function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustmen
                     "font-mono text-sm",
                     theme === "light" ? "text-blue-600" : "text-otc-primary"
                   )}>
-                    {source.value}
+                    {currentRates[source.code] || "—"}
                   </span>
                 </SelectItem>
               ))}
@@ -684,7 +688,7 @@ function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustmen
 }
 
 // FixedRateOptions component for further modularization
-function FixedRateOptions({ theme, t, language, customRateValue, setCustomRateValue, currentRates, applyRateSourceToFixed }: any) {
+function FixedRateOptions({ theme, t, language, customRateValue, setCustomRateValue, currentRates, applyRateSourceToFixed, availableSources, loading }: any) {
   return (
     <div className="space-y-4 pt-2 mt-2 border-t border-dashed">
       <div className="space-y-3">
@@ -695,20 +699,16 @@ function FixedRateOptions({ theme, t, language, customRateValue, setCustomRateVa
           {language === 'en' ? 'Quick Select Rate' : 'Быстрый выбор курса'}
         </Label>
         <div className="flex flex-wrap gap-2">
-          {Object.entries(currentRates).map(([key, value]) => ({
-            id: key,
-            name: key,
-            value: value
-          })).map(source => (
+          {availableSources.map((source: any) => (
             <Button 
-              key={source.id}
+              key={source.code}
               type="button"
               size="sm" 
               variant={theme === "light" ? "outline" : "secondary"}
-              onClick={() => applyRateSourceToFixed(source.id)}
+              onClick={() => applyRateSourceToFixed(source.code)}
               className={cn(
                 "gap-2",
-                customRateValue === source.value ? (
+                currentRates[source.code] === customRateValue ? (
                   theme === "light" 
                     ? "bg-blue-50 border-blue-300 text-blue-700" 
                     : "bg-otc-primary/20 border-otc-primary text-white"
@@ -718,9 +718,10 @@ function FixedRateOptions({ theme, t, language, customRateValue, setCustomRateVa
                     : "border-otc-active bg-otc-active"
                 )
               )}
+              disabled={loading}
             >
               <span>{source.name}:</span>
-              <span className="font-mono">{source.value}</span>
+              <span className="font-mono">{currentRates[source.code] || "—"}</span>
             </Button>
           ))}
         </div>

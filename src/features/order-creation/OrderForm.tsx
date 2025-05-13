@@ -10,7 +10,7 @@ import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
 import { getDefaultExpiryDate, getCurrencySymbol } from "./utils/dateUtils";
 import { tradePairs } from "@/data/mockData";
-import {useCurrencyRates} from "@/hooks/useCurrencyRates.ts";
+import { useCurrencyRates } from "@/hooks/useCurrencyRates.ts";
 
 export default function OrderForm() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function OrderForm() {
   const [amount, setAmount] = useState<string>("");
   const [amountCurrency, setAmountCurrency] = useState<string>("USD");
   const [rateType, setRateType] = useState<"dynamic" | "fixed">("dynamic");
-  const [rateSource, setRateSource] = useState<string>("cbr");
+  const [rateSource, setRateSource] = useState<string>("CBR");
   const [customRateValue, setCustomRateValue] = useState<string>("");
   const [rateAdjustment, setRateAdjustment] = useState<number>(0);
   const [serviceFee] = useState<number>(1); // Fixed 1% service fee
@@ -44,8 +44,8 @@ export default function OrderForm() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [selectedPairInfo, setSelectedPairInfo] = useState<any>(null);
-  const [currentRates, setCurrentRates] = useState<Record<string, string>>({});
 
+  // Use the currency rates hook
   const {
     rates,
     loading,
@@ -56,17 +56,36 @@ export default function OrderForm() {
     setCurrencyPair
   } = useCurrencyRates();
 
-  useEffect(() => {
-    if (!loading && availableSources) {
-      const initialRates: Record<string, string> = {};
+  // Use rates from the hook instead of maintaining a separate state
+  const [currentRates, setCurrentRates] = useState<Record<string, string>>({});
 
-      availableSources.forEach(source => {
-        initialRates[source.code] = rates?.[source.code]?.toFixed(2) || "0.00";
+  useEffect(() => {
+    if (!loading && rates) {
+      const initialRates: Record<string, string> = {};
+      
+      // Convert the rates object to strings for display
+      Object.entries(rates).forEach(([source, rate]) => {
+        initialRates[source] = rate?.toFixed(2) || "0.00";
       });
 
       setCurrentRates(initialRates);
+      
+      // If rateSource is not in availableSources, set it to the first available source
+      if (availableSources.length > 0 && !availableSources.find(source => source.code === rateSource)) {
+        setRateSource(availableSources[0].code);
+      }
     }
-  }, [loading, availableSources, rates]);
+  }, [loading, rates, availableSources, rateSource]);
+
+  // When available pairs change, update selected pair if not set
+  useEffect(() => {
+    if (availablePairs.length > 0 && !selectedPair) {
+      const firstPairValue = availablePairs[0]?.value;
+      if (firstPairValue) {
+        setSelectedPair(firstPairValue);
+      }
+    }
+  }, [availablePairs, selectedPair]);
   
   // Calculation state
   const [calculationResult, setCalculationResult] = useState<{
@@ -99,6 +118,15 @@ export default function OrderForm() {
         setSelectedPairInfo(pair);
         // Set initial amount currency based on the selected pair and order type
         updateAmountCurrency(pair, orderType);
+        
+        // Update the currency pair in the hook to match the selected pair
+        if (pair.baseCurrency && pair.quoteCurrency) {
+          const pairString = `${pair.baseCurrency}/${pair.quoteCurrency}`;
+          const matchingPair = availablePairs.find(p => p.value === pairString);
+          if (matchingPair) {
+            setCurrencyPair(matchingPair.value);
+          }
+        }
       }
     } else {
       setSelectedPairInfo(null);
@@ -106,7 +134,7 @@ export default function OrderForm() {
     // Reset calculation when pair changes
     setShowCalculation(false);
     setCalculationResult(null);
-  }, [selectedPair]);
+  }, [selectedPair, availablePairs, setCurrencyPair]);
 
   // Update amount currency when order type changes
   useEffect(() => {
@@ -135,7 +163,9 @@ export default function OrderForm() {
   };
 
   const applyRateSourceToFixed = (source: string) => {
-    if (currentRates[source]) {
+    if (rates && rates[source]) {
+      setCustomRateValue(rates[source].toFixed(2));
+    } else if (currentRates[source]) {
       setCustomRateValue(currentRates[source]);
     }
   };
@@ -147,10 +177,10 @@ export default function OrderForm() {
     }
 
     const sourceMap = {
-      "cbr": "ЦБ",
-      "profinance": "PF",
-      "investing": "IV",
-      "xe": "XE"
+      "CBR": "ЦБ",
+      "PF": "PF",
+      "IV": "IV",
+      "XE": "XE"
     };
 
     const sourceName = sourceMap[rateSource as keyof typeof sourceMap] || rateSource;
@@ -167,14 +197,18 @@ export default function OrderForm() {
       return;
     }
 
-    // Get base rate from source
-    let baseRate = parseFloat(
-      rateType === "fixed" 
-        ? customRateValue || currentRates[rateSource]
-        : currentRates[rateSource]
-    );
+    // Get base rate from source using the rates from the hook
+    let baseRate = 0;
+    
+    if (rateType === "fixed") {
+      baseRate = parseFloat(customRateValue) || 0;
+    } else if (rates && rates[rateSource]) {
+      baseRate = rates[rateSource];
+    } else if (currentRates[rateSource]) {
+      baseRate = parseFloat(currentRates[rateSource]);
+    }
 
-    if (isNaN(baseRate)) {
+    if (isNaN(baseRate) || baseRate === 0) {
       baseRate = 0; // Fallback value
     }
 
@@ -373,7 +407,10 @@ export default function OrderForm() {
     setCurrentStep,
     totalSteps,
     getCurrencySymbol,
-    autoCalculate
+    autoCalculate,
+    availablePairs,
+    availableSources,
+    loading: loading
   };
 
   return (
@@ -384,10 +421,24 @@ export default function OrderForm() {
         </h1>
       </div>
 
-      <OrderFormSteps
-        currentStep={currentStep}
-        formProps={formProps}
-      />
+      {loading && (
+        <div className="flex justify-center p-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        </div>
+      )}
+
+      {error && (
+        <div className={`p-4 rounded-md text-center ${theme === "light" ? "bg-red-50 text-red-700" : "bg-red-900/20 text-red-400"}`}>
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && (
+        <OrderFormSteps
+          currentStep={currentStep}
+          formProps={formProps}
+        />
+      )}
     </div>
   );
 }
