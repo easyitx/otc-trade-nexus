@@ -217,8 +217,10 @@ export default function OrderForm() {
 
     // Calculate adjusted rate with the adjustment percentage
     const finalRate = calculateAdjustedRate(baseRate, rateAdjustment, serviceFee);
+    console.log(`Final rate after adjustments: ${finalRate}`);
 
     const amountValue = parseFloat(amount.replace(/,/g, ''));
+    console.log(`Amount to convert: ${amountValue}`);
     
     // Используем рефакторинговую функцию для расчета
     const { youPay, youReceive } = calculateOrderAmount(
@@ -228,6 +230,8 @@ export default function OrderForm() {
       selectedPairInfo.baseCurrency,
       selectedPairInfo.quoteCurrency
     );
+    
+    console.log(`After calculation: Pay=${youPay}, Receive=${youReceive}`);
     
     // Determine from/to currencies based on order type
     const fromCurrency = orderType === "BUY" 
@@ -239,13 +243,29 @@ export default function OrderForm() {
       : selectedPairInfo.quoteCurrency;
 
     // Calculate additional values for display
-    const adjustmentAmount = (orderType === "BUY")
-      ? amountValue * baseRate * (rateAdjustment / 100)
-      : youReceive * (rateAdjustment / 100);
-      
-    const serviceFeeAmount = (orderType === "BUY")
-      ? amountValue * baseRate * (serviceFee / 100)
-      : youReceive * (serviceFee / 100);
+    // Calculate service fee and adjustment on the appropriate amount
+    let baseAmount = 0;
+    
+    if (orderType === "BUY") {
+      if (selectedPairInfo.baseCurrency === "RUB") {
+        // When buying RUB, calculate on the base amount (youReceive)
+        baseAmount = youReceive;
+      } else {
+        // When buying non-RUB, calculate on the quote amount converted at base rate
+        baseAmount = amountValue * baseRate; 
+      }
+    } else { // SELL
+      if (selectedPairInfo.baseCurrency === "RUB") {
+        // When selling RUB, calculate on the amount (youPay)
+        baseAmount = youPay;
+      } else {
+        // When selling non-RUB, calculate on the base amount converted to quote at base rate
+        baseAmount = amountValue * baseRate;
+      }
+    }
+    
+    const adjustmentAmount = baseAmount * (rateAdjustment / 100);
+    const serviceFeeAmount = baseAmount * (serviceFee / 100);
 
     // Set calculation result
     setCalculationResult({

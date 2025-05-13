@@ -75,27 +75,37 @@ export function calculateOrderAmount(
   // Для отладки
   console.log(`Calculate order: amount=${amount}, rate=${rate}, orderType=${orderType}, base=${baseCurrency}, quote=${quoteCurrency}`);
 
-  let youPay, youReceive;
+  let youPay = amount; // Default: user always pays the input amount
+  let youReceive = 0;
 
-  if (orderType === "BUY") { // Покупка базовой валюты
-    if (baseCurrency === "RUB") {
-      // Покупка RUB за иностранную валюту
-      youPay = amount; // в иностранной валюте
-      youReceive = amount * rate; // в рублях
-    } else {
-      // Покупка иностранной валюты за RUB
-      youPay = amount; // в рублях
-      youReceive = amount / rate; // в иностранной валюте
+  // USDT/RUB and USD/RUB pairs - converting between crypto/fiat
+  if ((baseCurrency === "USDT" || baseCurrency === "USD") && quoteCurrency === "RUB") {
+    if (orderType === "BUY") { // Buy USDT/USD with RUB
+      youPay = amount; // in RUB
+      youReceive = amount / rate; // in USDT/USD
+    } else { // Sell USDT/USD for RUB
+      youPay = amount; // in USDT/USD
+      youReceive = amount * rate; // in RUB
     }
-  } else { // SELL - Продажа базовой валюты
-    if (baseCurrency === "RUB") {
-      // Продажа RUB за иностранную валюту
-      youPay = amount; // в рублях
-      youReceive = amount / rate; // в иностранной валюте
-    } else {
-      // Продажа иностранной валюты за RUB
-      youPay = amount; // в иностранной валюте
-      youReceive = amount * rate; // в рублях
+  } 
+  // RUB/USD and RUB/USDT pairs
+  else if (baseCurrency === "RUB" && (quoteCurrency === "USD" || quoteCurrency === "USDT")) {
+    if (orderType === "BUY") { // Buy RUB with USD/USDT
+      youPay = amount; // in USD/USDT
+      youReceive = amount * rate; // in RUB
+    } else { // Sell RUB for USD/USDT
+      youPay = amount; // in RUB
+      youReceive = amount / rate; // in USD/USDT
+    }
+  }
+  // Generic case for any other currency pairs
+  else {
+    if (orderType === "BUY") { // Buy base currency
+      youPay = amount; // in quote currency
+      youReceive = amount / rate; // in base currency
+    } else { // Sell base currency
+      youPay = amount; // in base currency
+      youReceive = amount * rate; // in quote currency
     }
   }
 
