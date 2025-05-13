@@ -1,21 +1,12 @@
 
-import { BellIcon, MessageCircleIcon, Moon, Sun } from "lucide-react";
+import { MessageCircleIcon, Moon, Sun } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useAuth } from "../../contexts/AuthContext";
-import { Badge } from "../ui/badge";
-import { useToast } from "../../hooks/use-toast";
-import { Globe } from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useTheme } from "../../contexts/ThemeContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { SearchBar } from "./SearchBar";
-import { CurrencyRates } from "./CurrencyRates";
+import { CurrencyRates } from "../rates/CurrencyRates.tsx";
 import { UserProfile } from "./UserProfile";
 
 export function Navbar() {
@@ -78,14 +69,14 @@ export function Navbar() {
           {currentUser ? (
             <>
               {/* Notification */}
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect relative"
-              >
-                <BellIcon className="w-4 h-4" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
-              </Button>
+              {/*<Button */}
+              {/*  variant="outline" */}
+              {/*  size="icon" */}
+              {/*  className="w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-accent btn-hover-effect relative"*/}
+              {/*>*/}
+              {/*  <BellIcon className="w-4 h-4" />*/}
+              {/*  <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>*/}
+              {/*</Button>*/}
 
               {/* Messages */}
               <Button 

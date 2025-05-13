@@ -10,12 +10,12 @@ import OrderFormSteps from "./components/OrderFormSteps";
 import OrderSuccess from "./components/OrderSuccess";
 import { getDefaultExpiryDate, getCurrencySymbol } from "./utils/dateUtils";
 import { tradePairs } from "@/data/mockData";
+import {useCurrencyRates} from "@/hooks/useCurrencyRates.ts";
 
 export default function OrderForm() {
   const navigate = useNavigate();
   const { createOrder } = useOrders();
   const { currentUser } = useAuth();
-  const { rateAdjustments, isLoading: isLoadingSettings } = usePlatformSettings();
   const { t, language } = useLanguage();
   const { theme } = useTheme();
 
@@ -44,12 +44,29 @@ export default function OrderForm() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [selectedPairInfo, setSelectedPairInfo] = useState<any>(null);
-  const [currentRates, setCurrentRates] = useState<Record<string, string>>({
-    cbr: "90.50",
-    profinance: "91.25",
-    investing: "90.75",
-    xe: "91.00"
-  });
+  const [currentRates, setCurrentRates] = useState<Record<string, string>>({});
+
+  const {
+    rates,
+    loading,
+    error,
+    currencyPair,
+    availablePairs,
+    availableSources,
+    setCurrencyPair
+  } = useCurrencyRates();
+
+  useEffect(() => {
+    if (!loading && availableSources) {
+      const initialRates: Record<string, string> = {};
+
+      availableSources.forEach(source => {
+        initialRates[source.code] = rates?.[source.code]?.toFixed(2) || "0.00";
+      });
+
+      setCurrentRates(initialRates);
+    }
+  }, [loading, availableSources, rates]);
   
   // Calculation state
   const [calculationResult, setCalculationResult] = useState<{
@@ -117,12 +134,9 @@ export default function OrderForm() {
     }
   };
 
-  // Apply selected rate source value to custom rate when in fixed mode
   const applyRateSourceToFixed = (source: string) => {
     if (currentRates[source]) {
       setCustomRateValue(currentRates[source]);
-      // Don't auto-calculate here to fix the issue
-      // Let user click the calculate button deliberately
     }
   };
 
@@ -161,7 +175,7 @@ export default function OrderForm() {
     );
 
     if (isNaN(baseRate)) {
-      baseRate = 90.0; // Fallback value
+      baseRate = 0; // Fallback value
     }
 
     // Calculate adjusted rate with the adjustment percentage
@@ -370,10 +384,9 @@ export default function OrderForm() {
         </h1>
       </div>
 
-      <OrderFormSteps 
-        currentStep={currentStep} 
-        totalSteps={totalSteps} 
-        formProps={formProps} 
+      <OrderFormSteps
+        currentStep={currentStep}
+        formProps={formProps}
       />
     </div>
   );

@@ -24,6 +24,7 @@ export interface TradePair {
   quoteCurrency: string;
   group: TradePairGroup;
   displayName: string;
+  currencyPair: string;
 }
 
 export interface RateDetails {

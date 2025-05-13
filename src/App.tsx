@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import {LanguageProvider} from "./contexts/LanguageContext";
 import {ThemeProvider} from "./contexts/ThemeContext";
 import {MainLayout} from "@/components/layout/MainLayout.tsx";
+import CurrencyRatesPage from "@/pages/admin/CurrencyRatesPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
                     <Route path="settings" element={<SettingsPage/>}/>
                     {/*<Route path="telegram" element={<ConnectTelegramPage />} />*/}
                     <Route path="admin/rate-management" element={<RateManagementPage/>}/>
+                    <Route path="admin/currency-rates" element={<CurrencyRatesPage/>}/>
                     <Route path="*" element={<NotFound/>}/>
                   </Route>
                 </Routes>

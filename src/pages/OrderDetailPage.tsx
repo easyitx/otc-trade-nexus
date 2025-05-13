@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDeals } from "@/hooks/useDeals";
 import { tradePairs } from "@/data/mockData";
-import { ExchangeRates } from "@/components/ExchangeRates";
+import { ExchangeRates } from "@/components/rates/ExchangeRates.tsx";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -174,10 +174,6 @@ export default function OrderDetailPage() {
   return (
       <>
         <div className="space-y-6">
-          <div>
-            <ExchangeRates className="max-w-7xl mx-auto mb-6" />
-          </div>
-
           {/* Navigation */}
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground">

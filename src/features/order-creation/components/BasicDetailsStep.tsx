@@ -586,6 +586,7 @@ function RateSection({
 
 // DynamicRateOptions component for further modularization
 function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustment, setRateAdjustment, currentRates }: any) {
+  console.log(currentRates)
   return (
     <div className="space-y-4 pt-2 mt-2 border-t border-dashed">
       {/* Rate Source */}
@@ -614,12 +615,11 @@ function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustmen
               "grid grid-cols-2 gap-1",
               theme === "light" ? "bg-gray-50" : "bg-otc-active/40"
             )}>
-              {[
-                { id: "cbr", name: "ЦБ (CBR)", value: currentRates.cbr },
-                { id: "profinance", name: "Profinance (PF)", value: currentRates.profinance },
-                { id: "investing", name: "Investing (IV)", value: currentRates.investing },
-                { id: "xe", name: "XE", value: currentRates.xe }
-              ].map(source => (
+              {Object.entries(currentRates).map(([key, value]) => ({
+                id: key,
+                name: key,
+                value: value
+              })).map(source => (
                 <SelectItem
                   key={source.id}
                   value={source.id}
@@ -628,7 +628,7 @@ function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustmen
                     theme === "light" ? "hover:bg-gray-100" : "hover:bg-otc-active"
                   )}
                 >
-                  <span>{source.name}</span>
+                  <span>{source.name} </span>
                   <span className={cn(
                     "font-mono text-sm",
                     theme === "light" ? "text-blue-600" : "text-otc-primary"
@@ -695,12 +695,11 @@ function FixedRateOptions({ theme, t, language, customRateValue, setCustomRateVa
           {language === 'en' ? 'Quick Select Rate' : 'Быстрый выбор курса'}
         </Label>
         <div className="flex flex-wrap gap-2">
-          {[
-            { id: "cbr", label: "ЦБ", value: currentRates.cbr },
-            { id: "profinance", label: "PF", value: currentRates.profinance },
-            { id: "investing", label: "IV", value: currentRates.investing },
-            { id: "xe", label: "XE", value: currentRates.xe }
-          ].map(source => (
+          {Object.entries(currentRates).map(([key, value]) => ({
+            id: key,
+            name: key,
+            value: value
+          })).map(source => (
             <Button 
               key={source.id}
               type="button"
@@ -720,7 +719,7 @@ function FixedRateOptions({ theme, t, language, customRateValue, setCustomRateVa
                 )
               )}
             >
-              <span>{source.label}:</span>
+              <span>{source.name}:</span>
               <span className="font-mono">{source.value}</span>
             </Button>
           ))}

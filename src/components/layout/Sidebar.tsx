@@ -8,7 +8,7 @@ import {
   PlusCircleIcon, 
   UserIcon, 
   Settings2Icon, 
-  SendIcon, 
+  CurrencyIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   SlidersIcon
@@ -135,8 +135,8 @@ export function Sidebar() {
         <div className="space-y-1">
           <NavItem icon={HomeIcon} label={t('dashboard')} href="/" isCollapsed={isCollapsed} />
           <NavItem icon={ListIcon} label={t('orders')} href="/orders" isCollapsed={isCollapsed} />
-          <NavItem icon={MessageCircleIcon} label={t('deals')} href="/deals" isCollapsed={isCollapsed} />
           <NavItem icon={PlusCircleIcon} label={t('createNewOrder')} href="/create-order" isCollapsed={isCollapsed} />
+          <NavItem icon={MessageCircleIcon} label={t('deals')} href="/deals" isCollapsed={isCollapsed} />
           <NavItem icon={UserIcon} label={t('profile')} href="/profile" isCollapsed={isCollapsed} />
           <NavItem icon={Settings2Icon} label={t('settings')} href="/settings" isCollapsed={isCollapsed} />
 
@@ -145,6 +145,8 @@ export function Sidebar() {
               <div className="px-3 py-2">
                 {!isCollapsed && <p className="text-xs text-primary-foreground/70 uppercase font-semibold">Админ</p>}
               </div>
+
+              <NavItem icon={CurrencyIcon} label={t('currencyRates')} href="/admin/currency-rates" isCollapsed={isCollapsed} />
             </div>
           )}
         </div>

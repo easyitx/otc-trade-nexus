@@ -18,7 +18,7 @@ export type TranslationKey =
     | "selectCity" | "additionalNotes" | "notesPlaceholder" | "in" | "buy" | "sell"
     | "with" | "for" | "adjustment" | "expiryDate" | "receive"
     // Additional translation keys
-    | "dashboard" | "profile" | "settings" | "login" | "register" | "logout"
+    | "dashboard" | "profile" | "settings" | "login" | "register" | "logout" | "currencyRates"
     | "loggedOut" | "loggedOutSuccess"
     | "exchangeRates" | "ratesUpdatedAutomatically"
     | "searchPlaceholder" | "noResults" | "tradingPairs" | "quickNav" | "popularPairs"
@@ -95,6 +95,7 @@ export const translations = {
     with: "with",
     for: "for",
     expiryDate: "Expiry Date",
+    currencyRates: "Currency rates",
     // Additional translations in English
     dashboard: "Dashboard",
     profile: "Profile",
@@ -239,7 +240,7 @@ export const translations = {
     paymentPurpose: "Назначение платежа",
     purposeExample: "Например, Оплата импорта, Экспортная выручка и т.д.",
     exchangeRates: "Курсы валют",
-    ratesUpdatedAutomatically: "Курсы обновляются автоматически каждые 5 минут",
+    ratesUpdatedAutomatically: "Курсы обновляются каждые 5 минут",
     personalInfo: "Личная информация",
     error404: "404 - Страница не найдена",
     oopsNotFound: "Упс! Мы не смогли найти страницу, которую вы ищете.",
@@ -323,6 +324,8 @@ export const translations = {
     completed: "Завершено",
     cancelled: "Отменено",
     loadingChat: "Загрузка чата...",
+    currencyRates: "Курсы валют",
+    search: "Поиск",
 
     // Notifications
     success: "Успех",

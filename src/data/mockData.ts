@@ -9,84 +9,94 @@ export const tradePairs: TradePair[] = [
     baseCurrency: "RUB Cash",
     quoteCurrency: "USDT",
     group: "RUB_CASH" as TradePairGroup,
-    displayName: "RUB Cash – USDT"
+    displayName: "RUB Cash – USDT",
+    currencyPair: 'RUB/USD'
   },
-  {
-    id: "pair7",
-    name: "USD_CASH_USDT",
-    baseCurrency: "USD Cash",
-    quoteCurrency: "USDT",
-    group: "RUB_CASH" as TradePairGroup,
-    displayName: "USD Cash – USDT"
-  },
-  {
-    id: "pair8",
-    name: "EUR_CASH_USDT",
-    baseCurrency: "EUR Cash",
-    quoteCurrency: "USDT",
-    group: "RUB_CASH" as TradePairGroup,
-    displayName: "EUR Cash – USDT"
-  },
-
-  // RUB Neresident Group
-  { 
-    id: "pair1", 
-    name: "RUB_NR_USD", 
-    baseCurrency: "RUB (NR)", 
-    quoteCurrency: "USD", 
-    group: "RUB_NR" as TradePairGroup,
-    displayName: "RUB (NR) – USD"
-  },
-  { 
-    id: "pair2", 
-    name: "RUB_NR_AED", 
-    baseCurrency: "RUB (NR)", 
-    quoteCurrency: "AED", 
-    group: "RUB_NR" as TradePairGroup,
-    displayName: "RUB (NR) – AED"
-  },
-  { 
-    id: "pair3", 
-    name: "RUB_NR_EUR", 
-    baseCurrency: "RUB (NR)", 
-    quoteCurrency: "EUR", 
-    group: "RUB_NR" as TradePairGroup,
-    displayName: "RUB (NR) – EUR"
-  },
-  { 
-    id: "pair4", 
-    name: "RUB_NR_CNY", 
-    baseCurrency: "RUB (NR)", 
-    quoteCurrency: "CNY", 
-    group: "RUB_NR" as TradePairGroup,
-    displayName: "RUB (NR) – CNY"
-  },
-  { 
-    id: "pair5", 
-    name: "RUB_NR_USDT", 
-    baseCurrency: "RUB (NR)", 
-    quoteCurrency: "USDT", 
-    group: "RUB_NR" as TradePairGroup,
-    displayName: "RUB (NR) – USDT"
-  },
-  
-  // Tokenized Ruble Group
-  { 
-    id: "pair9", 
-    name: "A7A5_RUB", 
-    baseCurrency: "A7A5", 
-    quoteCurrency: "RUB", 
-    group: "TOKENIZED" as TradePairGroup,
-    displayName: "A7A5 – RUB"
-  },
-  { 
-    id: "pair10", 
-    name: "RUBT_A7A5", 
-    baseCurrency: "RUBT", 
-    quoteCurrency: "A7A5", 
-    group: "TOKENIZED" as TradePairGroup,
-    displayName: "RUBT – A7A5"
-  }
+  // {
+  //   id: "pair7",
+  //   name: "USD_CASH_USDT",
+  //   baseCurrency: "USD Cash",
+  //   quoteCurrency: "USDT",
+  //   group: "RUB_CASH" as TradePairGroup,
+  //   displayName: "USD Cash – USDT",
+  //   currencyPair: 'RUB/USD'
+  // },
+  // {
+  //   id: "pair8",
+  //   name: "EUR_CASH_USDT",
+  //   baseCurrency: "EUR Cash",
+  //   quoteCurrency: "USDT",
+  //   group: "RUB_CASH" as TradePairGroup,
+  //   displayName: "EUR Cash – USDT",
+  //   currencyPair: 'RUB/USD'
+  // },
+  //
+  // // RUB Neresident Group
+  // {
+  //   id: "pair1",
+  //   name: "RUB_NR_USD",
+  //   baseCurrency: "RUB (NR)",
+  //   quoteCurrency: "USD",
+  //   group: "RUB_NR" as TradePairGroup,
+  //   displayName: "RUB (NR) – USD",
+  //   currencyPair: 'RUB/USD'
+  // },
+  // {
+  //   id: "pair2",
+  //   name: "RUB_NR_AED",
+  //   baseCurrency: "RUB (NR)",
+  //   quoteCurrency: "AED",
+  //   group: "RUB_NR" as TradePairGroup,
+  //   displayName: "RUB (NR) – AED",
+  //   currencyPair: 'RUB/USD'
+  // },
+  // {
+  //   id: "pair3",
+  //   name: "RUB_NR_EUR",
+  //   baseCurrency: "RUB (NR)",
+  //   quoteCurrency: "EUR",
+  //   group: "RUB_NR" as TradePairGroup,
+  //   displayName: "RUB (NR) – EUR",
+  //   currencyPair: 'RUB/USD'
+  // },
+  // {
+  //   id: "pair4",
+  //   name: "RUB_NR_CNY",
+  //   baseCurrency: "RUB (NR)",
+  //   quoteCurrency: "CNY",
+  //   group: "RUB_NR" as TradePairGroup,
+  //   displayName: "RUB (NR) – CNY",
+  //   currencyPair: 'RUB/USD'
+  // },
+  // {
+  //   id: "pair5",
+  //   name: "RUB_NR_USDT",
+  //   baseCurrency: "RUB (NR)",
+  //   quoteCurrency: "USDT",
+  //   group: "RUB_NR" as TradePairGroup,
+  //   displayName: "RUB (NR) – USDT",
+  //   currencyPair: 'RUB/USD'
+  // },
+  //
+  // // Tokenized Ruble Group
+  // {
+  //   id: "pair9",
+  //   name: "A7A5_RUB",
+  //   baseCurrency: "A7A5",
+  //   quoteCurrency: "RUB",
+  //   group: "TOKENIZED" as TradePairGroup,
+  //   displayName: "A7A5 – RUB",
+  //   currencyPair: 'RUB/USD'
+  // },
+  // {
+  //   id: "pair10",
+  //   name: "RUBT_A7A5",
+  //   baseCurrency: "RUBT",
+  //   quoteCurrency: "A7A5",
+  //   group: "TOKENIZED" as TradePairGroup,
+  //   displayName: "RUBT – A7A5",
+  //   currencyPair: 'RUB/USD'
+  // }
 ];
 
 // Mock Users

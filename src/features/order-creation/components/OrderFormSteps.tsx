@@ -6,17 +6,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowRight, CreditCard, FileText, Info, CheckCircle } from "lucide-react";
 import BasicDetailsStep from "./BasicDetailsStep";
 import AdditionalDetailsStep from "./AdditionalDetailsStep";
-import TransactionSummary from "./TransactionSummary";
 
 interface OrderFormStepsProps {
   currentStep: number;
-  totalSteps: number;
   formProps: any; // Using any here for simplicity, but could be typed more precisely
 }
 
 export default function OrderFormSteps({ 
-  currentStep, 
-  totalSteps, 
+  currentStep,
   formProps 
 }: OrderFormStepsProps) {
   const { 
@@ -59,8 +56,8 @@ export default function OrderFormSteps({
 
       <Card className={cn(
         "shadow-md border",
-        theme === "light" 
-          ? "bg-white border-gray-200" 
+        theme === "light"
+          ? "bg-white border-gray-200"
           : "bg-otc-card border-otc-active"
       )}>
         <CardHeader className="pb-4 pt-5">
@@ -70,12 +67,12 @@ export default function OrderFormSteps({
           )}>
             {currentStep === 1 ? (
               <>
-                <CreditCard className="w-5 h-5" /> 
+                <CreditCard className="w-5 h-5" />
                 {t('basicDetails')}
               </>
             ) : (
               <>
-                <FileText className="w-5 h-5" /> 
+                <FileText className="w-5 h-5" />
                 {t('additionalDetails')}
               </>
             )}
@@ -97,19 +94,19 @@ export default function OrderFormSteps({
               {/* Render only 2 steps instead of totalSteps */}
               {[1, 2].map((stepNumber) => (
                 <div key={stepNumber} className="flex flex-col items-center">
-                  <div 
+                  <div
                     className={cn(
                       "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300",
-                      stepNumber === currentStep 
-                        ? theme === "light" 
-                            ? "bg-blue-600 text-white shadow-md ring-2 ring-blue-100" 
+                      stepNumber === currentStep
+                        ? theme === "light"
+                            ? "bg-blue-600 text-white shadow-md ring-2 ring-blue-100"
                             : "bg-otc-primary text-black shadow-md ring-2 ring-otc-primary/20"
                         : stepNumber < currentStep
-                          ? theme === "light" 
-                              ? "bg-green-500 text-white" 
+                          ? theme === "light"
+                              ? "bg-green-500 text-white"
                               : "bg-green-600 text-white"
-                          : theme === "light" 
-                              ? "bg-white text-gray-500 border border-gray-300" 
+                          : theme === "light"
+                              ? "bg-white text-gray-500 border border-gray-300"
                               : "bg-otc-active text-gray-400 border border-otc-active"
                     )}
                   >
@@ -125,8 +122,8 @@ export default function OrderFormSteps({
                       ? theme === "light" ? "text-blue-600" : "text-otc-primary"
                       : theme === "light" ? "text-gray-500" : "text-gray-400"
                   )}>
-                    {stepNumber === 1 
-                      ? t('basicDetails') 
+                    {stepNumber === 1
+                      ? t('basicDetails')
                       : t('additionalDetails')
                     }
                   </span>
@@ -135,7 +132,7 @@ export default function OrderFormSteps({
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="pt-2">
           <div className="space-y-6">
             {/* Step 1 - Basic Details */}
@@ -149,7 +146,7 @@ export default function OrderFormSteps({
             )}
           </div>
         </CardContent>
-        
+
         <CardFooter className="flex flex-row justify-end gap-3 pt-4 pb-5 border-t">
           {currentStep === 1 ? (
             /* Only show Continue/Calculate button on step 1 */
@@ -186,7 +183,7 @@ export default function OrderFormSteps({
               >
                 {t('back')}
               </Button>
-              
+
               <Button
                 type="submit"
                 variant={theme === "light" ? "gradient" : "default"}

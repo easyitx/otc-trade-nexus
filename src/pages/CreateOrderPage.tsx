@@ -1,17 +1,10 @@
 
 import OrderForm from "../features/order-creation/OrderForm";
-import { MainLayout } from "../components/layout/MainLayout";
 
 export default function CreateOrderPage() {
   return (
-    <MainLayout>
       <div className="container max-w-4xl mx-auto py-6 px-4">
-        <h1 className="text-2xl font-bold mb-2">Создание новой заявки</h1>
-        <p className="text-muted-foreground mb-6">
-          Заполните форму ниже для создания заявки на покупку или продажу криптовалюты
-        </p>
         <OrderForm />
       </div>
-    </MainLayout>
   );
 }
