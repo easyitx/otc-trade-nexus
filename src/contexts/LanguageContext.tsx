@@ -1,22 +1,28 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import translations from "../i18n/translations";
-import { Language, TranslationKey } from "../i18n/translationTypes";
+import { enTranslations, ruTranslations } from "../i18n/translations";
+import { Locale, TranslationKey } from "../i18n/translationTypes";
 
 interface LanguageContextType {
-  language: Language;
-  setLanguage: (lang: Language) => void;
+  language: Locale;
+  setLanguage: (lang: Locale) => void;
   t: (key: TranslationKey) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Create a translations object with both languages
+const translations = {
+  en: enTranslations,
+  ru: ruTranslations
+};
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   // Changed default language to Russian
-  const [language, setLanguage] = useState<Language>('ru');
+  const [language, setLanguage] = useState<Locale>('ru');
 
   const t = (key: TranslationKey): string => {
-    return translations[language][key];
+    return translations[language][key] || key;
   };
 
   return (
