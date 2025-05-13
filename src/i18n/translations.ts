@@ -82,8 +82,6 @@ export type TranslationKey =
     | 'admin'
     | 'user'
     | 'users'
-    | 'role'
-    | 'roles'
     | 'permission'
     | 'permissions'
     | 'notification'
@@ -104,11 +102,8 @@ export type TranslationKey =
     | 'transactions'
     | 'accounts'
     | 'budget'
-    | 'reports'
     | 'charts'
     | 'statistics'
-    | 'analytics'
-    | 'dashboard'
     | 'createNewOrder'
     | 'buy'
     | 'sell'
@@ -124,7 +119,36 @@ export type TranslationKey =
     | 'currency'
     | 'rates'
     | 'selectCurrencyPair'
-    | 'noRatesAvailable';
+    | 'noRatesAvailable'
+    // Add missing keys from current errors
+    | 'searchPlaceholder'
+    | 'noResults'
+    | 'tradingPairs'
+    | 'quickNav'
+    | 'deals'
+    | 'popularPairs'
+    | 'currencyRates'
+    | 'loggedOut'
+    | 'loggedOutSuccess'
+    | 'exchangeRates'
+    | 'ratesUpdatedAutomatically'
+    | 'welcome'
+    | 'tradeVolume'
+    | 'last30Days'
+    | 'activeOrders'
+    | 'acrossMarkets'
+    | 'activeTraders'
+    | 'thisWeek'
+    | 'error404'
+    | 'oopsNotFound'
+    | 'returnHome'
+    | 'personalInfo'
+    | 'fullName'
+    | 'notSet'
+    | 'memberSince'
+    | 'notAvailable'
+    | 'notConnected'
+    | 'editProfile';
 
 type TranslationType = Record<TranslationKey, string>;
 
@@ -210,8 +234,6 @@ export const translations: Record<Language, TranslationType> = {
     admin: "Admin",
     user: "User",
     users: "Users",
-    role: "Role",
-    roles: "Roles",
     permission: "Permission",
     permissions: "Permissions",
     notification: "Notification",
@@ -232,11 +254,8 @@ export const translations: Record<Language, TranslationType> = {
     transactions: "Transactions",
     accounts: "Accounts",
     budget: "Budget",
-    reports: "Reports",
     charts: "Charts",
     statistics: "Statistics",
-    analytics: "Analytics",
-    dashboard: "Dashboard",
     createNewOrder: "Create New Order",
     buy: "Buy",
     sell: "Sell",
@@ -252,7 +271,36 @@ export const translations: Record<Language, TranslationType> = {
     currency: "Currency",
     rates: "Rates",
     selectCurrencyPair: "Select Currency Pair",
-    noRatesAvailable: "No rates available for this currency pair"
+    noRatesAvailable: "No rates available for this currency pair",
+    // Add new translations for English
+    searchPlaceholder: "Search for currency pairs, orders, or help...",
+    noResults: "No results found",
+    tradingPairs: "Trading Pairs",
+    quickNav: "Quick Navigation",
+    deals: "Deals",
+    popularPairs: "Popular Pairs",
+    currencyRates: "Currency Rates",
+    loggedOut: "Logged Out",
+    loggedOutSuccess: "You have been successfully logged out",
+    exchangeRates: "Exchange Rates",
+    ratesUpdatedAutomatically: "Rates are updated automatically",
+    welcome: "Welcome",
+    tradeVolume: "Trade Volume",
+    last30Days: "Last 30 days",
+    activeOrders: "Active Orders",
+    acrossMarkets: "Across all markets",
+    activeTraders: "Active Traders",
+    thisWeek: "This week",
+    error404: "404 Error",
+    oopsNotFound: "Oops! The page you're looking for doesn't exist.",
+    returnHome: "Return to Home",
+    personalInfo: "Personal Information",
+    fullName: "Full Name",
+    notSet: "Not set",
+    memberSince: "Member Since",
+    notAvailable: "Not available",
+    notConnected: "Not connected",
+    editProfile: "Edit Profile"
   },
   ru: {
     loading: "Загрузка...",
@@ -335,8 +383,6 @@ export const translations: Record<Language, TranslationType> = {
     admin: "Администратор",
     user: "Пользователь",
     users: "Пользователи",
-    role: "Роль",
-    roles: "Роли",
     permission: "Разрешение",
     permissions: "Разрешения",
     notification: "Уведомление",
@@ -357,11 +403,8 @@ export const translations: Record<Language, TranslationType> = {
     transactions: "Транзакции",
     accounts: "Аккаунты",
     budget: "Бюджет",
-    reports: "Отчеты",
     charts: "Графики",
     statistics: "Статистика",
-    analytics: "Аналитика",
-    dashboard: "Панель управления",
     createNewOrder: "Создать новую заявку",
     buy: "Купить",
     sell: "Продать",
@@ -377,6 +420,35 @@ export const translations: Record<Language, TranslationType> = {
     currency: "Валюта",
     rates: "Курсы",
     selectCurrencyPair: "Выберите валютную пару",
-    noRatesAvailable: "Нет доступных курсов для этой валютной пары"
+    noRatesAvailable: "Нет доступных курсов для этой валютной пары",
+    // Add new translations for Russian
+    searchPlaceholder: "Поиск по валютным парам, заявкам или справке...",
+    noResults: "Результаты не найдены",
+    tradingPairs: "Торговые пары",
+    quickNav: "Быстрая навигация",
+    deals: "Сделки",
+    popularPairs: "Популярные пары",
+    currencyRates: "Курсы валют",
+    loggedOut: "Выход выполнен",
+    loggedOutSuccess: "Вы успешно вышли из системы",
+    exchangeRates: "Обменные курсы",
+    ratesUpdatedAutomatically: "Курсы обновляются автоматически",
+    welcome: "Добро пожаловать",
+    tradeVolume: "Объем торгов",
+    last30Days: "За последние 30 дней",
+    activeOrders: "Активные заявки",
+    acrossMarkets: "По всем рынкам",
+    activeTraders: "Активные трейдеры",
+    thisWeek: "На этой неделе",
+    error404: "Ошибка 404",
+    oopsNotFound: "Упс! Страница, которую вы ищете, не существует.",
+    returnHome: "Вернуться на главную",
+    personalInfo: "Личная информация",
+    fullName: "Полное имя",
+    notSet: "Не указано",
+    memberSince: "Участник с",
+    notAvailable: "Недоступно",
+    notConnected: "Не подключено",
+    editProfile: "Редактировать профиль"
   }
 };
