@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { TranslationKey } from "@/i18n/translations";
+import { TranslationKey } from "@/i18n/translationTypes";
 import { ArrowRight, ArrowRightCircle } from "lucide-react";
 import { tradePairs } from "@/data/mockData";
 import TransactionSummary from "./TransactionSummary";

@@ -1,4 +1,3 @@
-
 import { Language, TranslationKey } from './translationTypes';
 
 const translations: Record<Language, Record<TranslationKey, string>> = {
@@ -82,7 +81,36 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     fixedRate: "Fixed Rate",
     selectSource: "Select Source",
     finalRate: "Final Rate",
-    in: "in"
+    in: "in",
+    
+    // Navigation and layout
+    dashboard: "Dashboard",
+    orders: "Orders",
+    profile: "Profile",
+    settings: "Settings",
+    login: "Login",
+    register: "Register",
+    logout: "Logout",
+    user: "User",
+    search: "Search",
+    
+    // Rate management
+    activeRate: "Active Rate",
+    autoRate: "Auto Rate",
+    manualRate: "Manual Rate",
+    useManualRate: "Use Manual Rate",
+    sourceUpdated: "Source Updated",
+    lastUpdated: "Last Updated",
+    saveChanges: "Save Changes",
+    edit: "Edit",
+    cancel: "Cancel",
+    rates: "Rates",
+    selectCurrencyPair: "Select Currency Pair",
+    noRatesAvailable: "No Rates Available",
+    
+    // Other
+    company: "Company",
+    email: "Email"
   },
   ru: {
     createNewOrder: "Создать новую заявку",
@@ -164,7 +192,36 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     fixedRate: "Фиксированный курс",
     selectSource: "Выберите источник",
     finalRate: "Итоговый курс",
-    in: "в"
+    in: "в",
+    
+    // Navigation and layout
+    dashboard: "Панель управления",
+    orders: "Заявки",
+    profile: "Профиль",
+    settings: "Настройки",
+    login: "Вход",
+    register: "Регистрация",
+    logout: "Выход",
+    user: "Пользователь",
+    search: "Поиск",
+    
+    // Rate management
+    activeRate: "Активный курс",
+    autoRate: "Автоматический курс",
+    manualRate: "Ручной курс",
+    useManualRate: "Использовать ручной курс",
+    sourceUpdated: "Источник обновлен",
+    lastUpdated: "Последнее обновление",
+    saveChanges: "Сохранить изменения",
+    edit: "Редактировать",
+    cancel: "Отмена",
+    rates: "Курсы",
+    selectCurrencyPair: "Выберите валютную пару",
+    noRatesAvailable: "Нет доступных курсов",
+    
+    // Other
+    company: "Компания",
+    email: "Email"
   }
 };
 

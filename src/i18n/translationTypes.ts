@@ -1,4 +1,3 @@
-
 export type Language = 'en' | 'ru';
 
 // Create a union type of all available translation keys
@@ -24,4 +23,13 @@ export type TranslationKey =
   | 'notConnected' | 'editProfile'
   // Trade functionality
   | 'tradingPair' | 'selectTradingPair' | 'minimumOrder' | 'rate' | 'rateSource'
-  | 'dynamicRate' | 'fixedRate' | 'selectSource' | 'adjustment' | 'finalRate' | 'in';
+  | 'dynamicRate' | 'fixedRate' | 'selectSource' | 'adjustment' | 'finalRate' | 'in'
+  // Navigation and layout
+  | 'dashboard' | 'orders' | 'profile' | 'settings' | 'login' | 'register' | 'logout' | 'user'
+  | 'search'
+  // Rate management
+  | 'activeRate' | 'autoRate' | 'manualRate' | 'useManualRate' | 'sourceUpdated'
+  | 'lastUpdated' | 'saveChanges' | 'edit' | 'cancel' | 'rates' | 'selectCurrencyPair'
+  | 'noRatesAvailable'
+  // Other
+  | 'company' | 'email';
