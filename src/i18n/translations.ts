@@ -120,7 +120,6 @@ export type TranslationKey =
     | 'rates'
     | 'selectCurrencyPair'
     | 'noRatesAvailable'
-    // Add missing keys from current errors
     | 'searchPlaceholder'
     | 'noResults'
     | 'tradingPairs'
@@ -148,7 +147,31 @@ export type TranslationKey =
     | 'memberSince'
     | 'notAvailable'
     | 'notConnected'
-    | 'editProfile';
+    | 'editProfile'
+    // Order creation specific translations
+    | 'basicDetails'
+    | 'additionalDetails'
+    | 'enterOrderDetails'
+    | 'paymentDetails'
+    | 'continue'
+    | 'calculateSummary'
+    | 'creatingOrder'
+    | 'createOrder'
+    | 'minOrderSize'
+    | 'selectWhenExpires'
+    | 'geography'
+    | 'selectCountry'
+    | 'selectCity'
+    | 'paymentPurpose'
+    | 'purposeExample'
+    | 'additionalNotes'
+    | 'notesPlaceholder'
+    | 'orderSummary'
+    | 'youPay'
+    | 'youReceive'
+    | 'exchangeRate'
+    | 'expiryDate'
+    | 'orderType';
 
 type TranslationType = Record<TranslationKey, string>;
 
@@ -300,7 +323,31 @@ export const translations: Record<Language, TranslationType> = {
     memberSince: "Member Since",
     notAvailable: "Not available",
     notConnected: "Not connected",
-    editProfile: "Edit Profile"
+    editProfile: "Edit Profile",
+    // Order creation specific translations
+    basicDetails: "Basic Details",
+    additionalDetails: "Additional Details",
+    enterOrderDetails: "Enter order details and amount",
+    paymentDetails: "Payment and location details",
+    continue: "Continue",
+    calculateSummary: "Calculate Summary",
+    creatingOrder: "Creating Order...",
+    createOrder: "Create Order",
+    minOrderSize: "Minimum Order Size",
+    selectWhenExpires: "Select when this order expires",
+    geography: "Geography",
+    selectCountry: "Select country",
+    selectCity: "Select city",
+    paymentPurpose: "Payment Purpose",
+    purposeExample: "e.g. Payment for services",
+    additionalNotes: "Additional Notes",
+    notesPlaceholder: "Add any additional notes or instructions for this order",
+    orderSummary: "Order Summary",
+    youPay: "You Pay",
+    youReceive: "You Receive",
+    exchangeRate: "Exchange Rate",
+    expiryDate: "Expiry Date",
+    orderType: "Order Type"
   },
   ru: {
     loading: "Загрузка...",
@@ -449,6 +496,30 @@ export const translations: Record<Language, TranslationType> = {
     memberSince: "Участник с",
     notAvailable: "Недоступно",
     notConnected: "Не подключено",
-    editProfile: "Редактировать профиль"
+    editProfile: "Редактировать профиль",
+    // Order creation specific translations
+    basicDetails: "Основные детали",
+    additionalDetails: "Дополнительные детали",
+    enterOrderDetails: "Введите детали заявки и сумму",
+    paymentDetails: "Детали оплаты и местоположения",
+    continue: "Продолжить",
+    calculateSummary: "Рассчитать итог",
+    creatingOrder: "Создание заявки...",
+    createOrder: "Создать заявку",
+    minOrderSize: "Минимальный размер заявки",
+    selectWhenExpires: "Выберите, когда истекает эта заявка",
+    geography: "География",
+    selectCountry: "Выберите страну",
+    selectCity: "Выберите город",
+    paymentPurpose: "Назначение платежа",
+    purposeExample: "например, Оплата за услуги",
+    additionalNotes: "Дополнительные примечания",
+    notesPlaceholder: "Добавьте любые дополнительные примечания или инструкции для этой заявки",
+    orderSummary: "Сводка заявки",
+    youPay: "Вы платите",
+    youReceive: "Вы получаете",
+    exchangeRate: "Обменный курс",
+    expiryDate: "Срок действия",
+    orderType: "Тип заявки"
   }
 };
