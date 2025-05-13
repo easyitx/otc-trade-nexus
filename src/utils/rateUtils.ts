@@ -72,30 +72,67 @@ export function calculateOrderAmount(
     return { youPay: 0, youReceive: 0 };
   }
 
-  // Для отладки
   console.log(`Calculate order: amount=${amount}, rate=${rate}, orderType=${orderType}, base=${baseCurrency}, quote=${quoteCurrency}`);
 
   let youPay = amount; // Default: user always pays the input amount
   let youReceive = 0;
 
-  // USDT/RUB and USD/RUB pairs - converting between crypto/fiat
-  if ((baseCurrency === "USDT" || baseCurrency === "USD") && quoteCurrency === "RUB") {
-    if (orderType === "BUY") { // Buy USDT/USD with RUB
-      youPay = amount; // in RUB
-      youReceive = amount / rate; // in USDT/USD
-    } else { // Sell USDT/USD for RUB
-      youPay = amount; // in USDT/USD
-      youReceive = amount * rate; // in RUB
+  // Special handling for USDT/RUB pairs
+  if ((baseCurrency === "USDT" && quoteCurrency === "RUB") || 
+      (baseCurrency === "RUB" && quoteCurrency === "USDT")) {
+    
+    // USDT/RUB pair
+    if (baseCurrency === "USDT" && quoteCurrency === "RUB") {
+      if (orderType === "BUY") {
+        // Buying USDT with RUB
+        youPay = amount; // in RUB
+        youReceive = amount / rate; // in USDT
+      } else {
+        // Selling USDT for RUB
+        youPay = amount; // in USDT
+        youReceive = amount * rate; // in RUB
+      }
+    } 
+    // RUB/USDT pair
+    else {
+      if (orderType === "BUY") {
+        // Buying RUB with USDT
+        youPay = amount; // in USDT
+        youReceive = amount * rate; // in RUB
+      } else {
+        // Selling RUB for USDT
+        youPay = amount; // in RUB
+        youReceive = amount / rate; // in USDT
+      }
     }
-  } 
-  // RUB/USD and RUB/USDT pairs
-  else if (baseCurrency === "RUB" && (quoteCurrency === "USD" || quoteCurrency === "USDT")) {
-    if (orderType === "BUY") { // Buy RUB with USD/USDT
-      youPay = amount; // in USD/USDT
-      youReceive = amount * rate; // in RUB
-    } else { // Sell RUB for USD/USDT
-      youPay = amount; // in RUB
-      youReceive = amount / rate; // in USD/USDT
+  }
+  // Standard USD/RUB pairs
+  else if ((baseCurrency === "USD" && quoteCurrency === "RUB") || 
+           (baseCurrency === "RUB" && quoteCurrency === "USD")) {
+    
+    // USD/RUB pair
+    if (baseCurrency === "USD" && quoteCurrency === "RUB") {
+      if (orderType === "BUY") {
+        // Buying USD with RUB
+        youPay = amount; // in RUB
+        youReceive = amount / rate; // in USD
+      } else {
+        // Selling USD for RUB
+        youPay = amount; // in USD
+        youReceive = amount * rate; // in RUB
+      }
+    } 
+    // RUB/USD pair
+    else {
+      if (orderType === "BUY") {
+        // Buying RUB with USD
+        youPay = amount; // in USD
+        youReceive = amount * rate; // in RUB
+      } else {
+        // Selling RUB for USD
+        youPay = amount; // in RUB
+        youReceive = amount / rate; // in USD
+      }
     }
   }
   // Generic case for any other currency pairs
@@ -109,9 +146,7 @@ export function calculateOrderAmount(
     }
   }
 
-  // Для отладки результата
   console.log(`Result: youPay=${youPay}, youReceive=${youReceive}`);
-
   return { youPay, youReceive };
 }
 

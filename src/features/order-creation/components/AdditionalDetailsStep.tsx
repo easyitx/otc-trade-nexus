@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { EnhancedDatePicker } from "@/components/ui/enhanced-date-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -7,54 +7,37 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { Calendar, FileText, Globe, CreditCard, HelpCircle } from "lucide-react";
+import { Calendar, FileText, Globe, HelpCircle } from "lucide-react";
 import { countries } from "@/data/countries";
 import { citiesByCountry } from "@/data/cities";
 import { Button } from "@/components/ui/button";
-import { addDays, format } from "date-fns";
+import { addDays } from "date-fns";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { FormProps } from "../types";
+import OrderSummary from "./OrderSummary";
 
-export default function AdditionalDetailsStep({ formProps }: { formProps: any }) {
+export default function AdditionalDetailsStep({ formProps }: { formProps: FormProps }) {
   const {
     theme,
     t,
     language,
-    expiryDate,
-    setExpiryDate,
-    purpose,
-    setPurpose,
-    notes,
-    setNotes,
-    country,
-    setCountry,
-    city,
-    setCity,
+    formData,
+    updateFormData,
     isCashPair,
-    calculationResult
+    calculationResult,
+    getCurrencySymbol
   } = formProps;
+
+  const { expiryDate, purpose, notes, country, city } = formData;
 
   // Get cities based on selected country
   const getCitiesForCountry = () => {
     return country ? citiesByCountry[country] || [] : [];
-  };
-
-  // Get currency symbol
-  const getCurrencySymbol = (currency: string) => {
-    switch (currency) {
-      case "USD":
-        return "$";
-      case "EUR":
-        return "€";
-      case "RUB":
-        return "₽";
-      default:
-        return "";
-    }
   };
 
   // Preset date options
@@ -68,21 +51,21 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
   // Apply preset date
   const applyDatePreset = (days: number) => {
     const newDate = addDays(new Date(), days);
-    setExpiryDate(newDate);
+    updateFormData("expiryDate", newDate);
   };
 
   // Set default country/city if needed
   const handlePairChange = () => {
     if (isCashPair() && !country) {
       // Set Russia as default for cash pairs
-      setCountry("RU");
+      updateFormData("country", "RU");
       // Set Moscow as default city if Russia is selected
-      setCity("Moscow");
+      updateFormData("city", "Moscow");
     }
   };
 
   // Call this whenever isCashPair changes
-  React.useEffect(() => {
+  useEffect(() => {
     handlePairChange();
   }, [isCashPair()]);
 
@@ -152,7 +135,8 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
                 onClick={() => applyDatePreset(preset.days)}
                 className={cn(
                   "text-xs",
-                  expiryDate && format(expiryDate, 'yyyy-MM-dd') === format(addDays(new Date(), preset.days), 'yyyy-MM-dd')
+                  expiryDate && 
+                    addDays(new Date(), preset.days).toDateString() === expiryDate.toDateString()
                     ? theme === "light" 
                         ? "bg-blue-50 border-blue-300 text-blue-700" 
                         : "bg-otc-primary/20 border-otc-primary text-otc-primary"
@@ -168,7 +152,7 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
           
           <EnhancedDatePicker 
             date={expiryDate}
-            setDate={(date) => date && setExpiryDate(date)}
+            setDate={(date) => date && updateFormData("expiryDate", date)}
             placeholder={t('selectWhenExpires')}
             className={cn(
               "w-full",
@@ -241,10 +225,13 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
           )}>
             {t('country')} <span className="text-red-500 ml-1">*</span>
           </Label>
-          <Select value={country} onValueChange={(value) => {
-            setCountry(value);
-            setCity(""); // Reset city when country changes
-          }}>
+          <Select 
+            value={country} 
+            onValueChange={(value) => {
+              updateFormData("country", value);
+              updateFormData("city", ""); // Reset city when country changes
+            }}
+          >
             <SelectTrigger
               id="country"
               className={cn(
@@ -286,7 +273,7 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
               {t('city')}
               {isCashPair() && <span className="text-red-500 ml-1">*</span>}
             </Label>
-            <Select value={city} onValueChange={setCity}>
+            <Select value={city} onValueChange={value => updateFormData("city", value)}>
               <SelectTrigger
                 id="city"
                 className={cn(
@@ -326,7 +313,7 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
       {!isCashPair() && (
         <div className="space-y-3">
           <div className="flex items-center mb-2 gap-3">
-            <CreditCard className={cn(
+            <FileText className={cn(
               "w-5 h-5",
               theme === "light" ? "text-blue-600" : "text-otc-primary"
             )} />
@@ -340,7 +327,7 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
           <Input
             id="purpose"
             value={purpose}
-            onChange={(e) => setPurpose(e.target.value)}
+            onChange={(e) => updateFormData("purpose", e.target.value)}
             placeholder={t('purposeExample')}
             className={cn(
               theme === "light"
@@ -368,7 +355,7 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
         <Textarea
           id="notes"
           value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={(e) => updateFormData("notes", e.target.value)}
           placeholder={t('notesPlaceholder')}
           className={cn(
             "min-h-[120px]",
@@ -389,78 +376,5 @@ export default function AdditionalDetailsStep({ formProps }: { formProps: any })
         />
       )}
     </>
-  );
-}
-
-// Order summary component for second step
-function OrderSummary({ theme, t, calculationResult, getCurrencySymbol }: any) {
-  return (
-    <div className={cn(
-      "mt-6 rounded-lg overflow-hidden border shadow-md animate-fade-in",
-      theme === "light"
-        ? "bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200"
-        : "bg-gradient-to-br from-otc-primary/10 to-otc-primary/5 border-otc-primary/20"
-    )}>
-      <div className={cn(
-        "px-4 py-3 border-b",
-        theme === "light" 
-          ? "bg-blue-100/50 border-blue-200" 
-          : "bg-otc-primary/20 border-otc-primary/30"
-      )}>
-        <h3 className={cn(
-          "text-lg font-semibold",
-          theme === "light" ? "text-blue-800" : "text-otc-primary"
-        )}>
-          {t('orderSummary')}
-        </h3>
-      </div>
-      
-      <div className="p-4 space-y-4">
-        <div className={cn(
-          "rounded-lg p-4 border",
-          theme === "light" 
-            ? "bg-white border-gray-200" 
-            : "bg-otc-active/20 border-otc-active/40"
-        )}>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('youPay')}:
-              </span>
-              <span className={cn(
-                "font-medium",
-                theme === "light" ? "text-gray-900" : "text-white"
-              )}>
-                {getCurrencySymbol(calculationResult.fromCurrency)}{calculationResult.youPay} {calculationResult.fromCurrency}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('youReceive')}:
-              </span>
-              <span className={cn(
-                "font-medium",
-                theme === "light" ? "text-green-600" : "text-green-400"
-              )}>
-                {getCurrencySymbol(calculationResult.toCurrency)}{calculationResult.youReceive} {calculationResult.toCurrency}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
-                {t('exchangeRate')}:
-              </span>
-              <span className={cn(
-                "font-medium",
-                theme === "light" ? "text-blue-600" : "text-otc-primary"
-              )}>
-                {calculationResult.finalRate}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

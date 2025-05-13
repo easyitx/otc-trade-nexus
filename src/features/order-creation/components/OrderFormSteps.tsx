@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,16 +7,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowRight, CreditCard, FileText, Info, CheckCircle } from "lucide-react";
 import BasicDetailsStep from "./BasicDetailsStep";
 import AdditionalDetailsStep from "./AdditionalDetailsStep";
+import { FormProps } from "../types";
 
 interface OrderFormStepsProps {
-  currentStep: number;
-  formProps: any; // Using any here for simplicity, but could be typed more precisely
+  formProps: FormProps;
 }
 
-export default function OrderFormSteps({ 
-  currentStep,
-  formProps 
-}: OrderFormStepsProps) {
+export default function OrderFormSteps({ formProps }: OrderFormStepsProps) {
   const { 
     theme, 
     t, 
@@ -23,14 +21,14 @@ export default function OrderFormSteps({
     calculationResult, 
     calculateOrder, 
     isSubmitting, 
-    selectedPair, 
-    amount, 
-    country, 
+    formData,
     isCashPair, 
-    city, 
+    currentStep,
     setCurrentStep,
     showCalculation
   } = formProps;
+
+  const { selectedPair, amount, country, city } = formData;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
