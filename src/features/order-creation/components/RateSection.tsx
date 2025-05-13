@@ -1,167 +1,123 @@
 
-import React from "react";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
-import { FormProps } from "../types";
-import DynamicRateOptions from "./DynamicRateOptions";
-import FixedRateOptions from "./FixedRateOptions";
+import React from 'react';
+import { FormProps } from '../types';
 
-export default function RateSection({ formProps }: { formProps: FormProps }) {
-  const {
-    theme, 
+/**
+ * RateSection component
+ * Displays and controls rate settings for the order
+ */
+interface RateSectionProps {
+  formProps: FormProps;
+}
+
+const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
+  const { 
     t, 
     formData,
     updateFormData,
     formatRate
   } = formProps;
 
-  // Get the service fee from the form data instead of directly from formProps
+  // Get the service fee from the form data
   const serviceFee = formData.serviceFee;
 
   return (
     <div className="space-y-6 pt-2">
-      <div className="flex items-center justify-between">
-        <Label className={cn(
-          "text-base",
-          theme === "light" ? "text-gray-800" : "text-white"
-        )}>{t('rate')}</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="rateType" className="block text-sm font-medium">
+            {t('rateType')}
+          </label>
+          <select
+            id="rateType"
+            value={formData.rateType}
+            onChange={(e) => updateFormData({ rateType: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="dynamic">{t('dynamic')}</option>
+            <option value="fixed">{t('fixed')}</option>
+          </select>
+        </div>
 
-        <div className={cn(
-          "text-sm font-medium px-3 py-1 rounded-full",
-          theme === "light"
-            ? "bg-blue-100 text-blue-700"
-            : "bg-otc-primary/20 text-otc-primary"
-        )}>
-          {formatRate()}
+        {formData.rateType === 'dynamic' ? (
+          <div className="space-y-2">
+            <label htmlFor="rateSource" className="block text-sm font-medium">
+              {t('rateSource')}
+            </label>
+            <select
+              id="rateSource"
+              value={formData.rateSource}
+              onChange={(e) => updateFormData({ rateSource: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              {formData.rateSources && formData.rateSources.map((source) => (
+                <option key={source.code} value={source.code}>
+                  {source.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <label htmlFor="customRate" className="block text-sm font-medium">
+              {t('customRate')}
+            </label>
+            <input
+              id="customRate"
+              type="text"
+              value={formData.customRate || ''}
+              onChange={(e) => updateFormData({ customRate: e.target.value })}
+              placeholder="0.00"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="rateAdjustment" className="block text-sm font-medium">
+          {t('rateAdjustment')}
+        </label>
+        <div className="flex items-center">
+          <input
+            id="rateAdjustment"
+            type="number"
+            step="0.01"
+            value={formData.rateAdjustment || '0'}
+            onChange={(e) => updateFormData({ rateAdjustment: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <span className="ml-2">%</span>
         </div>
       </div>
 
-      {/* Rate Type Selection */}
-      <div className={cn(
-        "p-4 rounded-lg border",
-        theme === "light"
-          ? "bg-gray-50 border-gray-200"
-          : "bg-otc-active/30 border-otc-active"
-      )}>
-        <div className="space-y-4">
-          <Label className={cn(
-            "block font-medium",
-            theme === "light" ? "text-gray-700" : "text-gray-300"
-          )}>
-            {t('rateType')}
-          </Label>
-          <RadioGroup
-            value={formData.rateType}
-            onValueChange={(value) => updateFormData("rateType", value as "dynamic" | "fixed")}
-            className="flex gap-4"
-          >
-            <div className={cn(
-              "flex items-center gap-2 p-3 rounded-lg border transition-all",
-              formData.rateType === "dynamic" ? (
-                theme === "light"
-                  ? "bg-blue-50 border-blue-200"
-                  : "bg-otc-primary/10 border-otc-primary/30"
-              ) : (
-                theme === "light"
-                  ? "bg-white border-gray-200"
-                  : "bg-otc-active border-otc-active"
-              )
-            )}>
-              <RadioGroupItem
-                value="dynamic"
-                id="dynamic-rate"
-                className={cn(
-                  theme === "light"
-                    ? "border-gray-300 text-blue-600"
-                    : "border-otc-active text-otc-primary"
-                )}
-              />
-              <Label
-                htmlFor="dynamic-rate"
-                className={cn(
-                  "cursor-pointer",
-                  theme === "light" ? "text-gray-800" : "text-white"
-                )}
-              >
-                {t('dynamicRate')}
-              </Label>
-            </div>
-
-            <div className={cn(
-              "flex items-center gap-2 p-3 rounded-lg border transition-all",
-              formData.rateType === "fixed" ? (
-                theme === "light"
-                  ? "bg-blue-50 border-blue-200"
-                  : "bg-otc-primary/10 border-otc-primary/30"
-              ) : (
-                theme === "light"
-                  ? "bg-white border-gray-200"
-                  : "bg-otc-active border-otc-active"
-              )
-            )}>
-              <RadioGroupItem
-                value="fixed"
-                id="fixed-rate"
-                className={cn(
-                  theme === "light"
-                    ? "border-gray-300 text-blue-600"
-                    : "border-otc-active text-otc-primary"
-                )}
-              />
-              <Label
-                htmlFor="fixed-rate"
-                className={cn(
-                  "cursor-pointer",
-                  theme === "light" ? "text-gray-800" : "text-white"
-                )}
-              >
-                {t('fixedRate')}
-              </Label>
-            </div>
-          </RadioGroup>
-
-          {/* Dynamic Rate Options */}
-          {formData.rateType === "dynamic" && <DynamicRateOptions formProps={formProps} />}
-
-          {/* Fixed Rate Input with Source Selection */}
-          {formData.rateType === "fixed" && <FixedRateOptions formProps={formProps} />}
-
-          {/* Rate Summary */}
-          <div className={cn(
-            "rounded-lg p-4 mt-4 border",
-            theme === "light"
-              ? "bg-blue-50 border-blue-100 text-blue-800"
-              : "bg-otc-primary/10 border-otc-primary/20 text-white"
-          )}>
-            <div className="flex justify-between items-center">
-              <Label>{t('serviceFee')}: </Label>
-              <span className={cn(
-                "font-semibold",
-                theme === "light" ? "text-blue-700" : "text-otc-primary"
-              )}>
-                {serviceFee}%
-              </span>
-            </div>
-            <div className={cn(
-              "mt-3 pt-3",
-              theme === "light"
-                ? "border-t border-blue-200"
-                : "border-t border-otc-primary/20"
-            )}>
-              <div className="flex justify-between items-center">
-                <Label>{t('finalRate')}: </Label>
-                <span className={cn(
-                  "font-medium",
-                  theme === "light" ? "text-blue-700" : "text-otc-primary"
-                )}>
-                  {formatRate()}
-                </span>
-              </div>
-            </div>
+      {serviceFee !== undefined && (
+        <div className="space-y-2">
+          <label htmlFor="serviceFee" className="block text-sm font-medium">
+            {t('serviceFee')}
+          </label>
+          <div className="flex items-center">
+            <input
+              id="serviceFee"
+              type="number"
+              step="0.01"
+              value={serviceFee}
+              onChange={(e) => updateFormData({ serviceFee: parseFloat(e.target.value) })}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <span className="ml-2">%</span>
           </div>
         </div>
-      </div>
+      )}
+
+      {formData.currentRate !== undefined && (
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
+          <div className="text-sm text-gray-500 dark:text-gray-400">{t('finalRate')}</div>
+          <div className="text-lg font-medium">{formatRate(formData.currentRate)}</div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default RateSection;

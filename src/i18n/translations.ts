@@ -1,3 +1,4 @@
+
 import { Language, TranslationKey } from './translationTypes';
 
 const translations: Record<Language, Record<TranslationKey, string>> = {
@@ -110,7 +111,11 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     
     // Other
     company: "Company",
-    email: "Email"
+    email: "Email",
+    
+    // Added missing keys
+    validationError: "Validation Error",
+    error: "Error"
   },
   ru: {
     createNewOrder: "Создать новую заявку",
@@ -221,7 +226,11 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     
     // Other
     company: "Компания",
-    email: "Email"
+    email: "Email",
+    
+    // Added missing keys
+    validationError: "Ошибка валидации",
+    error: "Ошибка"
   }
 };
 

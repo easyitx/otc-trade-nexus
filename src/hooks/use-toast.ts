@@ -1,6 +1,6 @@
 
-// Import directly from the original source
-import { useToast as useToastOriginal, toast as toastOriginal } from '@radix-ui/react-toast';
+// Import directly from the components/ui/toast.tsx file
+import { useToast as useToastOriginal, toast as toastOriginal } from '@/components/ui/toast';
 
 // Re-export the toast hook and function
 export const useToast = useToastOriginal;

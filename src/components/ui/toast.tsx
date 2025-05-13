@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -114,6 +115,81 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>
 
+// Create our own useToast hook and toast function for the app to use
+const toasts = new Set<{
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: ToastActionElement;
+  variant?: "default" | "destructive";
+}>();
+
+const listeners = new Set<() => void>();
+
+function emitChange() {
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
+function useToast() {
+  const [toastList, setToastList] = React.useState<Array<any>>([...toasts]);
+
+  React.useEffect(() => {
+    function handleToastsChange() {
+      setToastList([...toasts]);
+    }
+
+    listeners.add(handleToastsChange);
+    return () => {
+      listeners.delete(handleToastsChange);
+    };
+  }, []);
+
+  return {
+    toasts: toastList,
+    toast,
+    dismiss: (id: string) => {
+      for (const toast of toasts) {
+        if (toast.id === id) {
+          toasts.delete(toast);
+          emitChange();
+          break;
+        }
+      }
+    },
+  };
+}
+
+function toast({
+  title,
+  description,
+  action,
+  variant,
+}: {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: ToastActionElement;
+  variant?: "default" | "destructive";
+}) {
+  const id = Math.random().toString(36).slice(2, 10);
+  toasts.add({ id, title, description, action, variant });
+  emitChange();
+
+  return {
+    id,
+    dismiss: () => {
+      for (const toast of toasts) {
+        if (toast.id === id) {
+          toasts.delete(toast);
+          emitChange();
+          break;
+        }
+      }
+    },
+  };
+}
+
 export {
   type ToastProps,
   type ToastActionElement,
@@ -124,4 +200,6 @@ export {
   ToastDescription,
   ToastClose,
   ToastAction,
-}
+  useToast,
+  toast,
+};

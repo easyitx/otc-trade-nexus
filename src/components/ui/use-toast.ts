@@ -1,7 +1,6 @@
 
 // Import from the hook to avoid circular references
-import { useToast as useToastHook, toast as toastFunction } from "@/components/ui/toast";
+import { useToast, toast } from "@/hooks/use-toast";
 
 // Re-export with standard names
-export const useToast = useToastHook;
-export const toast = toastFunction;
+export { useToast, toast };
