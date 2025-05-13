@@ -154,7 +154,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           toast({
             title: "ID скопирован",
             description: "ID заявки скопирован в буфер обмена",
-            duration: 2000,
           });
         })
         .catch(err => {
@@ -162,8 +161,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
           toast({
             title: "Ошибка",
             description: "Не удалось скопировать ID",
-            variant: "destructive",
-            duration: 2000,
+            variant: "destructive"
           });
         });
   };

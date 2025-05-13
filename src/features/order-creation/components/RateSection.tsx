@@ -15,11 +15,9 @@ const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
     t, 
     formData,
     updateFormData,
-    formatRate
+    formatRate,
+    availableSources
   } = formProps;
-
-  // Get the service fee from the form data
-  const serviceFee = formData.serviceFee;
 
   return (
     <div className="space-y-6 pt-2">
@@ -31,7 +29,7 @@ const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
           <select
             id="rateType"
             value={formData.rateType}
-            onChange={(e) => updateFormData({ rateType: e.target.value })}
+            onChange={(e) => updateFormData("rateType", e.target.value as "dynamic" | "fixed")}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="dynamic">{t('dynamic')}</option>
@@ -47,10 +45,10 @@ const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
             <select
               id="rateSource"
               value={formData.rateSource}
-              onChange={(e) => updateFormData({ rateSource: e.target.value })}
+              onChange={(e) => updateFormData("rateSource", e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {formData.rateSources && formData.rateSources.map((source) => (
+              {availableSources && availableSources.map((source) => (
                 <option key={source.code} value={source.code}>
                   {source.name}
                 </option>
@@ -59,14 +57,14 @@ const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
           </div>
         ) : (
           <div className="space-y-2">
-            <label htmlFor="customRate" className="block text-sm font-medium">
+            <label htmlFor="customRateValue" className="block text-sm font-medium">
               {t('customRate')}
             </label>
             <input
-              id="customRate"
+              id="customRateValue"
               type="text"
-              value={formData.customRate || ''}
-              onChange={(e) => updateFormData({ customRate: e.target.value })}
+              value={formData.customRateValue || ''}
+              onChange={(e) => updateFormData("customRateValue", e.target.value)}
               placeholder="0.00"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
@@ -84,14 +82,14 @@ const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
             type="number"
             step="0.01"
             value={formData.rateAdjustment || '0'}
-            onChange={(e) => updateFormData({ rateAdjustment: e.target.value })}
+            onChange={(e) => updateFormData("rateAdjustment", parseFloat(e.target.value))}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <span className="ml-2">%</span>
         </div>
       </div>
 
-      {serviceFee !== undefined && (
+      {formData.serviceFee !== undefined && (
         <div className="space-y-2">
           <label htmlFor="serviceFee" className="block text-sm font-medium">
             {t('serviceFee')}
@@ -101,8 +99,8 @@ const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
               id="serviceFee"
               type="number"
               step="0.01"
-              value={serviceFee}
-              onChange={(e) => updateFormData({ serviceFee: parseFloat(e.target.value) })}
+              value={formData.serviceFee}
+              onChange={(e) => updateFormData("serviceFee", parseFloat(e.target.value))}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <span className="ml-2">%</span>
@@ -110,10 +108,10 @@ const RateSection: React.FC<RateSectionProps> = ({ formProps }) => {
         </div>
       )}
 
-      {formData.currentRate !== undefined && (
+      {formData.calculatedRate !== undefined && (
         <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-md text-center">
           <div className="text-sm text-gray-500 dark:text-gray-400">{t('finalRate')}</div>
-          <div className="text-lg font-medium">{formatRate(formData.currentRate)}</div>
+          <div className="text-lg font-medium">{formatRate()}</div>
         </div>
       )}
     </div>

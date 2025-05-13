@@ -1,5 +1,5 @@
 
-// Import directly from the components/ui/toast.tsx file
+// Import directly from the ui components
 import { useToast as useToastOriginal, toast as toastOriginal } from '@/components/ui/toast';
 
 // Re-export the toast hook and function

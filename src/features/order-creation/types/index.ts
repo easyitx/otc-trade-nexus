@@ -1,6 +1,5 @@
 
 import { Dispatch, SetStateAction } from "react";
-import { CurrencyPair, RateSource } from "@/hooks/useCurrencyRates";
 
 // Order form data type
 export interface OrderFormData {
@@ -18,6 +17,18 @@ export interface OrderFormData {
   notes: string;
   country: string;
   city: string;
+  calculatedRate?: number; // Added to hold the calculated rate value
+}
+
+// Export these interfaces from useCurrencyRates if they're missing
+export interface CurrencyPair {
+  label: string;
+  value: string;
+}
+
+export interface RateSource {
+  name: string;
+  code: string;
 }
 
 // Order calculation result type
