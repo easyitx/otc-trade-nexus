@@ -58,6 +58,7 @@ export default function BasicDetailsStep({ formProps }: { formProps: any }) {
     const currencySymbols: Record<string, string> = {
       // Основные валюты
       USD: "$",     // Доллар США
+      USDT: "$",     // Доллар США
       EUR: "€",     // Евро
       GBP: "£",     // Фунт стерлингов
       JPY: "¥",     // Японская иена
@@ -586,7 +587,6 @@ function RateSection({
 
 // DynamicRateOptions component for further modularization
 function DynamicRateOptions({ theme, t, rateSource, setRateSource, rateAdjustment, setRateAdjustment, currentRates }: any) {
-  console.log(currentRates)
   return (
     <div className="space-y-4 pt-2 mt-2 border-t border-dashed">
       {/* Rate Source */}

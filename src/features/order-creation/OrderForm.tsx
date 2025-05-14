@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOrders } from "@/hooks/useOrders";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import OrderFormSteps from "./components/OrderFormSteps";
@@ -21,8 +20,7 @@ export default function OrderForm() {
 
   // Auto calculation flag
   const [autoCalculate, setAutoCalculate] = useState<boolean>(true);
-  
-  // Form steps - changed from 3 to 2 total steps
+
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
 
@@ -32,7 +30,7 @@ export default function OrderForm() {
   const [amount, setAmount] = useState<string>("");
   const [amountCurrency, setAmountCurrency] = useState<string>("USD");
   const [rateType, setRateType] = useState<"dynamic" | "fixed">("dynamic");
-  const [rateSource, setRateSource] = useState<string>("cbr");
+  const [rateSource, setRateSource] = useState<string>("ЦБ");
   const [customRateValue, setCustomRateValue] = useState<string>("");
   const [rateAdjustment, setRateAdjustment] = useState<number>(0);
   const [serviceFee] = useState<number>(1); // Fixed 1% service fee
@@ -85,13 +83,13 @@ export default function OrderForm() {
   
   const [showCalculation, setShowCalculation] = useState<boolean>(false);
 
-  // Check if the selected pair involves cash
+  // Проверьте, включает ли выбранная пара наличные деньги
   const isCashPair = () => {
     const pair = tradePairs.find(p => p.id === selectedPair);
     return pair?.group === "RUB_CASH";
   };
 
-  // Update selected pair info when pair changes
+  // Обновляйте информацию о выбранной паре при изменении пары
   useEffect(() => {
     if (selectedPair) {
       const pair = tradePairs.find(p => p.id === selectedPair);
@@ -103,12 +101,12 @@ export default function OrderForm() {
     } else {
       setSelectedPairInfo(null);
     }
-    // Reset calculation when pair changes
+
     setShowCalculation(false);
     setCalculationResult(null);
   }, [selectedPair]);
 
-  // Update amount currency when order type changes
+  // Обновляйте сумму и валюту при изменении типа заказа
   useEffect(() => {
     if (selectedPairInfo) {
       updateAmountCurrency(selectedPairInfo, orderType);
@@ -123,7 +121,7 @@ export default function OrderForm() {
     }
   }, [orderType]);
 
-  // Function to update amount currency based on selected pair and order type
+  // Функция обновления суммы валюты в зависимости от выбранной пары и типа ордера
   const updateAmountCurrency = (pairInfo: any, type: string) => {
     if (type === "BUY") {
       // When buying base currency, amount is in quote currency
@@ -140,28 +138,7 @@ export default function OrderForm() {
     }
   };
 
-  // Format rate string based on selected source and adjustments
-  const formatRate = () => {
-    if (rateType === "fixed") {
-      return customRateValue ? `Фикс: ${customRateValue}` : "Нет значения";
-    }
-
-    const sourceMap = {
-      "cbr": "ЦБ",
-      "profinance": "PF",
-      "investing": "IV",
-      "xe": "XE"
-    };
-
-    const sourceName = sourceMap[rateSource as keyof typeof sourceMap] || rateSource;
-    // Only include user adjustment and service fee
-    const totalAdjustment = rateAdjustment + serviceFee;
-
-    const sign = totalAdjustment >= 0 ? "+" : "";
-    return `${sourceName}${sign}${totalAdjustment.toFixed(2)}%`;
-  };
-
-  // Calculate order details based on inputs
+  // Рассчитать детали заказа на основе исходных данных
   const calculateOrder = () => {
     if (!selectedPairInfo || !amount || parseFloat(amount) <= 0) {
       return;
@@ -253,7 +230,7 @@ export default function OrderForm() {
     setShowCalculation(true);
   };
 
-  // Format currencies for display
+  // Форматирование валют для отображения
   const formatOrderTypeDescription = () => {
     if (!selectedPairInfo) return "";
     
@@ -262,6 +239,19 @@ export default function OrderForm() {
     } else {
       return `${t('sell')} ${selectedPairInfo.quoteCurrency} ${t('receive')} ${selectedPairInfo.baseCurrency}`;
     }
+  };
+
+  // Итоговый курс
+  const formatRate = () => {
+    if (rateType === "fixed") {
+      return customRateValue ? `Фикс: ${customRateValue}` : "Нет значения";
+    }
+
+    // Only include user adjustment and service fee
+    const totalAdjustment = rateAdjustment + serviceFee;
+
+    const sign = totalAdjustment >= 0 ? "+" : "";
+    return `${sign}${totalAdjustment.toFixed(2)}%`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -369,11 +359,11 @@ export default function OrderForm() {
     theme,
     t,
     language,
+    getCurrencySymbol,
+    autoCalculate,
     currentStep,
     setCurrentStep,
     totalSteps,
-    getCurrencySymbol,
-    autoCalculate
   };
 
   return (

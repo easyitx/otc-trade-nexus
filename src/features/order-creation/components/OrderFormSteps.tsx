@@ -34,6 +34,7 @@ export default function OrderFormSteps({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Алерт */}
       <Alert className={cn(
         "border-l-4 shadow-sm",
         theme === "light"
@@ -53,6 +54,7 @@ export default function OrderFormSteps({
           </div>
         </div>
       </Alert>
+      {/* <> Алерт <> */}
 
       <Card className={cn(
         "shadow-md border",
@@ -84,7 +86,6 @@ export default function OrderFormSteps({
             {currentStep === 1 ? t('enterOrderDetails') : t('paymentDetails')}
           </CardDescription>
 
-          {/* Step indicator - more compact */}
           <div className="mt-4 relative">
             <div className={cn(
               "absolute top-1/2 left-0 right-0 h-0.5 -translate-y-1/2",
@@ -149,7 +150,6 @@ export default function OrderFormSteps({
 
         <CardFooter className="flex flex-row justify-end gap-3 pt-4 pb-5 border-t">
           {currentStep === 1 ? (
-            /* Only show Continue/Calculate button on step 1 */
             <Button
               type="button"
               variant={theme === "light" ? "gradient" : "default"}
@@ -168,7 +168,6 @@ export default function OrderFormSteps({
               </span>
             </Button>
           ) : (
-            /* On step 2, show Back and Submit buttons */
             <>
               <Button
                 type="button"
